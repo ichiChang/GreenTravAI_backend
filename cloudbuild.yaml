@@ -1,3 +1,6 @@
+options:
+  logging: LEGACY
+  default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'LOCATION-docker.pkg.dev/$PROJECT_ID/ecotripdocker/MY-APP:$COMMIT_SHA', '.']
