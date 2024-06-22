@@ -1,15 +1,23 @@
 options:
   logging: LEGACY
   default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
+
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/MY-APP:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:${COMMIT_SHA:0:7}', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/MY-APP:$COMMIT_SHA']
+    args: ['push', 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:${COMMIT_SHA:0:7}']
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
-    args: ['run', 'deploy', 'EcoTrip', '--image', 'asia-east1-docker.pkg.dev/PROJECT_ID/ecotripdocker/MY-APP:$COMMIT_SHA', '--platform', 'managed', '--region', 'asia-east1', '--allow-unauthenticated']
+    args: [
+      'run', 'deploy', 'EcoTrip',
+      '--image', 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:${COMMIT_SHA:0:7}',
+      '--platform', 'managed',
+      '--region', 'asia-east1',
+      '--allow-unauthenticated'
+    ]
+
 images:
-  - 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:$COMMIT_SHA'
+  - 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:${COMMIT_SHA:0:7}'
