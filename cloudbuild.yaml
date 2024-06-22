@@ -12,4 +12,4 @@ steps:
     entrypoint: 'gcloud'
     args: ['run', 'deploy', 'EcoTrip', '--image', 'LOCATION-docker.pkg.dev/PROJECT_ID/ecotripdocker/MY-APP:$COMMIT_SHA', '--platform', 'managed', '--region', 'asia-east1', '--allow-unauthenticated']
 images:
-  - 'LOCATION-docker.pkg.dev/$PROJECT_ID/REPOSITORY_NAME/EcoTrip:$COMMIT_SHA'
+  - 'LOCATION-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:$COMMIT_SHA'
