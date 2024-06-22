@@ -1,0 +1,10 @@
+flask
+flask-smorest
+python-dotenv
+ git+https://github.com/idoshr/flask-mongoengine.git@1.0.1
+flask-jwt-extended
+passlib
+gunicorn
+psycopg2-binary
+requests
+redis
