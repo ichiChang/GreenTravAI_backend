@@ -1,7 +1,5 @@
 options:
-  logging: CLOUD_LOGGING_ONLY
-  logStreamingOption: STREAM_ON
-logsBucket: 'gs://ecotripbucket'
+  logging: CLOUD_LOGGING_ONLY  # 或 NONE 如果你不想記錄任何日誌
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/ecoTrip:$COMMIT_SHA', '.']
