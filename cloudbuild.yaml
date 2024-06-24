@@ -1,34 +1,21 @@
-options:
-  logging: LEGACY
-  default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
-
 steps:
-  - name: 'gcr.io/cloud-builders/git'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        SHORT_SHA=$(echo $COMMIT_SHA | cut -c 1-7)
-        echo "SHORT_SHA=$SHORT_SHA" >> $BUILDER_OUTPUT/output
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:$SHORT_SHA', '.']
-    env: ['SHORT_SHA=$$SHORT_SHA']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:$SHORT_SHA']
-    env: ['SHORT_SHA=$$SHORT_SHA']
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
-    args:
-      - 'run'
-      - 'deploy'
-      - 'EcoTrip'
-      - '--image'
-      - 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:$SHORT_SHA'
-      - '--platform'
-      - 'managed'
-      - '--region'
-      - 'asia-east1'
-      - '--allow-unauthenticated'
-    env: ['SHORT_SHA=$$SHORT_SHA']
-images:
-  - 'asia-east1-docker.pkg.dev/$PROJECT_ID/ecotripdocker/EcoTrip:$SHORT_SHA'
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/ecoTrip:$COMMIT_SHA', '.']
+  id: 'build'
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/ecoTrip:$COMMIT_SHA']
+  id: 'push'
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'gcloud'
+  args:
+    - 'run'
+    - 'deploy'
+    - 'ecoTrip'
+    - '--image=gcr.io/$PROJECT_ID/ecoTrip:$COMMIT_SHA'
+    - '--region=us-central1'
+    - '--platform=managed'
+    - '--allow-unauthenticated'
+  id: 'deploy'
+timeout: '1600s'
