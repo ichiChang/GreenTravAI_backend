@@ -14,7 +14,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # 暴露應用所需的端口
-EXPOSE 5000
+EXPOSE 8080
 
 # 設置容器啟動命令
 CMD ["python", "app.py"]
