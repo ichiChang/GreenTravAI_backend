@@ -23,7 +23,7 @@ class Places(MethodView):
     @blp.arguments(PlaceSchema, location="files")
     @blp.response(200, PlaceSchema)
     def post(self, place_data):
-        image = request.files.get("image")
+        image = place_data["image"]
         if image:
             filename = secure_filename(image.filename)
             image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
