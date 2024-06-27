@@ -28,13 +28,14 @@ class UpdateTravelPlanSchema(Schema):
     EndDay = fields.DateTime(required=True)
     CreateAt = fields.DateTime(dump_only=True)
     UserId = fields.Str(required=True, load_only=True)  # 只在加載時包括
-    
+
+
 class PlaceSchema(Schema):
-    Name = fields.Str(required=True)
-    OpeningTime = fields.Str()
-    Address = fields.Str()
-    Long = fields.Str()
-    Lat = fields.Str()
-    Rating = fields.Float()
-    LowCarbon = fields.Bool()
-    Image = fields.Raw(type='file', description='Upload image', required=False)
+    name = fields.Str(required=True)
+    openingTime = fields.Str()
+    address = fields.Str()
+    long = fields.Str()
+    lat = fields.Str()
+    rating = fields.Float()
+    lowCarbon = fields.Bool()
+    image = fields.Raw(type="file", description="Upload image", required=False)

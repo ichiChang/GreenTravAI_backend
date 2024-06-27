@@ -2,11 +2,11 @@ from db import mongo as mg
 
 
 class PlaceModel(mg.Document):
-    Name = mg.StringField(required=True)
-    OpeningTime = mg.StringField()
-    Address = mg.StringField()
-    Long = mg.StringField()
-    Lat = mg.StringField()
-    Rating = mg.FloatField()
-    LowCarbon = mg.BooleanField()
-    Image = mg.StringField()
+    name = mg.StringField(required=True)
+    openingTime = mg.StringField()
+    address = mg.StringField()
+    long = mg.StringField()
+    lat = mg.StringField()
+    rating = mg.FloatField()
+    lowCarbon = mg.BooleanField()
+    image = mg.StringField()
