@@ -9,7 +9,7 @@ from BlockList import BlockList
 from db import mongo
 from resources.TravelPlan import blp as TravelPlanBlueprint
 from resources.user import blp as UserBlueprint
-from resources.place import blp as place_blueprint
+from resources.place import blp as PlaceBlueprint
 
 
 # Load environment variables from .env file
@@ -54,7 +54,7 @@ api.spec.options["security"] = [{"BearerAuth": []}]
 
 api.register_blueprint(UserBlueprint)
 api.register_blueprint(TravelPlanBlueprint)
-app.register_blueprint(place_blueprint)
+api.register_blueprint(PlaceBlueprint)
 
 
 if __name__ == "__main__":

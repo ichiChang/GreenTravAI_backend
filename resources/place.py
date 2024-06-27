@@ -6,12 +6,14 @@ from models.place import PlaceModel
 from Schema import PlaceSchema
 from services.google_storage import upload_image_to_gcs
 from werkzeug.utils import secure_filename
+from flask_jwt_extended import jwt_required
 
 blp = Blueprint('places', __name__, url_prefix='/places')
 
 @blp.route('/')
 class Places(MethodView):
 
+    @jwt_required()
     def get(self):
         # Retrieve all places
         places = PlaceModel.objects()
@@ -32,6 +34,7 @@ class Places(MethodView):
 class Place(MethodView):
 
     @blp.arguments(PlaceSchema)
+    @jwt_required()
     def put(self, update_data, id):
         # Update a place with validated data
         image = request.files.get('image')
@@ -46,6 +49,7 @@ class Place(MethodView):
         else:
             return jsonify(error='Place not found'), 404
 
+    @jwt_required()
     def get(self, id):
         # Retrieve a single place by id
         place = PlaceModel.objects(id=id).first()
@@ -54,6 +58,7 @@ class Place(MethodView):
         else:
             return jsonify(error='Place not found'), 404
 
+    @jwt_required()
     def delete(self, id):
         # Delete a place
         place = PlaceModel.objects(id=id).delete()
