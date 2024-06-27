@@ -2,7 +2,7 @@
 from google.cloud import storage
 
 
-def upload_file_to_gcs(file_stream, filename, content_type):
+def upload_image_to_gcs(file_stream, filename, content_type):
     client = storage.Client()
     bucket = client.bucket("ecotripbucket")
     blob = bucket.blob(filename)
