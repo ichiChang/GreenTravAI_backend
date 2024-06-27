@@ -23,19 +23,19 @@ class Places(MethodView):
     @blp.arguments(PlaceSchema, location="files")
     @blp.response(200, PlaceSchema)
     def post(self, place_data):
-        image = place_data["image"]
+        image = request.form["image"]
         if image:
             filename = secure_filename(image.filename)
             image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
 
         place = PlaceModel(
-            name=place_data["name"],
-            openingTime=place_data["openingTime"],
-            address=place_data["address"],
-            long=place_data["long"],
-            lat=place_data["lat"],
-            rating=place_data["rating"],
-            lowCarbon=place_data["lowCarbon"],
+            name=request.form["name"],
+            openingTime=request.form["openingTime"],
+            address=request.form["address"],
+            long=request.form["long"],
+            lat=request.form["lat"],
+            rating=request.form["rating"],
+            lowCarbon=request.form["lowCarbon"],
             image=image_url,
         )
         place.save()
