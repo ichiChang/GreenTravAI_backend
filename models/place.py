@@ -9,3 +9,4 @@ class PlaceModel(mg.Document):
     Lat = mg.StringField()
     Rating = mg.FloatField()
     LowCarbon = mg.BooleanField()
+    Image = mg.StringField()
