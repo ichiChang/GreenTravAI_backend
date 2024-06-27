@@ -8,9 +8,10 @@ from services.google_storage import upload_image_to_gcs
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
 
-blp = Blueprint('places', __name__, url_prefix='/places')
+blp = Blueprint("places", __name__, url_prefix="/places")
 
-@blp.route('/')
+
+@blp.route("/")
 class Places(MethodView):
 
     @jwt_required()
@@ -19,35 +20,38 @@ class Places(MethodView):
         places = PlaceModel.objects()
         return jsonify(places), 200
 
-    @blp.arguments(PlaceSchema, location='json')
+    @blp.arguments(PlaceSchema, location="form")
     @blp.response(200, PlaceSchema)
     def post(self, new_data):
-        image = request.files.get('image')
+        image = request.files.get("Image")
         if image:
             filename = secure_filename(image.filename)
             image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
-            new_data['image'] = image_url
+            new_data["Image"] = image_url
         place = Place.create(**new_data)
         return place
 
-@blp.route('/<string:id>')
+
+@blp.route("/<string:id>")
 class Place(MethodView):
 
     @blp.arguments(PlaceSchema)
     @jwt_required()
     def put(self, update_data, id):
         # Update a place with validated data
-        image = request.files.get('image')
+        image = request.files.get("image")
         place = PlaceModel.objects(id=id).first()
         if place:
             if image:
                 filename = secure_filename(image.filename)
-                image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
-                update_data['Image'] = image_url
+                image_url = upload_image_to_gcs(
+                    image.read(), filename, image.content_type
+                )
+                update_data["Image"] = image_url
             place.update(**update_data)
             return jsonify(place), 200
         else:
-            return jsonify(error='Place not found'), 404
+            return jsonify(error="Place not found"), 404
 
     @jwt_required()
     def get(self, id):
@@ -56,7 +60,7 @@ class Place(MethodView):
         if place:
             return jsonify(place), 200
         else:
-            return jsonify(error='Place not found'), 404
+            return jsonify(error="Place not found"), 404
 
     @jwt_required()
     def delete(self, id):
@@ -65,4 +69,4 @@ class Place(MethodView):
         if place:
             return jsonify(success=True), 200
         else:
-            return jsonify(error='Place not found'), 404
+            return jsonify(error="Place not found"), 404
