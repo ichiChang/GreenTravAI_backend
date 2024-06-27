@@ -28,7 +28,7 @@ class Places(MethodView):
         if image:
             filename = secure_filename(image.filename)
             image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
-            new_data["image"] = image_url
+            new_data["Image"] = image_url
         place = Place.create(**new_data)
         return place
 
