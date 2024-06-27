@@ -20,7 +20,7 @@ class Places(MethodView):
         places = PlaceModel.objects()
         return jsonify(places), 200
 
-    @blp.arguments(PlaceSchema, location="form")
+    @blp.arguments(PlaceSchema, location="files")
     @blp.response(200, PlaceSchema)
     def post(self, args):
         image = request.files.get("Image")
