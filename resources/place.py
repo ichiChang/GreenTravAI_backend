@@ -7,7 +7,7 @@ from Schema import PlaceSchema
 from services.google_storage import upload_image_to_gcs
 from werkzeug.utils import secure_filename
 
-blp = Blueprint('places', 'places', url_prefix='/places')
+blp = Blueprint('places', __name__, url_prefix='/places')
 
 @blp.route('/')
 class Places(MethodView):
