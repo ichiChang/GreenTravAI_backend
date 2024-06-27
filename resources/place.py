@@ -19,16 +19,16 @@ class Places(MethodView):
         places = PlaceModel.objects()
         return jsonify(places), 200
 
-    @blp.arguments(PlaceSchema)
+    @blp.arguments(PlaceSchema, location='json')
+    @blp.response(200, PlaceSchema)
     def post(self, new_data):
-        # Create a new place with validated data
         image = request.files.get('image')
         if image:
             filename = secure_filename(image.filename)
             image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
-            new_data['Image'] = image_url
-        place = PlaceModel(**new_data).save()
-        return jsonify(place), 201
+            new_data['image'] = image_url
+        place = Place.create(**new_data)
+        return place
 
 @blp.route('/<string:id>')
 class Place(MethodView):

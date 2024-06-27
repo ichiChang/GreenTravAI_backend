@@ -37,4 +37,4 @@ class PlaceSchema(Schema):
     Lat = fields.Str()
     Rating = fields.Float()
     LowCarbon = fields.Bool()
-    Image = fields.Str()
+    Image = fields.Raw(type='file', description='Upload image', required=False)
