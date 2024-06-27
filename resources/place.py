@@ -22,12 +22,13 @@ class Places(MethodView):
 
     @blp.arguments(PlaceSchema, location="form")
     @blp.response(200, PlaceSchema)
-    def post(self, new_data):
+    def post(self, args):
         image = request.files.get("Image")
+        new_data = request.form.to_dict()  # 从 form-data 中获取其他数据
         if image:
             filename = secure_filename(image.filename)
             image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
-            new_data["Image"] = image_url
+            new_data["image"] = image_url
         place = Place.create(**new_data)
         return place
 
