@@ -31,11 +31,11 @@ class UpdateTravelPlanSchema(Schema):
 
 
 class PlaceSchema(Schema):
-    name = fields.Str(required=True)
+    placename = fields.Str()
     openingTime = fields.Str()
     address = fields.Str()
     long = fields.Str()
     lat = fields.Str()
     rating = fields.Float()
-    lowCarbon = fields.Bool()
+    lowCarbon = fields.Raw(type="boolean")
     image = fields.Raw(type="file", description="Upload image", required=False)

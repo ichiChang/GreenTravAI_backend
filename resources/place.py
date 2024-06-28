@@ -7,6 +7,7 @@ from Schema import PlaceSchema
 from services.google_storage import upload_image_to_gcs
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
+import traceback
 
 blp = Blueprint("places", __name__, url_prefix="/places")
 
@@ -21,27 +22,38 @@ class Places(MethodView):
         return jsonify(places), 200
 
     @blp.arguments(PlaceSchema, location="files")
-    @blp.response(200, PlaceSchema)
     def post(self, place_data):
-        image = request.form["image"]
-        if image:
-            filename = secure_filename(image.filename)
-            image_url = upload_image_to_gcs(image.read(), filename, image.content_type)
+        try:
+            # 检查 image 字段是否存在于 request.files 中
+            image = request.files.get("image")
+            if image:
+                filename = secure_filename(image.filename)
+                image_url = upload_image_to_gcs(
+                    image.read(), filename, image.content_type
+                )
+            else:
+                image_url = None  # 没有图片时的处理
 
-        place = PlaceModel(
-            name=request.form["name"],
-            openingTime=request.form["openingTime"],
-            address=request.form["address"],
-            long=request.form["long"],
-            lat=request.form["lat"],
-            rating=request.form["rating"],
-            lowCarbon=request.form["lowCarbon"],
-            image=image_url,
-        )
-        place.save()
-        return {
-            "message": f'Place named {place_data["name"]} created successfully'
-        }, 201
+            # 从 request.form 中获取其他字段
+            place = PlaceModel(
+                placename=request.form.get("placename"),
+                openingTime=request.form.get("openingTime"),
+                address=request.form.get("address"),
+                long=request.form.get("long"),
+                lat=request.form.get("lat"),
+                rating=float(request.form.get("rating")),
+                lowCarbon=request.form.get("lowCarbon") == "true",
+                image=image_url,
+            )
+            place.save()
+            return {
+                "message": f'Place named {request.form.get("placename")} created successfully'
+            }, 201
+        except Exception as e:
+            # 打印异常到控制台
+            traceback.print_exc()
+            # 返回错误信息给客户端
+            return {"error": str(e)}, 400
 
 
 @blp.route("/<string:id>")

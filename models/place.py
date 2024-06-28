@@ -2,7 +2,7 @@ from db import mongo as mg
 
 
 class PlaceModel(mg.Document):
-    name = mg.StringField(required=True)
+    placename = mg.StringField()
     openingTime = mg.StringField()
     address = mg.StringField()
     long = mg.StringField()
