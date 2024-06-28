@@ -15,13 +15,13 @@ blp = Blueprint("places", __name__, url_prefix="/places")
 @blp.route("/")
 class Places(MethodView):
 
-    @jwt_required()
     def get(self):
         # Retrieve all places
         places = PlaceModel.objects()
         return jsonify(places), 200
 
     @blp.arguments(PlaceSchema, location="files")
+    @jwt_required()
     def post(self, place_data):
         try:
             # 检查 image 字段是否存在于 request.files 中
