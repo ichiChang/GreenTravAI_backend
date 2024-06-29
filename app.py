@@ -10,6 +10,9 @@ from db import mongo
 from resources.TravelPlan import blp as TravelPlanBlueprint
 from resources.user import blp as UserBlueprint
 from resources.place import blp as PlaceBlueprint
+from resources.stop import blp as StopBlueprint
+from resources.day import blp as DayBlueprint
+from resources.transportation import blp as TransportationBlueprint
 
 
 # Load environment variables from .env file
@@ -53,8 +56,11 @@ api.spec.components.security_scheme(
 api.spec.options["security"] = [{"BearerAuth": []}]
 
 api.register_blueprint(UserBlueprint)
-api.register_blueprint(TravelPlanBlueprint)
 api.register_blueprint(PlaceBlueprint)
+api.register_blueprint(StopBlueprint)
+api.register_blueprint(TransportationBlueprint)
+api.register_blueprint(DayBlueprint)
+api.register_blueprint(TravelPlanBlueprint)
 
 
 if __name__ == "__main__":

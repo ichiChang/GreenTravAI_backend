@@ -8,5 +8,5 @@ class TransportationModel(mg.Document):
     TimeSpent = mg.IntField(required=True)
     LowCarbon = mg.BooleanField()
     CreateAt = mg.DateTimeField(default=datetime.now)
-    FromStopId = mg.ReferenceField(StopModel)
-    ToStopId = mg.ReferenceField(StopModel)
+    FromStopId = mg.ReferenceField(document_type=StopModel)
+    ToStopId = mg.ReferenceField(document_type=StopModel)

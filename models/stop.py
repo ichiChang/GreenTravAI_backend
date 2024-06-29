@@ -1,4 +1,6 @@
 from db import mongo as mg
+from models.day import DayModel
+from models.place import PlaceModel
 
 
 class StopModel(mg.Document):
@@ -6,5 +8,5 @@ class StopModel(mg.Document):
     StartTime = mg.DateTimeField()
     EndTime = mg.DateTimeField()
     note = mg.StringField()
-    PlaceId = mg.ReferenceField("PlaceModel")
-    DayId = mg.ReferenceField("DayModel")
+    PlaceId = mg.ReferenceField(document_type=PlaceModel)
+    DayId = mg.ReferenceField(document_type=DayModel)

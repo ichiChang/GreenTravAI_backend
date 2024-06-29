@@ -7,5 +7,5 @@ class TravelPlanModel(mg.Document):
     planname = mg.StringField(required=True)
     startdate = mg.DateTimeField(required=True)
     enddate = mg.DateTimeField(required=True)
-    createAt = mg.DateTimeField(default=datetime.now())
-    user = mg.ReferenceField(document_type=UserModel)
+    createAt = mg.DateTimeField(default=datetime.now)
+    userId = mg.ReferenceField(document_type=UserModel)
