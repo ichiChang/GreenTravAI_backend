@@ -6,7 +6,7 @@ from models.travelPlan import TravelPlanModel
 from db import mongo
 from Schema import UserSchema, AddTravelPlanSchema, UpdateTravelPlanSchema
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask import jsonify
+from flask import jsonify, Response
 from datetime import datetime
 
 blp = Blueprint("TravelPlan", __name__, url_prefix="/travel_plans")
@@ -31,9 +31,13 @@ class TravelPlanList(MethodView):
             user=user,
         )
         travel_plan.save()
-        return {
-            "message": f'{user.username} created a travel plan named {travel_plan_data["planname"]}'
-        }, 201
+        return Response(
+            response=jsonify({
+                "message": f'{user.username} created a travel plan named {travel_plan_data["planname"]}'
+            }),
+            status=201,
+            mimetype="application/json"
+        )
 
     @jwt_required()
     def get(self):
@@ -43,8 +47,8 @@ class TravelPlanList(MethodView):
             abort(404, description="User not found")
 
         travel_plans = TravelPlanModel.objects(user=user)
-        return jsonify(
-            [
+        return Response(
+            response=jsonify([
                 {
                     "planname": plan.planname,
                     "startdate": plan.startdate,
@@ -52,7 +56,9 @@ class TravelPlanList(MethodView):
                     "createdAt": plan.createAt,
                 }
                 for plan in travel_plans
-            ]
+            ]),
+            status=200,
+            mimetype="application/json"
         )
 
 
@@ -65,19 +71,27 @@ class TravelPlanItem(MethodView):
         travel_plan = TravelPlanModel.objects(id=plan_id, user=user_id).first()
         if not travel_plan:
             abort(404, description="Travel plan not found")
-        return {
-            "planname": travel_plan.planname,
-            "startdate": travel_plan.startdate,
-            "enddate": travel_plan.enddate,
-            "createdAt": travel_plan.createAt,
-        }
+        return Response(
+            response=jsonify({
+                "planname": travel_plan.planname,
+                "startdate": travel_plan.startdate,
+                "enddate": travel_plan.enddate,
+                "createdAt": travel_plan.createAt,
+            }),
+            status=200,
+            mimetype="application/json"
+        )
 
     @blp.arguments(UpdateTravelPlanSchema)
     @jwt_required()
     def put(self, update_data, plan_id):
         user_id = get_jwt_identity()
         TravelPlanModel.objects(id=plan_id, user=user_id).update(**update_data)
-        return {"message": "Travel plan updated successfully"}
+        return Response(
+            response=jsonify({"message": "Travel plan updated successfully"}),
+            status=200,
+            mimetype="application/json"
+        )
 
     @jwt_required()
     def delete(self, plan_id):
@@ -86,4 +100,8 @@ class TravelPlanItem(MethodView):
         if not travel_plan:
             abort(404, description="Travel plan not found")
         travel_plan.delete()
-        return {"message": "Travel plan deleted successfully"}
+        return Response(
+            response=jsonify({"message": "Travel plan deleted successfully"}),
+            status=200,
+            mimetype="application/json"
+        )

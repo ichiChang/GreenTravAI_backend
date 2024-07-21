@@ -5,7 +5,7 @@ from models.day import DayModel
 from models.travelPlan import TravelPlanModel
 from Schema import DaySchema, AddDaySchema, UpdateDaySchema
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask import jsonify
+from flask import jsonify, Response
 
 blp = Blueprint("Day", __name__, url_prefix="/days")
 
@@ -25,12 +25,23 @@ class DayList(MethodView):
             TravelPlanId=travel_plan,
         )
         day.save()
-        return {"message": f'Day {day_data["Date"]} created successfully'}, 201
+        return Response(
+            response=jsonify({"message": f'Day {day_data["Date"]} created successfully'}),
+            status=201,
+            mimetype="application/json"
+        )
+        # return {"message": f'Day {day_data["Date"]} created successfully'}, 201
 
     @jwt_required()
     def get(self):
         days = DayModel.objects()
-        return jsonify(days), 200
+
+        return Response(
+            response=jsonify(days),
+            status=200,
+            mimetype="application/json"
+        )
+        # return jsonify(days), 200
 
 
 @blp.route("/<string:day_id>")
@@ -41,12 +52,24 @@ class DayItem(MethodView):
         day = DayModel.objects(id=day_id).first()
         if not day:
             abort(404, description="Day not found")
-        return jsonify(day), 200
+
+        return Response(
+            response=jsonify(day),
+            status=200,
+            mimetype="application/json"
+        )
+        # return jsonify(day), 200
 
     @blp.arguments(UpdateDaySchema)
     @jwt_required()
     def put(self, update_data, day_id):
         DayModel.objects(id=day_id).update(**update_data)
+
+        return Response(
+            response=jsonify({"message": "Day updated successfully"}),
+            status=200,
+            mimetype="application/json"
+        )
         return {"message": "Day updated successfully"}
 
     @jwt_required()
@@ -54,4 +77,12 @@ class DayItem(MethodView):
         day = DayModel.objects(id=day_id).delete()
         if not day:
             abort(404, description="Day not found")
+
+
+
+        return Response(
+            response=jsonify({"message": "Day deleted successfully"}),
+            status=200,
+            mimetype="application/json"
+        )
         return {"message": "Day deleted successfully"}

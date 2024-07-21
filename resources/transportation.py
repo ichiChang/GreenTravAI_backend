@@ -8,7 +8,7 @@ from Schema import (
     UpdateTransportationSchema,
 )
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask import jsonify
+from flask import jsonify, Response
 
 blp = Blueprint("Transportation", __name__, url_prefix="/transportations")
 
@@ -32,14 +32,20 @@ class TransportationList(MethodView):
             ToStopId=to_stop,
         )
         transportation.save()
-        return {
-            "message": f'Transportation {transportation_data["Name"]} created successfully'
-        }, 201
+        return Response(
+            response=jsonify({"message": f'Transportation {transportation_data["Name"]} created successfully'}),
+            status=201,
+            mimetype="application/json"
+        )
 
     @jwt_required()
     def get(self):
         transportations = TransportationModel.objects()
-        return jsonify(transportations), 200
+        return Response(
+            response=jsonify(transportations),
+            status=200,
+            mimetype="application/json"
+        )
 
 
 @blp.route("/<string:transportation_id>")
@@ -50,17 +56,30 @@ class TransportationItem(MethodView):
         transportation = TransportationModel.objects(id=transportation_id).first()
         if not transportation:
             abort(404, description="Transportation not found")
-        return jsonify(transportation), 200
+        return Response(
+            response=jsonify(transportation),
+            status=200,
+            mimetype="application/json"
+        )
+
 
     @blp.arguments(UpdateTransportationSchema)
     @jwt_required()
     def put(self, update_data, transportation_id):
         TransportationModel.objects(id=transportation_id).update(**update_data)
-        return {"message": "Transportation updated successfully"}
+        return Response(
+            response=jsonify({"message": "Transportation updated successfully"}),
+            status=200,
+            mimetype="application/json"
+        )
 
     @jwt_required()
     def delete(self, transportation_id):
         transportation = TransportationModel.objects(id=transportation_id).delete()
         if not transportation:
             abort(404, description="Transportation not found")
-        return {"message": "Transportation deleted successfully"}
+        return Response(
+            response=jsonify({"message": "Transportation deleted successfully"}),
+            status=200,
+            mimetype="application/json"
+        )

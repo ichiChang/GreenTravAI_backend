@@ -1,5 +1,5 @@
 # resources/place.py
-from flask import request, jsonify
+from flask import request, jsonify, Response
 from flask.views import MethodView
 from flask_smorest import Blueprint
 from models.place import PlaceModel
@@ -18,7 +18,13 @@ class Places(MethodView):
     def get(self):
         # Retrieve all places
         places = PlaceModel.objects()
-        return jsonify(places), 200
+
+
+        return Response(
+            response=jsonify(places),
+            status=200,
+            mimetype="application/json"
+        )
 
     @blp.arguments(PlaceSchema, location="files")
     @jwt_required()
@@ -46,14 +52,24 @@ class Places(MethodView):
                 image=image_url,
             )
             place.save()
-            return {
-                "message": f'Place named {request.form.get("placename")} created successfully'
-            }, 201
+
+            return Response(
+                response=jsonify({"message": f'Place named {request.form.get("placename")} created successfully'}),
+                status=201,
+                mimetype="application/json"
+            )
+            # return {
+            #     "message": f'Place named {request.form.get("placename")} created successfully'
+            # }, 201
         except Exception as e:
             # 打印异常到控制台
             traceback.print_exc()
             # 返回错误信息给客户端
-            return {"error": str(e)}, 400
+            return Response(
+                response=jsonify({"error": str(e)}),
+                status=400,
+                mimetype="application/json"
+            )
 
 
 @blp.route("/<string:id>")
@@ -73,24 +89,52 @@ class Place(MethodView):
                 )
                 update_data["Image"] = image_url
             place.update(**update_data)
-            return jsonify(place), 200
+
+            return Response(
+                response=jsonify(place),
+                status=200,
+                mimetype="application/json"
+            )
+            # return jsonify(place), 200
         else:
-            return jsonify(error="Place not found"), 404
+            return Response(
+                response=jsonify({"error": "Place not found"}),
+                status=404,
+                mimetype="application/json"
+            )
+            # return jsonify(error="Place not found"), 404
 
     @jwt_required()
     def get(self, id):
         # Retrieve a single place by id
         place = PlaceModel.objects(id=id).first()
         if place:
-            return jsonify(place), 200
+            return Response(
+                response=jsonify(place),
+                status=200,
+                mimetype="application/json"
+            )
         else:
-            return jsonify(error="Place not found"), 404
+            return Response(
+                response=jsonify({"error": "Place not found"}),
+                status=404,
+                mimetype="application/json"
+            )
 
     @jwt_required()
     def delete(self, id):
         # Delete a place
         place = PlaceModel.objects(id=id).delete()
         if place:
-            return jsonify(success=True), 200
+            
+            return Response(
+                response=jsonify({"success": True}),
+                status=200,
+                mimetype="application/json"
+            )
         else:
-            return jsonify(error="Place not found"), 404
+            return Response(
+                response=jsonify({"error": "Place not found"}),
+                status=404,
+                mimetype="application/json"
+            )

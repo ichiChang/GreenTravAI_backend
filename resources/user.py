@@ -15,8 +15,9 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 from BlockList import BlockList
-from flask import jsonify
 from datetime import datetime
+from flask import jsonify, Response
+
 
 
 blp = Blueprint("User", __name__)
@@ -27,8 +28,7 @@ class UserRegister(MethodView):
     @blp.arguments(UserRegisterSchema)
     def post(self, user_data):
 
-        # print('ok')
-        if UserModel.objects(username=user_data["username"]).first():
+        if UserModel.objects(username=user_data["email"]).first():
             abort(409, description="This user account has already been used.")
 
         user = UserModel(
@@ -44,8 +44,9 @@ class UserRegister(MethodView):
                 500,
                 description=f"Error arise when inserting item to database: {str(e)}",
             )
-
-        return {"Message": "the user is registered successfully"}, 201
+        return Response(response=jsonify({"message": "the user is registered successfully"}),
+                        status=201,
+                        mimetype="application/json")
 
 
 @blp.route("/login")
@@ -53,7 +54,7 @@ class UserLogin(MethodView):
     @blp.arguments(UserSchema)
     def post(self, user_data):
         try:
-            user = UserModel.objects(username=user_data["username"]).first()
+            user = UserModel.objects(username=user_data["email"]).first()
         except Exception as e:
             print("error")
             abort(
@@ -65,7 +66,11 @@ class UserLogin(MethodView):
             token = create_access_token(identity=str(user.id), fresh=True)
             refresh_token = create_refresh_token(identity=str(user.id))
 
-            return {"access_token": token, "refresh_token": refresh_token}, 201
+            return Response(
+                response=jsonify({"access_token": token, "refresh_token": refresh_token}),
+                status=201,
+                mimetype="application/json"
+            )
         else:
             abort(401, description="Invalid credentials")
 
@@ -78,8 +83,12 @@ class UserLogout(MethodView):
         jti = get_jwt()["jti"]
 
         BlockList.add(jti)
-        return {"message": "logout successfully"}
 
+        return Response(
+            response=jsonify({"message": "logout successfully"}),
+            status=200,
+            mimetype="application/json"
+        )
 
 @blp.route("/refresh")
 class UserRefresh(MethodView):
@@ -89,4 +98,8 @@ class UserRefresh(MethodView):
         new_token = create_access_token(identity=current_user, fresh=False)
         jti = get_jwt()["jti"]
         BlockList.add(jti)
-        return {"access_token": new_token}
+        return Response(
+            response=jsonify({"access_token": new_token}),
+            status=200,
+            mimetype="application/json"
+        )
