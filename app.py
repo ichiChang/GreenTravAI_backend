@@ -1,5 +1,7 @@
+from datetime import timedelta
 import os
 
+import certifi
 from dotenv import load_dotenv
 from flask import Flask
 from flask_jwt_extended import JWTManager
@@ -13,6 +15,8 @@ from resources.place import blp as PlaceBlueprint
 from resources.stop import blp as StopBlueprint
 from resources.day import blp as DayBlueprint
 from resources.transportation import blp as TransportationBlueprint
+from urllib.parse import quote_plus
+
 
 
 # Load environment variables from .env file
@@ -22,7 +26,9 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configure the app with environment variables
-app.config["MONGODB_HOST"] = os.getenv("MONGODB_URI")
+app.config["MONGODB_HOST"] = f'mongodb+srv://David:hu2177ng@cluster0.fntr2bt.mongodb.net/test?tlsCAFile={quote_plus(certifi.where())}'
+
+
 app.config["API_TITLE"] = "Travel test API"
 app.config["API_VERSION"] = "v1"
 app.config["OPENAPI_VERSION"] = "3.0.3"
@@ -30,12 +36,14 @@ app.config["OPENAPI_JSON_PATH"] = "api-spec.json"
 app.config["OPENAPI_URL_PREFIX"] = "/"
 app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
 app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
+
 
 # Initialize MongoDB
 mongo.init_app(app)
-
 # Initialize JWT
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "default_secret_key")
+app.config["JWT_SECRET_KEY"] = '27605168684557772074256969153596259963'
+# app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "default_secret_key")
 jwt = JWTManager(app)
 
 

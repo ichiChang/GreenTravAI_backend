@@ -3,12 +3,12 @@ from marshmallow import Schema, fields, validate
 
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
-    username = fields.Str(required=True)
+    email = fields.Str(required=True)
     password = fields.Str(required=True, load_only=True)
 
 
 class UserRegisterSchema(UserSchema):
-    email = fields.Str(required=True)
+    username = fields.Str(required=True)
 
 
 class AddTravelPlanSchema(Schema):
@@ -26,7 +26,7 @@ class UpdateTravelPlanSchema(Schema):
     StartDay = fields.DateTime(required=True)
     EndDay = fields.DateTime(required=True)
     CreateAt = fields.DateTime(dump_only=True)
-    UserId = fields.Str(required=True, load_only=True)
+    # UserId = fields.Str(required=True, load_only=True)
 
 
 class PlaceSchema(Schema):
@@ -96,5 +96,5 @@ class AddDaySchema(DaySchema):
 
 
 class UpdateDaySchema(Schema):
-    Date = fields.DateTime()
-    TravelPlanId = fields.Str()
+    Date = fields.DateTime(required=True)
+    # TravelPlanId = fields.Str(required=True)

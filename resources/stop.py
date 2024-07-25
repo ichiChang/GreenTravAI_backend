@@ -6,7 +6,7 @@ from models.place import PlaceModel
 from models.day import DayModel
 from Schema import StopSchema, AddStopSchema, UpdateStopSchema
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask import jsonify, Response
+from flask import jsonify, make_response
 
 blp = Blueprint("Stop", __name__, url_prefix="/stops")
 
@@ -31,20 +31,17 @@ class StopList(MethodView):
             DayId=day,
         )
         stop.save()
-        return Response(
-            response=jsonify({"message": f'Stop {stop_data["Name"]} created successfully'}),
-            status=201,
-            mimetype="application/json"
-        )
+        data = jsonify({"message": f'Stop {stop_data["Name"]} created successfully'})
+        return make_response(data,201)
+        
 
     @jwt_required()
     def get(self):
         stops = StopModel.objects()
-        return Response(
-            response=jsonify(stops),
-            status=200,
-            mimetype="application/json"
-        )
+
+        data = jsonify(stops)
+        return make_response(data,200)
+        
 
 
 @blp.route("/<string:stop_id>")
@@ -55,21 +52,19 @@ class StopItem(MethodView):
         stop = StopModel.objects(id=stop_id).first()
         if not stop:
             abort(404, description="Stop not found")
-        return Response(
-            response=jsonify(stop),
-            status=200,
-            mimetype="application/json"
-        )
+
+        data = jsonify(stop)
+        return make_response(data,200)
+        
 
     @blp.arguments(UpdateStopSchema)
     @jwt_required()
     def put(self, update_data, stop_id):
         StopModel.objects(id=stop_id).update(**update_data)
-        return Response(
-            response=jsonify({"message": "Stop updated successfully"}),
-            status=200,
-            mimetype="application/json"
-        )
+
+        data = jsonify({"message": "Stop updated successfully"})
+        return make_response(data,200)
+        
 
 
     @jwt_required()
@@ -77,8 +72,6 @@ class StopItem(MethodView):
         stop = StopModel.objects(id=stop_id).delete()
         if not stop:
             abort(404, description="Stop not found")
-        return Response(
-            response=jsonify({"message": "Stop deleted successfully"}),
-            status=200,
-            mimetype="application/json"
-        )
+        data = jsonify({"message": "Stop deleted successfully"})
+        return make_response(data,200)
+        

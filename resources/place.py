@@ -1,5 +1,5 @@
 # resources/place.py
-from flask import request, jsonify, Response
+from flask import request, jsonify, make_response
 from flask.views import MethodView
 from flask_smorest import Blueprint
 from models.place import PlaceModel
@@ -19,12 +19,9 @@ class Places(MethodView):
         # Retrieve all places
         places = PlaceModel.objects()
 
-
-        return Response(
-            response=jsonify(places),
-            status=200,
-            mimetype="application/json"
-        )
+        data = jsonify(places)
+        return make_response(data,200)
+  
 
     @blp.arguments(PlaceSchema, location="files")
     @jwt_required()
@@ -40,7 +37,11 @@ class Places(MethodView):
             else:
                 image_url = None  # 没有图片时的处理
 
+
+
             # 从 request.form 中获取其他字段
+         
+
             place = PlaceModel(
                 placename=request.form.get("placename"),
                 openingTime=request.form.get("openingTime"),
@@ -53,23 +54,20 @@ class Places(MethodView):
             )
             place.save()
 
-            return Response(
-                response=jsonify({"message": f'Place named {request.form.get("placename")} created successfully'}),
-                status=201,
-                mimetype="application/json"
-            )
-            # return {
-            #     "message": f'Place named {request.form.get("placename")} created successfully'
-            # }, 201
+            
+
+            data = jsonify({"message": f'Place named {request.form.get("placename")} created successfully'})
+            return make_response(data,201)
+            
+            
+     
         except Exception as e:
             # 打印异常到控制台
             traceback.print_exc()
+            data = jsonify({"error": str(e)})
+            return make_response(data,400)
             # 返回错误信息给客户端
-            return Response(
-                response=jsonify({"error": str(e)}),
-                status=400,
-                mimetype="application/json"
-            )
+            
 
 
 @blp.route("/<string:id>")
@@ -90,36 +88,32 @@ class Place(MethodView):
                 update_data["Image"] = image_url
             place.update(**update_data)
 
-            return Response(
-                response=jsonify(place),
-                status=200,
-                mimetype="application/json"
-            )
-            # return jsonify(place), 200
+            # place.reload()
+
+            response_data = {
+                "message": "Place successfully updated",
+            }
+
+            return make_response(jsonify(response_data), 200)
+            
         else:
-            return Response(
-                response=jsonify({"error": "Place not found"}),
-                status=404,
-                mimetype="application/json"
-            )
-            # return jsonify(error="Place not found"), 404
+            data = jsonify({"error": "Place not found"})
+            return make_response(data,404)
+            
 
     @jwt_required()
     def get(self, id):
         # Retrieve a single place by id
         place = PlaceModel.objects(id=id).first()
         if place:
-            return Response(
-                response=jsonify(place),
-                status=200,
-                mimetype="application/json"
-            )
+
+            data = jsonify(place)
+            return make_response(data,200)
+            
         else:
-            return Response(
-                response=jsonify({"error": "Place not found"}),
-                status=404,
-                mimetype="application/json"
-            )
+            data = jsonify({"error": "Place not found"})
+            return make_response(data,404)
+            
 
     @jwt_required()
     def delete(self, id):
@@ -127,14 +121,9 @@ class Place(MethodView):
         place = PlaceModel.objects(id=id).delete()
         if place:
             
-            return Response(
-                response=jsonify({"success": True}),
-                status=200,
-                mimetype="application/json"
-            )
+            data = jsonify({"success": True})
+            return make_response(data,200)
         else:
-            return Response(
-                response=jsonify({"error": "Place not found"}),
-                status=404,
-                mimetype="application/json"
-            )
+            data = jsonify({"error": "Place not found"})
+            return make_response(data,404)
+            
