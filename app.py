@@ -26,7 +26,9 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configure the app with environment variables
-app.config["MONGODB_HOST"] = f'mongodb+srv://David:hu2177ng@cluster0.fntr2bt.mongodb.net/test?tlsCAFile={quote_plus(certifi.where())}'
+mongo_uri = os.getenv("MONGODB_URI")
+app.config["MONGODB_HOST"] =f'{mongo_uri}/test?tlsCAFile={quote_plus(certifi.where())}'
+
 
 
 app.config["API_TITLE"] = "Travel test API"
@@ -42,8 +44,8 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
 # Initialize MongoDB
 mongo.init_app(app)
 # Initialize JWT
-app.config["JWT_SECRET_KEY"] = '27605168684557772074256969153596259963'
-# app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "default_secret_key")
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "default_secret_key")
+
 jwt = JWTManager(app)
 
 
