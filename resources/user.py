@@ -70,7 +70,10 @@ class UserLogin(MethodView):
             token = create_access_token(identity=str(user.id), fresh=True)
             refresh_token = create_refresh_token(identity=str(user.id))
             print(token)
-            data = jsonify({"message": f"access_token: {token}, refresh_token: {refresh_token}"})
+            data = jsonify({
+    "access_token": token,
+    "refresh_token": refresh_token
+})
             return make_response(data,201)
         # If user is not found or password does not match
         
