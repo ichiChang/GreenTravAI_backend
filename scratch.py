@@ -43,3 +43,11 @@ def scratchEcoSpot():
     finally:
 
         driver.quit()
+
+
+def scratchSpot():
+    pass
+
+
+def scratchRestaurant():
+    pass

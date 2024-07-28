@@ -150,3 +150,11 @@ def getEcoRestaurantData():
     pd_eco_restaurant = pd_eco_restaurant.drop(columns=6)
     pd_eco_restaurant = pd_eco_restaurant.drop(columns=7)
     return pd_eco_restaurant
+
+
+def getEcoSpotData():
+    with open('data/ecoSpots.json', 'r', encoding='utf-8') as f:
+        ecoSpots = json.load(f)
+    pd_ecoSpots = pd.DataFrame(ecoSpots)
+    pd_ecoSpots = pd_ecoSpots.drop(columns="id")
+    return pd_ecoSpots
