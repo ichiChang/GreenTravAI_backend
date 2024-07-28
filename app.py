@@ -18,7 +18,6 @@ from resources.transportation import blp as TransportationBlueprint
 from urllib.parse import quote_plus
 
 
-
 # Load environment variables from .env file
 load_dotenv()
 
@@ -27,8 +26,7 @@ app = Flask(__name__)
 
 # Configure the app with environment variables
 mongo_uri = os.getenv("MONGODB_URI")
-app.config["MONGODB_HOST"] =f'{mongo_uri}/test?tlsCAFile={quote_plus(certifi.where())}'
-
+app.config["MONGODB_HOST"] = f"{mongo_uri}?tlsCAFile={quote_plus(certifi.where())}"
 
 
 app.config["API_TITLE"] = "Travel test API"
