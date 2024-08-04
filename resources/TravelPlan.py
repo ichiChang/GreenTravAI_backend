@@ -46,7 +46,18 @@ class TravelPlanList(MethodView):
             abort(404, description="User not found")
 
         travel_plans = TravelPlanModel.objects(userId=user.id)
-        data = jsonify(travel_plans)
+        data = jsonify(
+            [
+                {
+                    "id": str(plan.id),
+                    "planname": plan.planname,
+                    "startdate": plan.startdate,
+                    "enddate": plan.enddate,
+                    "createdAt": plan.createAt,
+                }
+                for plan in travel_plans
+            ]
+        )
         return make_response(data, 200)
 
 
