@@ -20,7 +20,6 @@ from flask import jsonify, make_response
 import json
 
 
-
 blp = Blueprint("User", __name__)
 
 
@@ -29,7 +28,6 @@ class UserRegister(MethodView):
     @blp.arguments(UserRegisterSchema)
     def post(self, user_data):
         print(user_data)
-        
 
         if UserModel.objects(email=user_data["email"]).first():
             abort(409, description="This user account has already been used.")
@@ -48,8 +46,7 @@ class UserRegister(MethodView):
                 description=f"Error arise when inserting item to database: {str(e)}",
             )
         data = jsonify({"message": "the user is registered successfully"})
-        return make_response(data,201)
-                      
+        return make_response(data, 201)
 
 
 @blp.route("/login")
@@ -70,15 +67,11 @@ class UserLogin(MethodView):
             token = create_access_token(identity=str(user.id), fresh=True)
             refresh_token = create_refresh_token(identity=str(user.id))
             print(token)
-            data = jsonify({
-    "access_token": token,
-    "refresh_token": refresh_token
-})
-            return make_response(data,201)
+            data = jsonify({"access_token": token, "refresh_token": refresh_token})
+            return make_response(data, 201)
         # If user is not found or password does not match
-        
+
         return jsonify({"error": "Invalid email or password"}), 401
-        
 
 
 @blp.route("/logout")
@@ -91,8 +84,8 @@ class UserLogout(MethodView):
         BlockList.add(jti)
 
         data = jsonify({"message": "logout successfully"})
-        return make_response(data,200)
-        
+        return make_response(data, 200)
+
 
 @blp.route("/refresh")
 class UserRefresh(MethodView):
@@ -104,5 +97,21 @@ class UserRefresh(MethodView):
         BlockList.add(jti)
 
         data = jsonify({"access_token": new_token})
-        return make_response(data,200)
-       
+        return make_response(data, 200)
+
+
+@blp.route("/info")
+class UserInfo(MethodView):
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        user = UserModel.objects(id=user_id).first()
+        if not user:
+            abort(404, description="User not found")
+        data = jsonify(
+            {
+                "username": user.username,
+                "email": user.email,
+            }
+        )
+        return make_response(data, 200)
