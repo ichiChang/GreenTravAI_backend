@@ -110,6 +110,7 @@ class UserInfo(MethodView):
             abort(404, description="User not found")
         data = jsonify(
             {
+                "id": str(user.id),
                 "username": user.username,
                 "email": user.email,
             }
