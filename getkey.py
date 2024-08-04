@@ -121,6 +121,7 @@ def getEcoHotelData():
     pd_eco_hotel = pd_eco_hotel.drop(columns=2)
     pd_eco_hotel = pd_eco_hotel.drop(columns=3)
     pd_eco_hotel = pd_eco_hotel.drop(columns=7)
+    print(pd_eco_hotel)
     return pd_eco_hotel
 
 
@@ -135,6 +136,7 @@ def getEcoLivingData():
     pd_eco_living = pd_eco_living.drop(columns=1)
     pd_eco_living = pd_eco_living.drop(columns=3)
     pd_eco_living = pd_eco_living.drop(columns=4)
+    print(pd_eco_living)
     return pd_eco_living
 
 
@@ -158,3 +160,14 @@ def getEcoSpotData():
     pd_ecoSpots = pd.DataFrame(ecoSpots)
     pd_ecoSpots = pd_ecoSpots.drop(columns="id")
     return pd_ecoSpots
+
+
+def getRestaurant():
+    with open('data/taipeiRestaurant.json', 'r', encoding='utf-8') as f:
+        Restaurant = json.load(f)
+    pd_restaurant = pd.DataFrame(Restaurant)
+    pd_restaurant = pd_restaurant.drop(columns="ID")
+    return pd_restaurant
+
+
+getRestaurant()

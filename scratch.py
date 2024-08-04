@@ -6,11 +6,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
 
+chrome_driver_path = r"C:\Users\USER\Desktop\Side project\beauty-master\chromedriver-win64\chromedriver-win64\chromedriver.exe"
+options = Options()
+options.chrome_executable_path = chrome_driver_path
+
 
 def scratchEcoSpot():
-    chrome_driver_path = r"C:\Users\USER\Desktop\Side project\beauty-master\chromedriver-win64\chromedriver-win64\chromedriver.exe"
-    options = Options()
-    options.chrome_executable_path = chrome_driver_path
 
     driver = webdriver.Chrome(options=options)
     driver.get("https://neecs.moenv.gov.tw/Home/PlaceQry")
@@ -41,7 +42,6 @@ def scratchEcoSpot():
             json.dump(result, f, ensure_ascii=False, indent=4)
 
     finally:
-
         driver.quit()
 
 
@@ -50,4 +50,17 @@ def scratchSpot():
 
 
 def scratchRestaurant():
-    pass
+    driver = webdriver.Chrome(options=options)
+    driver.get("https://www.dalang.tw/%E5%8F%B0%E5%8C%97%E7%BE%8E%E9%A3%9F%E7%B2%BE%E9%81%B8%E5%BF%85%E5%90%83%E9%A4%90%E5%BB%B3/")
+
+    try:
+        elements = driver.find_elements(By.CLASS_NAME, "tag-post-area")
+        result = []
+        for i in elements:
+            print(i.text)
+            result.append(i.text)
+        with open("./data/Restaurants.json", "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=4)
+
+    finally:
+        driver.quit()
