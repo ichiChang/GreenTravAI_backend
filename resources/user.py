@@ -100,7 +100,7 @@ class UserRefresh(MethodView):
         return make_response(data, 200)
 
 
-@blp.route("/info")
+@blp.route("/userInfo")
 class UserInfo(MethodView):
     @jwt_required()
     def get(self):
