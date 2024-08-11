@@ -98,3 +98,6 @@ class AddDaySchema(DaySchema):
 class UpdateDaySchema(Schema):
     Date = fields.DateTime(required=True)
     # TravelPlanId = fields.Str(required=True)
+
+class ChatbotSchema(Schema):
+    query = fields.Str(required=True)

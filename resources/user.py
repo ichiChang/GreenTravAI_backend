@@ -27,7 +27,7 @@ blp = Blueprint("User", __name__)
 class UserRegister(MethodView):
     @blp.arguments(UserRegisterSchema)
     def post(self, user_data):
-        print(user_data)
+        # print(user_data)
 
         if UserModel.objects(email=user_data["email"]).first():
             abort(409, description="This user account has already been used.")

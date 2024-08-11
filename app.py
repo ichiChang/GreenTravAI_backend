@@ -15,6 +15,7 @@ from resources.place import blp as PlaceBlueprint
 from resources.stop import blp as StopBlueprint
 from resources.day import blp as DayBlueprint
 from resources.transportation import blp as TransportationBlueprint
+from resources.chatbot import blp as ChatbotBlueprint
 from urllib.parse import quote_plus
 
 
@@ -23,6 +24,7 @@ load_dotenv()
 
 
 app = Flask(__name__)
+
 
 # Configure the app with environment variables
 mongo_uri = os.getenv("MONGODB_URI")
@@ -69,6 +71,7 @@ api.register_blueprint(StopBlueprint)
 api.register_blueprint(TransportationBlueprint)
 api.register_blueprint(DayBlueprint)
 api.register_blueprint(TravelPlanBlueprint)
+api.register_blueprint(ChatbotBlueprint)
 
 
 if __name__ == "__main__":
