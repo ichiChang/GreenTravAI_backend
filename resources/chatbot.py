@@ -24,18 +24,12 @@ import os
 
 blp = Blueprint("Chatbot", __name__)
 
-
-
-
-blp = Blueprint("Chatbot", __name__)
-
 @blp.route("/chatbot")
 class Chatbot(MethodView):
     
     @blp.arguments(ChatbotSchema)
     @jwt_required()
     def post(self, user_data):
-        print(user_data)
         user_query = user_data["query"]
 
         if not user_query:
