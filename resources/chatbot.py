@@ -34,7 +34,7 @@ class Chatbot(MethodView):
     
     @blp.arguments(ChatbotSchema)
     @jwt_required()
-    def get(self, user_data):
+    def post(self, user_data):
         print(user_data)
         user_query = user_data["query"]
 
@@ -54,7 +54,7 @@ class Chatbot(MethodView):
 class GreenChatbot(MethodView):
       @blp.arguments(ChatbotSchema)
       @jwt_required()
-      def get(self,user_data):
+      def post(self,user_data):
         user_query = user_data["query"]
     
         if not user_query:
