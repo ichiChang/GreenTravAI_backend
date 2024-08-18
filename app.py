@@ -38,7 +38,9 @@ app.config["OPENAPI_JSON_PATH"] = "api-spec.json"
 app.config["OPENAPI_URL_PREFIX"] = "/"
 app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
 app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
+# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
+
 
 
 # Initialize MongoDB
