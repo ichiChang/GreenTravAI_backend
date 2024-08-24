@@ -48,10 +48,19 @@ class StopSchema(Schema):
     note = fields.Str()
     PlaceId = fields.Str(required=True)
     DayId = fields.Str(required=True)
+    
 
 
 class AddStopSchema(StopSchema):
     pass
+
+class LinkStopSchema(Schema):
+    origin_Sid = fields.Str(required=True)
+    dest_Sid = fields.Str(required=True)
+
+class StopinDaySchema(Schema):
+    day_id = fields.Str(required=True)
+
 
 
 class UpdateStopSchema(Schema):

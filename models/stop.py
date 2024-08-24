@@ -1,6 +1,7 @@
 from db import mongo as mg
 from models.day import DayModel
 from models.place import PlaceModel
+from models.travelPlan import TravelPlanModel
 
 
 class StopModel(mg.Document):
@@ -10,3 +11,5 @@ class StopModel(mg.Document):
     note = mg.StringField()
     PlaceId = mg.ReferenceField(document_type=PlaceModel)
     DayId = mg.ReferenceField(document_type=DayModel)
+    # TravelPlan_id = mg.ReferenceField(document_type=TravelPlanModel)
+    
