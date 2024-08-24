@@ -100,7 +100,6 @@ class StopLink(MethodView):
 
             
         api_key = os.getenv("GOOGLE_MAP_API_KEY")
-        # api_key = "AIzaSyAMncPb3INeUVKzl3gA8S0DRwgVUUvecwE"
 
         optimal_mode, duration, best_directions = find_optimal_mode(origin_address, dest_address, api_key)
         
