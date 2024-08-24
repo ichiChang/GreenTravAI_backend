@@ -24,9 +24,10 @@ import os
 
 blp = Blueprint("Chatbot", __name__)
 
+
 @blp.route("/chatbot")
 class Chatbot(MethodView):
-    
+
     @blp.arguments(ChatbotSchema)
     @jwt_required()
     def post(self, user_data):
@@ -35,27 +36,40 @@ class Chatbot(MethodView):
         if not user_query:
             return jsonify({"error": "Query is required"}), 400
 
-        llm_api_key = os.getenv('OPENAI_API_KEY') 
+        llm_api_key = os.getenv("OPENAI_API_KEY")
         travel_planner = TravelPlanner(llm_api_key=llm_api_key)
         response = travel_planner.retrieve_document_content(user_query)
 
         return jsonify(response)
 
-   
-
 
 @blp.route("/greenchatbot")
 class GreenChatbot(MethodView):
-      @blp.arguments(ChatbotSchema)
-      @jwt_required()
-      def post(self,user_data):
+    @blp.arguments(ChatbotSchema)
+    @jwt_required()
+    def post(self, user_data):
         user_query = user_data["query"]
-    
+
         if not user_query:
             return jsonify({"error": "Query is required"}), 400
 
-        llm_api_key = os.getenv('OPENAI_API_KEY')
+        llm_api_key = os.getenv("OPENAI_API_KEY")
         travel_planner = TravelPlanner(llm_api_key=llm_api_key)
         response = travel_planner.retrieve_document_content_green(user_query)
-    
+
+        return jsonify(response)
+
+
+@blp.route("/easyMessage")
+class EasyMessage(MethodView):
+    @blp.arguments(ChatbotSchema)
+    @jwt_required()
+    def post(self, user_data):
+        user_query = user_data["query"]
+
+        if not user_query:
+            return jsonify({"error": "Query is required"}), 400
+
+        response = "test message"
+
         return jsonify(response)
