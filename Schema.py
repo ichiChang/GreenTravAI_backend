@@ -52,7 +52,9 @@ class StopSchema(Schema):
 
 
 class AddStopSchema(StopSchema):
-    pass
+    isContinue = fields.Boolean(required=True)
+    latency = fields.Int()
+    prev_stop = fields.Str()
 
 class LinkStopSchema(Schema):
     origin_Sid = fields.Str(required=True)

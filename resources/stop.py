@@ -12,6 +12,7 @@ from Route import get_directions, get_duration_in_seconds, print_detailed_route_
 from models.transportation import TransportationModel
 from bson import ObjectId
 import os
+from datetime import timedelta
 
 blp = Blueprint("Stop", __name__, url_prefix="/stops")
 
@@ -22,20 +23,60 @@ class StopList(MethodView):
     @blp.arguments(AddStopSchema)
     @jwt_required()
     def post(self, stop_data):
+
+        latency = stop_data["latency"]
         place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
         day = DayModel.objects(id=stop_data["DayId"]).first()
         if not place or not day:
             abort(404, description="Place or Day not found")
+        if stop_data["isContinue"]:
+            prev_stop = StopModel.objects(id=stop_data["prev_stop"]).first()
+            prev_endtime = prev_stop.EndTime
+            prev_address = prev_stop.PlaceId.address
+            
 
-        stop = StopModel(
+            api_key = os.getenv("GOOGLE_MAP_API_KEY")
+
+            optimal_mode, duration, best_directions = find_optimal_mode(prev_address, place.address, api_key)
+
+            if optimal_mode:
+
+                starttime = prev_endtime+timedelta(minutes=int(duration/60))
+                stop = StopModel(
+            Name=stop_data["Name"],
+            StartTime=starttime,
+            EndTime=starttime + timedelta(minutes=latency),
+            note=stop_data["note"],
+            PlaceId=place.id,
+            DayId=day.id,
+                    )
+                stop.save()
+                transportation = TransportationModel(
+            Name=optimal_mode,
+            TimeSpent= int(duration/60),
+            LowCarbon=True if optimal_mode != "driving" else False,
+            FromStopId=prev_stop.id,
+            ToStopId=stop.id,
+                )
+                transportation.save()
+
+            else:
+                abort(
+                500,
+                description=f"Fail to obtain the transportation between {prev_stop.Name} and {stop.Name}",
+            )
+                    
+        else:
+            
+            stop = StopModel(
             Name=stop_data["Name"],
             StartTime=stop_data["StartTime"],
-            EndTime=stop_data["EndTime"],
+            EndTime=stop_data["StartTime"]+timedelta(minutes=latency),
             note=stop_data["note"],
             PlaceId=place,
             DayId=day,
         )
-        stop.save()
+            stop.save()
         data = jsonify({"message": f'Stop {stop_data["Name"]} created successfully'})
         return make_response(data,201)
         
@@ -81,55 +122,51 @@ class StopItem(MethodView):
         data = jsonify({"message": "Stop deleted successfully"})
         return make_response(data,200)
 
-@blp.route("/link")
-class StopLink(MethodView):
+# @blp.route("/link")
+# class StopLink(MethodView):
 
-    @blp.arguments(LinkStopSchema)
-    @jwt_required()
-    def post(self, stop_data):
-        origin_stop = StopModel.objects(id=stop_data["origin_Sid"]).first()
-        dest_stop = StopModel.objects(id=stop_data["dest_Sid"]).first()
-        # origin_pid = origin_stop.PlaceId
-        # dest_pid = dest_stop.PlaceId
-        origin_address = origin_stop.PlaceId.address
-        dest_address = dest_stop.PlaceId.address
+#     @blp.arguments(LinkStopSchema)
+#     @jwt_required()
+#     def post(self, stop_data):
+#         origin_stop = StopModel.objects(id=stop_data["origin_Sid"]).first()
+#         dest_stop = StopModel.objects(id=stop_data["dest_Sid"]).first()
+#         # origin_pid = origin_stop.PlaceId
+#         # dest_pid = dest_stop.PlaceId
+#         origin_address = origin_stop.PlaceId.address
+#         dest_address = dest_stop.PlaceId.address
 
-        # origin_address = PlaceModel.objects(id=ObjectId(origin_stop.PlaceId)).first().address
-        # dest_address = PlaceModel.objects(id=ObjectId(dest_stop.PlaceId)).first().address
+#         # origin_address = PlaceModel.objects(id=ObjectId(origin_stop.PlaceId)).first().address
+#         # dest_address = PlaceModel.objects(id=ObjectId(dest_stop.PlaceId)).first().address
 
 
             
-        api_key = os.getenv("GOOGLE_MAP_API_KEY")
+#         api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-        optimal_mode, duration, best_directions = find_optimal_mode(origin_address, dest_address, api_key)
+#         optimal_mode, duration, best_directions = find_optimal_mode(origin_address, dest_address, api_key)
         
 
-        if optimal_mode:
+#         if optimal_mode:
        
-            transportation = TransportationModel(
-            Name=optimal_mode,
-            TimeSpent= int(duration/60),
-            LowCarbon=True if optimal_mode != "driving" else False,
-            FromStopId=stop_data["origin_Sid"],
-            ToStopId=stop_data["dest_Sid"],
-        )
-            transportation.save()
-            data = jsonify({"message": f'Link  origin {origin_stop.Name} and dest{dest_stop.Name} with {optimal_mode} ',
-                            "trans_mode": optimal_mode,
-                            "TimeSpend":int(duration/60),
-                            "LowCarbon":transportation.LowCarbon}
-                            )
+#             transportation = TransportationModel(
+#             Name=optimal_mode,
+#             TimeSpent= int(duration/60),
+#             LowCarbon=True if optimal_mode != "driving" else False,
+#             FromStopId=stop_data["origin_Sid"],
+#             ToStopId=stop_data["dest_Sid"],
+#         )
+#             transportation.save()
+#             data = jsonify({"message": f'Link  origin {origin_stop.Name} and dest{dest_stop.Name} with {optimal_mode} ',
+#                             "trans_mode": optimal_mode,
+#                             "TimeSpend":int(duration/60),
+#                             "LowCarbon":transportation.LowCarbon}
+#                             )
             
-            return make_response(data,201)
+#             return make_response(data,201)
         
-        abort(
-                500,
-                description=f"Fail to obtain the transportation between {origin_stop.Name} and {dest_stop.Name}",
-            )
-
-
-
-
+#         abort(
+#                 500,
+#                 description=f"Fail to obtain the transportation between {origin_stop.Name} and {dest_stop.Name}",
+#             )
 
 
 
@@ -147,11 +184,13 @@ class StopinDay(MethodView):
 
             stops_data = [
         {
-            "planname": stop.Name,
+            "id":stop.id,
+            "stopname": stop.Name,
             "StartTime": stop.StartTime,
             "EndTime": stop.EndTime,
             "Note": stop.note,
             "transportationToNext": {
+                "trans_id":transportation.id,
                 "Mode": transportation.Name,
                 "TimeSpent": transportation.TimeSpent,
                 "LowCarbon": transportation.LowCarbon
