@@ -2,12 +2,13 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from models.user import UserModel
 from models.travelPlan import TravelPlanModel
+from models.day import DayModel
 
 from db import mongo
 from Schema import UserSchema, AddTravelPlanSchema, UpdateTravelPlanSchema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify, make_response
-from datetime import datetime
+from datetime import datetime, timedelta
 
 blp = Blueprint("TravelPlan", __name__, url_prefix="/travel_plans")
 
@@ -31,6 +32,15 @@ class TravelPlanList(MethodView):
             userId=user.id,
         )
         travel_plan.save()
+
+        current_date = travel_plan_data["startdate"]
+        while current_date <= travel_plan_data["enddate"]:
+            day = DayModel(
+                Date=current_date,
+                TravelPlanId=travel_plan.id # Associate the day with the travel plan
+            )
+            day.save()  # Save each DayModel instance to the database
+            current_date += timedelta(days=1)
         data = jsonify(
             {
                 "message": f'{user.username} created a travel plan named {travel_plan_data["planname"]}'
@@ -51,8 +61,8 @@ class TravelPlanList(MethodView):
                 {
                     "id": str(plan.id),
                     "planname": plan.planname,
-                    "startdate": plan.startdate,
-                    "enddate": plan.enddate,
+                    "startdate": plan.startdate.strftime('%Y-%m-%d'),
+                    "enddate": plan.enddate.strftime('%Y-%m-%d'),
                     "createdAt": plan.createAt,
                 }
                 for plan in travel_plans
@@ -73,8 +83,8 @@ class TravelPlanItem(MethodView):
         data = jsonify(
             {
                 "planname": travel_plan.planname,
-                "startdate": travel_plan.startdate,
-                "enddate": travel_plan.enddate,
+                "startdate": travel_plan.startdate.strftime('%Y-%m-%d'),
+                "enddate": travel_plan.enddate.strftime('%Y-%m-%d'),
                 "createdAt": travel_plan.createAt,
             }
         )

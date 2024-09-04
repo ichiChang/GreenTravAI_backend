@@ -32,7 +32,7 @@ def print_detailed_route_info(directions):
         print("No route found.")
 
 def find_optimal_mode(origin, destination, api_key):
-    modes = ['driving', 'walking', 'bicycling', 'transit']
+    modes = ['driving', 'walking', 'bicycling', 'transit', 'TWO_WHEELER']
     optimal_mode = None
     shortest_duration = float('inf')
     best_directions = None

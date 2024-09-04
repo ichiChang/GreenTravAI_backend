@@ -70,6 +70,6 @@ class EasyMessage(MethodView):
         if not user_query:
             return jsonify({"error": "Query is required"}), 400
 
-        response = "test message"
+        response = {"Message":"text message","Recommendation":[{"Activity": "住宿","Address": "臺北市中山區林森北路286號2至3樓","Location": "千彩格精品旅店"}]}
 
         return jsonify(response)

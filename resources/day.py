@@ -3,7 +3,7 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from models.day import DayModel
 from models.travelPlan import TravelPlanModel
-from Schema import AddDaySchema, UpdateDaySchema
+from Schema import AddDaySchema, UpdateDaySchema, DayinPlanSchema, DaySchema
 from flask_jwt_extended import jwt_required
 from flask import jsonify, make_response
 
@@ -13,10 +13,11 @@ blp = Blueprint("Day", __name__, url_prefix="/days")
 @blp.route("/")
 class DayList(MethodView):
 
-    @blp.arguments(AddDaySchema)
+    @blp.arguments(DaySchema)
     @jwt_required()
     def post(self, day_data):
         # travel_plan = TravelPlanModel.objects(id=plan_id,).first()
+        print('got here')
 
         travel_plan = TravelPlanModel.objects(id=day_data['TravelPlanId'],).first()
 
@@ -57,7 +58,14 @@ class DayItem(MethodView):
         if not day:
             abort(404, description="Day not found")
 
-        data = jsonify(day)
+        data = jsonify(
+            {
+                "id": day.id,
+                "date": day.Date.strftime('%Y-%m-%d'),
+                "TravelPlanId": day.TravelPlanId.id,
+                
+            }
+        )
         return make_response(data,200)
 
     @blp.arguments(UpdateDaySchema)
@@ -77,4 +85,28 @@ class DayItem(MethodView):
 
         data = jsonify({"message": "Day deleted successfully"})
         return make_response(data,200)
+
+@blp.route("/day-in-plan")
+class DayinPlan(MethodView):
+
+    @blp.arguments(DayinPlanSchema)
+    @jwt_required()
+    def post(self, plan_data):
+        print('got here')
+        plan_id = plan_data['TravelPlanId']
+        
+        days = DayModel.objects(TravelPlanId=plan_id)
+        
+        formatted_days = []
+        for day in days:
+            formatted_date_time = day.Date.strftime('%Y-%m-%d') if day.Date else None
+            formatted_day = {
+                'id': str(day.id),
+                'date': formatted_date_time,
+                'travel_plan_id': day.TravelPlanId.id
+            }
+            formatted_days.append(formatted_day)
+        
+        data = jsonify(formatted_days)
+        return make_response(data, 201)
         

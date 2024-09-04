@@ -100,7 +100,18 @@ class StopItem(MethodView):
         if not stop:
             abort(404, description="Stop not found")
 
-        data = jsonify(stop)
+        data = jsonify(
+            {
+                "id": stop.id,
+                "Name":stop.Name,
+                "StartTime": stop.StartTime.strftime('%Y-%m-%d %H:%M'),
+                "EndTime": stop.EndTime.strftime('%Y-%m-%d %H:%M'),
+                "note": stop.note,
+                "DayId": stop.DayId.id,
+                
+            }
+        )
+        
         return make_response(data,200)
         
 
@@ -186,8 +197,8 @@ class StopinDay(MethodView):
         {
             "id":stop.id,
             "stopname": stop.Name,
-            "StartTime": stop.StartTime,
-            "EndTime": stop.EndTime,
+            "StartTime": stop.StartTime.strftime('%Y-%m-%d %H:%M'),
+            "EndTime": stop.EndTime.strftime('%Y-%m-%d %H:%M'),
             "Note": stop.note,
             "transportationToNext": {
                 "trans_id":transportation.id,

@@ -13,18 +13,18 @@ class UserRegisterSchema(UserSchema):
 
 class AddTravelPlanSchema(Schema):
     planname = fields.Str(required=True, validate=validate.Length(min=1))
-    startdate = fields.DateTime(required=True)
-    enddate = fields.DateTime(required=True)
+    startdate = fields.Date(required=True, format='%Y-%m-%d') #date
+    enddate = fields.Date(required=True, format='%Y-%m-%d') #date
 
 
 class UpdateTravelPlanSchema(Schema):
     planname = fields.Str(validate=validate.Length(min=1))
-    startdate = fields.DateTime()
-    enddate = fields.DateTime()
+    startdate = fields.Date( format='%Y-%m-%d') #date
+    enddate = fields.Date( format='%Y-%m-%d') #date
     id = fields.Str(dump_only=True)
     Name = fields.Str(required=True, validate=validate.Length(min=1))
-    StartDay = fields.DateTime(required=True)
-    EndDay = fields.DateTime(required=True)
+    StartDay = fields.Date(required=True, format='%Y-%m-%d') #date
+    EndDay = fields.Date(required=True, format='%Y-%m-%d') #date
     CreateAt = fields.DateTime(dump_only=True)
     # UserId = fields.Str(required=True, load_only=True)
 
@@ -43,8 +43,8 @@ class PlaceSchema(Schema):
 class StopSchema(Schema):
     id = fields.Str(dump_only=True)
     Name = fields.Str(required=True, validate=validate.Length(min=1))
-    StartTime = fields.DateTime()
-    EndTime = fields.DateTime()
+    StartTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
+    EndTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
     note = fields.Str()
     PlaceId = fields.Str(required=True)
     DayId = fields.Str(required=True)
@@ -67,8 +67,8 @@ class StopinDaySchema(Schema):
 
 class UpdateStopSchema(Schema):
     Name = fields.Str(validate=validate.Length(min=1))
-    StartTime = fields.DateTime()
-    EndTime = fields.DateTime()
+    StartTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
+    EndTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
     note = fields.Str()
     PlaceId = fields.Str()
     DayId = fields.Str()
@@ -98,16 +98,20 @@ class UpdateTransportationSchema(Schema):
 
 class DaySchema(Schema):
     id = fields.Str(dump_only=True)
-    Date = fields.DateTime(required=True)
+    Date = fields.Date(required=True, format='%Y-%m-%d') #date
+    #date_time = fields.DateTime(format='%Y-%m-%d %H:%M') #time
     TravelPlanId = fields.Str(required=True)
 
 
 class AddDaySchema(DaySchema):
     pass
 
+class DayinPlanSchema(Schema):
+    TravelPlanId = fields.Str(required=True)
+
 
 class UpdateDaySchema(Schema):
-    Date = fields.DateTime(required=True)
+    Date = fields.Date(required=True, format='%Y-%m-%d') #time
     # TravelPlanId = fields.Str(required=True)
 
 class ChatbotSchema(Schema):
