@@ -9,6 +9,7 @@ class StopModel(mg.Document):
     StartTime = mg.DateTimeField()
     EndTime = mg.DateTimeField()
     note = mg.StringField()
+    transportation = mg.DictField()
     PlaceId = mg.ReferenceField(document_type=PlaceModel)
     DayId = mg.ReferenceField(document_type=DayModel)
     # TravelPlan_id = mg.ReferenceField(document_type=TravelPlanModel)

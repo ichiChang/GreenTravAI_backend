@@ -5,11 +5,11 @@ from models.stop import StopModel
 from models.place import PlaceModel
 from models.day import DayModel
 from models.travelPlan import TravelPlanModel
-from Schema import StopSchema, AddStopSchema, UpdateStopSchema, LinkStopSchema, StopinDaySchema
+from Schema import StopSchema, AddStopSchema, UpdateStopSchema, LinkStopSchema, StopinDaySchema, EditStopSchema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify, make_response
 from Route import get_directions, get_duration_in_seconds, print_detailed_route_info, find_optimal_mode
-from models.transportation import TransportationModel
+# from models.transportation import TransportationModel
 from bson import ObjectId
 import os
 from datetime import timedelta
@@ -29,7 +29,7 @@ class StopList(MethodView):
         day = DayModel.objects(id=stop_data["DayId"]).first()
         if not place or not day:
             abort(404, description="Place or Day not found")
-        if stop_data["isContinue"]:
+        if stop_data["prev_stop"] is not None:
             prev_stop = StopModel.objects(id=stop_data["prev_stop"]).first()
             prev_endtime = prev_stop.EndTime
             prev_address = prev_stop.PlaceId.address
@@ -38,6 +38,7 @@ class StopList(MethodView):
             api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
             optimal_mode, duration, best_directions = find_optimal_mode(prev_address, place.address, api_key)
+            print(optimal_mode,duration)
 
             if optimal_mode:
 
@@ -47,18 +48,21 @@ class StopList(MethodView):
             StartTime=starttime,
             EndTime=starttime + timedelta(minutes=latency),
             note=stop_data["note"],
+            transportation = {},
             PlaceId=place.id,
             DayId=day.id,
                     )
                 stop.save()
-                transportation = TransportationModel(
-            Name=optimal_mode,
-            TimeSpent= int(duration/60),
-            LowCarbon=True if optimal_mode != "driving" else False,
-            FromStopId=prev_stop.id,
-            ToStopId=stop.id,
-                )
-                transportation.save()
+                prev_stop.transportation = {"mode":optimal_mode,"Timespent":int(duration/60),"LowCarbon":True if optimal_mode != "driving" else False}
+                prev_stop.save()
+            #     transportation = TransportationModel(
+            # Name=optimal_mode,
+            # TimeSpent= int(duration/60),
+            # LowCarbon=True if optimal_mode != "driving" else False,
+            # FromStopId=prev_stop.id,
+            # ToStopId=stop.id,
+            #     )
+            #     transportation.save()
 
             else:
                 abort(
@@ -74,6 +78,7 @@ class StopList(MethodView):
             EndTime=stop_data["StartTime"]+timedelta(minutes=latency),
             note=stop_data["note"],
             PlaceId=place,
+            transportation = {},
             DayId=day,
         )
             stop.save()
@@ -193,6 +198,7 @@ class StopinDay(MethodView):
             
 
 
+
             stops_data = [
         {
             "id":stop.id,
@@ -201,11 +207,10 @@ class StopinDay(MethodView):
             "EndTime": stop.EndTime.strftime('%Y-%m-%d %H:%M'),
             "Note": stop.note,
             "transportationToNext": {
-                "trans_id":transportation.id,
-                "Mode": transportation.Name,
-                "TimeSpent": transportation.TimeSpent,
-                "LowCarbon": transportation.LowCarbon
-            } if (transportation := TransportationModel.objects(FromStopId=stop.id).first()) else {}
+                "Mode": stop.transportation.get("mode"),
+                "TimeSpent": stop.transportation.get("Timespent"),
+                "LowCarbon": stop.transportation.get("LowCarbon")
+            } 
         }
         for stop in stops
     ]
@@ -213,6 +218,57 @@ class StopinDay(MethodView):
 
             data = jsonify({"day_id":stop_data["day_id"],
                             "stops":stops_data})
+
+            return make_response(data,201)
+
+@blp.route("/EditStop")
+class EditStop(MethodView):
+
+    @blp.arguments(EditStopSchema)
+    @jwt_required()
+    def post(self, stop_data):
+            stops = stop_data['stops']
+            res_data =[]
+            for stop in stops:
+                current_stop = StopModel.objects(id=stop['stop_id']).first()
+                prev_stop = StopModel.objects(id=stop['previous_stop_id']).first() or None
+
+                if prev_stop is None:
+                    latency = int((current_stop.EndTime - current_stop.StartTime).total_seconds() / 60)
+                    current_day = current_stop.DayId
+                    root_starttime = StopModel.objects(DayId=current_day).order_by('StartTime').first().StartTime
+                    current_stop.StartTime = root_starttime
+                    current_stop.EndTime = root_starttime + timedelta(minutes=latency)
+                    current_stop.transportation={}
+
+                    current_stop.save()
+                    
+                else:
+                    current_addr = current_stop.PlaceId.address
+                    prev_addr = prev_stop.PlaceId.address
+                    api_key = os.getenv("GOOGLE_MAP_API_KEY")
+
+                    optimal_mode, duration, best_directions = find_optimal_mode(prev_addr, current_addr, api_key)
+
+
+                    # current_stop.StartTime = prev_stop.EndTime
+                    if optimal_mode:
+                    
+                        prev_endtime = prev_stop.EndTime
+                        starttime = prev_endtime+timedelta(minutes=int(duration/60))
+                    
+                        current_stop.StartTime=starttime
+                        current_stop.EndTime=starttime + timedelta(minutes=latency)
+                        current_stop.transportation = {}
+                       
+                        current_stop.save()
+
+                        prev_stop.transportation = {"mode":optimal_mode,"Timespent":int(duration/60),"LowCarbon":True if optimal_mode != "driving" else False}
+                        prev_stop.save()
+                res_data.append(stop)
+
+            
+            data = jsonify({"stops":res_data})
 
             return make_response(data,201)
 

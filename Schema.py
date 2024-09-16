@@ -43,8 +43,8 @@ class PlaceSchema(Schema):
 class StopSchema(Schema):
     id = fields.Str(dump_only=True)
     Name = fields.Str(required=True, validate=validate.Length(min=1))
-    StartTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
-    EndTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
+    StartTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False) #time
+    EndTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False) #time
     note = fields.Str()
     PlaceId = fields.Str(required=True)
     DayId = fields.Str(required=True)
@@ -52,9 +52,9 @@ class StopSchema(Schema):
 
 
 class AddStopSchema(StopSchema):
-    isContinue = fields.Boolean(required=True)
+    isContinue = fields.Boolean()
     latency = fields.Int()
-    prev_stop = fields.Str()
+    prev_stop = fields.Str(allow_none=True)
 
 class LinkStopSchema(Schema):
     origin_Sid = fields.Str(required=True)
@@ -62,6 +62,14 @@ class LinkStopSchema(Schema):
 
 class StopinDaySchema(Schema):
     day_id = fields.Str(required=True)
+
+class EditStopIndSchema(Schema):
+    stop_id = fields.String(required=True)            # Individual stop_id
+    previous_stop_id = fields.String(required=True, allow_none=True)   # Individual previous_stop_id
+
+class EditStopSchema(Schema):
+    stops = fields.List(fields.Nested(EditStopIndSchema), required=True)  # List of stop objects
+
 
 
 
