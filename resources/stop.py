@@ -229,6 +229,7 @@ class EditStop(MethodView):
     def post(self, stop_data):
             stops = stop_data['stops']
             res_data =[]
+            count = 0
             for stop in stops:
                 current_stop = StopModel.objects(id=stop['stop_id']).first()
                 prev_stop = StopModel.objects(id=stop['previous_stop_id']).first() or None
@@ -265,7 +266,15 @@ class EditStop(MethodView):
 
                         prev_stop.transportation = {"mode":optimal_mode,"Timespent":int(duration/60),"LowCarbon":True if optimal_mode != "driving" else False}
                         prev_stop.save()
-                res_data.append(stop)
+                if count == len(stops)-1:
+                    res_data.append(prev_stop)
+                    res_data.append(current_stop)
+
+                else:
+                    if prev_stop is not None:
+                        res_data.append(prev_stop)
+                count +=1
+
 
             
             data = jsonify({"stops":res_data})
