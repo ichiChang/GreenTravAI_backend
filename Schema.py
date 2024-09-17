@@ -43,8 +43,8 @@ class PlaceSchema(Schema):
 class StopSchema(Schema):
     id = fields.Str(dump_only=True)
     Name = fields.Str(required=True, validate=validate.Length(min=1))
-    StartTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False) #time
-    EndTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False) #time
+    StartTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False,example="2024-09-17 08:00") #time
+    EndTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False,example="2024-09-17 08:00") #time
     note = fields.Str()
     PlaceId = fields.Str(required=True)
     DayId = fields.Str(required=True)

@@ -6,6 +6,8 @@ from models.travelPlan import TravelPlanModel
 from Schema import AddDaySchema, UpdateDaySchema, DayinPlanSchema, DaySchema
 from flask_jwt_extended import jwt_required
 from flask import jsonify, make_response
+from datetime import timedelta
+
 
 blp = Blueprint("Day", __name__, url_prefix="/days")
 
@@ -92,7 +94,6 @@ class DayinPlan(MethodView):
     @blp.arguments(DayinPlanSchema)
     @jwt_required()
     def post(self, plan_data):
-        print('got here')
         plan_id = plan_data['TravelPlanId']
         
         days = DayModel.objects(TravelPlanId=plan_id)
@@ -108,5 +109,36 @@ class DayinPlan(MethodView):
             formatted_days.append(formatted_day)
         
         data = jsonify(formatted_days)
+        return make_response(data, 201)
+
+
+@blp.route("/append-day-inTP")
+class AppendDayinTP(MethodView):
+
+    @blp.arguments(DayinPlanSchema)
+    @jwt_required()
+    def post(self, plan_data):
+        plan_id = plan_data['TravelPlanId']
+        
+       
+        
+        # Get the days for the specified TravelPlanId, sorted by Date in descending order
+        latest_day = DayModel.objects(TravelPlanId=plan_id).order_by('-Date').first()
+
+        if latest_day:
+            # Get the latest Date and add one day
+            new_date = latest_day.Date + timedelta(days=1)
+
+            # Create a new Day object with the new date
+            new_day = DayModel(
+                TravelPlanId=plan_id,
+                Date=new_date,
+                # Add other necessary fields for the DayModel if required
+            )
+            new_day.save()
+        
+        
+        
+        data = jsonify({"message": f'Day {new_day.Date} appended on travelplan {plan_id} successfully'})
         return make_response(data, 201)
         
