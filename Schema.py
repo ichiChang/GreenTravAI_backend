@@ -124,3 +124,10 @@ class UpdateDaySchema(Schema):
 
 class ChatbotSchema(Schema):
     query = fields.Str(required=True)
+
+class FavorPlaceSchema(Schema):
+    UserId = fields.Str(required=True)
+    PlaceId = fields.Str(required=True)
+
+class RetrieveFavorPlaceSchema(Schema):
+    UserId = fields.Str(required=True)

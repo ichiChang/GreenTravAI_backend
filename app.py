@@ -16,6 +16,7 @@ from resources.stop import blp as StopBlueprint
 from resources.day import blp as DayBlueprint
 from resources.transportation import blp as TransportationBlueprint
 from resources.chatbot import blp as ChatbotBlueprint
+from resources.favorPlace import blp as FavorPLaceBlueprint
 from urllib.parse import quote_plus
 
 
@@ -74,6 +75,7 @@ api.register_blueprint(TransportationBlueprint)
 api.register_blueprint(DayBlueprint)
 api.register_blueprint(TravelPlanBlueprint)
 api.register_blueprint(ChatbotBlueprint)
+api.register_blueprint(FavorPLaceBlueprint)
 
 
 if __name__ == "__main__":
