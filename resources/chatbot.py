@@ -18,8 +18,9 @@ from BlockList import BlockList
 from datetime import datetime
 from flask import jsonify, make_response
 import json
-from TravelPlanner import TravelPlanner
+# from TravelPlanner import TravelPlanner
 import os
+from TravelAgent import run_travel_agent, run_travel_agent_green
 
 
 blp = Blueprint("Chatbot", __name__)
@@ -37,10 +38,19 @@ class Chatbot(MethodView):
             return jsonify({"error": "Query is required"}), 400
 
         llm_api_key = os.getenv("OPENAI_API_KEY")
-        travel_planner = TravelPlanner(llm_api_key=llm_api_key)
-        response = travel_planner.retrieve_document_content(user_query)
+        response = run_travel_agent(user_query)
+        # travel_planner = TravelPlanner(llm_api_key=llm_api_key)
+        # response = travel_planner.retrieve_document_content(user_query)
+        json_str = response.replace("'", '"')
 
-        return jsonify(response)
+        data = json.loads(json_str)
+
+        json_response  = jsonify(data)
+
+        return json_response
+        
+
+        
 
 
 @blp.route("/greenchatbot")
@@ -54,10 +64,16 @@ class GreenChatbot(MethodView):
             return jsonify({"error": "Query is required"}), 400
 
         llm_api_key = os.getenv("OPENAI_API_KEY")
-        travel_planner = TravelPlanner(llm_api_key=llm_api_key)
-        response = travel_planner.retrieve_document_content_green(user_query)
+        response = run_travel_agent_green(user_query)
+        # travel_planner = TravelPlanner(llm_api_key=llm_api_key)
+        # response = travel_planner.retrieve_document_content(user_query)
+        json_str = response.replace("'", '"')
 
-        return jsonify(response)
+        data = json.loads(json_str)
+
+        json_response  = jsonify(data)
+
+        return json_response
 
 
 @blp.route("/easyMessage")
