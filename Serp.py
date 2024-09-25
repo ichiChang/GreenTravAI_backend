@@ -1,7 +1,8 @@
 import requests
-
+import os
 # Your SERP API key
-API_KEY = '1395a83ae0debc210be1318b0355fb0fc8d77a1e260f4c42f1ae36ca281fa030'
+
+API_KEY = os.getenv('SERP_API_KEY')
 
 def search_hotels(query: str, location: str = "Taipei") -> str:
     """
