@@ -25,19 +25,21 @@ class StopList(MethodView):
     def post(self, stop_data):
 
         latency = stop_data["latency"]
-        place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
+        current_stop = StopModel.objects()
+        # place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
         day = DayModel.objects(id=stop_data["DayId"]).first()
-        if not place or not day:
-            abort(404, description="Place or Day not found")
+        current_address = stop_data["address"]
+        if not day:
+            abort(404, description="Day not found")
         if stop_data["prev_stop"] is not None:
             prev_stop = StopModel.objects(id=stop_data["prev_stop"]).first()
             prev_endtime = prev_stop.EndTime
-            prev_address = prev_stop.PlaceId.address
+            prev_address = prev_stop.address
             
 
             api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-            optimal_mode, duration, best_directions = find_optimal_mode(prev_address, place.address, api_key)
+            optimal_mode, duration, best_directions = find_optimal_mode(prev_address, current_address, api_key)
             print(optimal_mode,duration)
 
             if optimal_mode:
@@ -48,8 +50,9 @@ class StopList(MethodView):
             StartTime=starttime,
             EndTime=starttime + timedelta(minutes=latency),
             note=stop_data["note"],
+            address=current_address,
             transportation = {},
-            PlaceId=place.id,
+            # PlaceId=place.id,
             DayId=day.id,
                     )
                 stop.save()
@@ -77,7 +80,8 @@ class StopList(MethodView):
             StartTime=stop_data["StartTime"],
             EndTime=stop_data["StartTime"]+timedelta(minutes=latency),
             note=stop_data["note"],
-            PlaceId=place,
+            address=current_address,
+            # PlaceId=place,
             transportation = {},
             DayId=day,
         )
@@ -112,6 +116,7 @@ class StopItem(MethodView):
                 "StartTime": stop.StartTime.strftime('%Y-%m-%d %H:%M'),
                 "EndTime": stop.EndTime.strftime('%Y-%m-%d %H:%M'),
                 "note": stop.note,
+                "address":stop.address,
                 "DayId": stop.DayId.id,
                 
             }
@@ -206,6 +211,7 @@ class StopinDay(MethodView):
             "StartTime": stop.StartTime.strftime('%Y-%m-%d %H:%M'),
             "EndTime": stop.EndTime.strftime('%Y-%m-%d %H:%M'),
             "Note": stop.note,
+            "Address":stop.address,
             "transportationToNext": {
                 "Mode": stop.transportation.get("mode"),
                 "TimeSpent": stop.transportation.get("Timespent"),
@@ -245,8 +251,8 @@ class EditStop(MethodView):
                     current_stop.save()
                     
                 else:
-                    current_addr = current_stop.PlaceId.address
-                    prev_addr = prev_stop.PlaceId.address
+                    current_addr = current_stop.address
+                    prev_addr = prev_stop.address
                     api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
                     optimal_mode, duration, best_directions = find_optimal_mode(prev_addr, current_addr, api_key)

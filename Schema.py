@@ -46,7 +46,7 @@ class StopSchema(Schema):
     StartTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False,example="2024-09-17 08:00") #time
     # EndTime = fields.DateTime(format='%Y-%m-%d %H:%M', required=False,example="2024-09-17 08:00") #time
     note = fields.Str()
-    PlaceId = fields.Str(required=True)
+    # PlaceId = fields.Str(required=True)
     DayId = fields.Str(required=True)
     
 
@@ -54,6 +54,7 @@ class StopSchema(Schema):
 class AddStopSchema(StopSchema):
     # isContinue = fields.Boolean()
     latency = fields.Int()
+    address = fields.Str(required=True)
     prev_stop = fields.Str(allow_none=True)
 
 class LinkStopSchema(Schema):
@@ -78,7 +79,8 @@ class UpdateStopSchema(Schema):
     StartTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
     EndTime = fields.DateTime(format='%Y-%m-%d %H:%M') #time
     note = fields.Str()
-    PlaceId = fields.Str()
+    # PlaceId = fields.Str()
+    address = fields.Str(required=True)
     DayId = fields.Str()
 
 
