@@ -91,7 +91,6 @@ class EasyMessage(MethodView):
                     "Name": "信義遠百A13",
                     "Address": "110台北市信義區松仁路58號",
                     "latency": 120,
-                    "Location": "千彩格精品旅店",
                 }
             ],
         }
