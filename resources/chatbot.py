@@ -18,6 +18,7 @@ from BlockList import BlockList
 from datetime import datetime
 from flask import jsonify, make_response
 import json
+
 # from TravelPlanner import TravelPlanner
 import os
 from TravelAgent import run_travel_agent, run_travel_agent_green
@@ -45,12 +46,9 @@ class Chatbot(MethodView):
 
         data = json.loads(json_str)
 
-        json_response  = jsonify(data)
+        json_response = jsonify(data)
 
         return json_response
-        
-
-        
 
 
 @blp.route("/greenchatbot")
@@ -71,7 +69,7 @@ class GreenChatbot(MethodView):
 
         data = json.loads(json_str)
 
-        json_response  = jsonify(data)
+        json_response = jsonify(data)
 
         return json_response
 
@@ -86,6 +84,16 @@ class EasyMessage(MethodView):
         if not user_query:
             return jsonify({"error": "Query is required"}), 400
 
-        response = {"Message":"text message","Recommendation":[{"Activity": "住宿","Address": "臺北市中山區林森北路286號2至3樓","Location": "千彩格精品旅店"}]}
+        response = {
+            "Message": "好的，我將為您提供台北市信義區的逛街選項",
+            "Recommendation": [
+                {
+                    "Name": "信義遠百A13",
+                    "Address": "110台北市信義區松仁路58號",
+                    "latency": 120,
+                    "Location": "千彩格精品旅店",
+                }
+            ],
+        }
 
         return jsonify(response)
