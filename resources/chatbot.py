@@ -127,8 +127,8 @@ class EasyMessage(MethodView):
         這些飯店都擁有良好的評價和便利的地理位置，適合您在台北的住宿需求。希望您有個愉快的旅程！
         """
             response = {
-                "message": hotel_recommendations,
-                "recommendation": [],
+                "Message": hotel_recommendations,
+                "Recommendation": [],
             }
 
         return jsonify(response)
