@@ -162,15 +162,15 @@ class EasyGreenMessage(MethodView):
 
             1. **台北凱達大飯店**  
             獲得「金級環保旅館」認證，提供綠色設施與服務。  
-            [訂房連結](https://www.caesarmetro.com.tw)&#8203;:contentReference[oaicite:0]{index=0}。
+            [訂房連結](https://www.caesarmetro.com.tw)
 
             2. **台北圓環國際青年旅舍**  
             綠色認證旅館，注重可持續發展和社會責任，適合預算旅客。  
-            [訂房連結](https://www.youthhostel.com.tw)&#8203;:contentReference[oaicite:1]{index=1}。
+            [訂房連結](https://www.youthhostel.com.tw)
 
             3. **台北綠意飯店**  
             提供環保的住宿選擇，並致力於減少環境影響。  
-            [訂房連結](https://www.greenhotel.com.tw)&#8203;:contentReference[oaicite:2]{index=2}。
+            [訂房連結](https://www.greenhotel.com.tw)
 
             這些住宿選擇都符合環保標準，並提供良好的服務。希望您能找到合適的住宿！
             """
