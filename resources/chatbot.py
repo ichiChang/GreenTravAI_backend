@@ -132,3 +132,51 @@ class EasyMessage(MethodView):
             }
 
         return jsonify(response)
+
+
+@blp.route("/easyGreenMessage")
+class EasyGreenMessage(MethodView):
+    @blp.arguments(ChatbotSchema)
+    @jwt_required()
+    def post(self, user_data):
+        user_query = user_data["query"]
+
+        if not user_query:
+            return jsonify({"error": "Query is required"}), 400
+        if "逛街" in user_query:
+            response = {
+                "Message": "我會建議你去 **台北 101 購物中心**。  這裡不僅是台北市的地標，購物選擇也非常多樣化，從奢侈品牌到特色餐飲應有盡有。購物完還可以登上 101 大樓的觀景台，俯瞰整個台北市，尤其是傍晚時分可以欣賞到日落和城市夜景，非常值得一逛。  ",
+                "Recommendation": [
+                    {
+                        "Name": "信義遠百A13",
+                        "Address": "110台北市信義區松仁路58號",
+                        "Latency": 120,
+                    }
+                ],
+            }
+        elif "住宿" in user_query:
+            green_hotel_recommendations = """
+            # 台北市環保旅館推薦 (2024年10月20日至10月23日)
+
+            以下是幾家適合您需求的環保或綠色旅館：
+
+            1. **台北凱達大飯店**  
+            獲得「金級環保旅館」認證，提供綠色設施與服務。  
+            [訂房連結](https://www.caesarmetro.com.tw)&#8203;:contentReference[oaicite:0]{index=0}。
+
+            2. **台北圓環國際青年旅舍**  
+            綠色認證旅館，注重可持續發展和社會責任，適合預算旅客。  
+            [訂房連結](https://www.youthhostel.com.tw)&#8203;:contentReference[oaicite:1]{index=1}。
+
+            3. **台北綠意飯店**  
+            提供環保的住宿選擇，並致力於減少環境影響。  
+            [訂房連結](https://www.greenhotel.com.tw)&#8203;:contentReference[oaicite:2]{index=2}。
+
+            這些住宿選擇都符合環保標準，並提供良好的服務。希望您能找到合適的住宿！
+            """
+            response = {
+                "Message": green_hotel_recommendations,
+                "Recommendation": [],
+            }
+
+        return jsonify(response)
