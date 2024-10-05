@@ -8,5 +8,7 @@ class TravelPlanModel(mg.Document):
     startdate = mg.DateTimeField(required=True)
     enddate = mg.DateTimeField(required=True)
     createAt = mg.DateTimeField(default=datetime.now)
-    userId = mg.ReferenceField(document_type=UserModel,)
+    userId = mg.ReferenceField(
+        document_type=UserModel,
+    )
     is_liked = mg.BooleanField()

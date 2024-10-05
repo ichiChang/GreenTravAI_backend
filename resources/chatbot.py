@@ -21,6 +21,7 @@ import json
 
 # from TravelPlanner import TravelPlanner
 import os
+import json
 from TravelAgent import run_travel_agent, run_travel_agent_green
 
 
@@ -42,11 +43,13 @@ class Chatbot(MethodView):
         response = run_travel_agent(user_query)
         # travel_planner = TravelPlanner(llm_api_key=llm_api_key)
         # response = travel_planner.retrieve_document_content(user_query)
-        json_str = response.replace("'", '"')
+        # json_str = response.replace("'", '"')
+        # print(type(response))
 
-        data = json.loads(json_str)
+        # data = json.loads(json_str)
+        # json_data = json.dumps(response, ensure_ascii=False)
 
-        json_response = jsonify(data)
+        json_response = jsonify({"response":response})
 
         return json_response
 
@@ -65,12 +68,9 @@ class GreenChatbot(MethodView):
         response = run_travel_agent_green(user_query)
         # travel_planner = TravelPlanner(llm_api_key=llm_api_key)
         # response = travel_planner.retrieve_document_content(user_query)
-        json_str = response.replace("'", '"')
+        # json_str = response.replace("'", '"')
 
-        data = json.loads(json_str)
-
-        json_response = jsonify(data)
-
+        json_response = jsonify({"response":response})
         return json_response
 
 

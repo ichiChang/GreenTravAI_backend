@@ -43,7 +43,6 @@ app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 
 
-
 # Initialize MongoDB
 mongo.init_app(app)
 # Initialize JWT

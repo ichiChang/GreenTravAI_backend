@@ -37,7 +37,7 @@ class TravelPlanList(MethodView):
         while current_date <= travel_plan_data["enddate"]:
             day = DayModel(
                 Date=current_date,
-                TravelPlanId=travel_plan.id # Associate the day with the travel plan
+                TravelPlanId=travel_plan.id,  # Associate the day with the travel plan
             )
             day.save()  # Save each DayModel instance to the database
             current_date += timedelta(days=1)
@@ -61,8 +61,8 @@ class TravelPlanList(MethodView):
                 {
                     "id": str(plan.id),
                     "planname": plan.planname,
-                    "startdate": plan.startdate.strftime('%Y-%m-%d'),
-                    "enddate": plan.enddate.strftime('%Y-%m-%d'),
+                    "startdate": plan.startdate.strftime("%Y-%m-%d"),
+                    "enddate": plan.enddate.strftime("%Y-%m-%d"),
                     "createdAt": plan.createAt,
                 }
                 for plan in travel_plans
@@ -83,8 +83,8 @@ class TravelPlanItem(MethodView):
         data = jsonify(
             {
                 "planname": travel_plan.planname,
-                "startdate": travel_plan.startdate.strftime('%Y-%m-%d'),
-                "enddate": travel_plan.enddate.strftime('%Y-%m-%d'),
+                "startdate": travel_plan.startdate.strftime("%Y-%m-%d"),
+                "enddate": travel_plan.enddate.strftime("%Y-%m-%d"),
                 "createdAt": travel_plan.createAt,
             }
         )

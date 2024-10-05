@@ -20,8 +20,7 @@ class Places(MethodView):
         places = PlaceModel.objects()
 
         data = jsonify(places)
-        return make_response(data,200)
-  
+        return make_response(data, 200)
 
     @blp.arguments(PlaceSchema, location="files")
     @jwt_required()
@@ -37,10 +36,7 @@ class Places(MethodView):
             else:
                 image_url = None  # 没有图片时的处理
 
-
-
             # 从 request.form 中获取其他字段
-         
 
             place = PlaceModel(
                 placename=request.form.get("placename"),
@@ -54,20 +50,19 @@ class Places(MethodView):
             )
             place.save()
 
-            
+            data = jsonify(
+                {
+                    "message": f'Place named {request.form.get("placename")} created successfully'
+                }
+            )
+            return make_response(data, 201)
 
-            data = jsonify({"message": f'Place named {request.form.get("placename")} created successfully'})
-            return make_response(data,201)
-            
-            
-     
         except Exception as e:
             # 打印异常到控制台
             traceback.print_exc()
             data = jsonify({"error": str(e)})
-            return make_response(data,400)
+            return make_response(data, 400)
             # 返回错误信息给客户端
-            
 
 
 @blp.route("/<string:id>")
@@ -95,11 +90,10 @@ class Place(MethodView):
             }
 
             return make_response(jsonify(response_data), 200)
-            
+
         else:
             data = jsonify({"error": "Place not found"})
-            return make_response(data,404)
-            
+            return make_response(data, 404)
 
     @jwt_required()
     def get(self, id):
@@ -108,22 +102,20 @@ class Place(MethodView):
         if place:
 
             data = jsonify(place)
-            return make_response(data,200)
-            
+            return make_response(data, 200)
+
         else:
             data = jsonify({"error": "Place not found"})
-            return make_response(data,404)
-            
+            return make_response(data, 404)
 
     @jwt_required()
     def delete(self, id):
         # Delete a place
         place = PlaceModel.objects(id=id).delete()
         if place:
-            
+
             data = jsonify({"success": True})
-            return make_response(data,200)
+            return make_response(data, 200)
         else:
             data = jsonify({"error": "Place not found"})
-            return make_response(data,404)
-            
+            return make_response(data, 404)

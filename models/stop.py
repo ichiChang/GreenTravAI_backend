@@ -15,4 +15,3 @@ class StopModel(mg.Document):
     address = mg.StringField()
 
     # TravelPlan_id = mg.ReferenceField(document_type=TravelPlanModel)
-    

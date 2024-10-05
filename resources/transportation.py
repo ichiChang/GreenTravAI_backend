@@ -32,16 +32,18 @@ class TransportationList(MethodView):
             ToStopId=to_stop,
         )
         transportation.save()
-        data = jsonify({"message": f'Transportation {transportation_data["Name"]} created successfully'})
-        return make_response(data,201)
-        
+        data = jsonify(
+            {
+                "message": f'Transportation {transportation_data["Name"]} created successfully'
+            }
+        )
+        return make_response(data, 201)
 
     @jwt_required()
     def get(self):
         transportations = TransportationModel.objects()
         data = jsonify(transportations)
-        return make_response(data,200)
-        
+        return make_response(data, 200)
 
 
 @blp.route("/<string:transportation_id>")
@@ -54,9 +56,7 @@ class TransportationItem(MethodView):
             abort(404, description="Transportation not found")
 
         data = jsonify(transportation)
-        return make_response(data,200)
-        
-
+        return make_response(data, 200)
 
     @blp.arguments(UpdateTransportationSchema)
     @jwt_required()
@@ -64,13 +64,12 @@ class TransportationItem(MethodView):
         TransportationModel.objects(id=transportation_id).update(**update_data)
 
         data = jsonify({"message": "Transportation updated successfully"})
-        return make_response(data,200)
-        
+        return make_response(data, 200)
+
     @jwt_required()
     def delete(self, transportation_id):
         transportation = TransportationModel.objects(id=transportation_id).delete()
         if not transportation:
             abort(404, description="Transportation not found")
         data = jsonify({"message": "Transportation deleted successfully"})
-        return make_response(data,200)
-        
+        return make_response(data, 200)

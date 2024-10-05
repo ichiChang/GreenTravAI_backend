@@ -9,30 +9,32 @@ from flask import jsonify, make_response
 
 blp = Blueprint("Favorplace", __name__, url_prefix="/favorplace")
 
+
 @blp.route("/")
 class FavorPLaceList(MethodView):
 
     @blp.arguments(FavorPlaceSchema)
     @jwt_required()
     def post(self, favorplace_data):
-        if favorPlaceModel.objects.filter(UserId=favorplace_data["UserId"], PlaceId=favorplace_data["PlaceId"]).first() :
+        if favorPlaceModel.objects.filter(
+            UserId=favorplace_data["UserId"], PlaceId=favorplace_data["PlaceId"]
+        ).first():
             abort(404, description="favorplace is already exist")
 
         favorplace = favorPlaceModel(
             UserId=favorplace_data["UserId"],
             PlaceId=favorplace_data["PlaceId"],
-            
         )
         favorplace.save()
-        data = jsonify({"message": f'favorplace {favorplace} created successfully'})
-        return make_response(data,201)
-        
+        data = jsonify({"message": f"favorplace {favorplace} created successfully"})
+        return make_response(data, 201)
 
     @jwt_required()
     def get(self):
         favorplace = favorplace.objects()
         data = jsonify(favorplace)
-        return make_response(data,200)
+        return make_response(data, 200)
+
 
 @blp.route("/retrieve-favor")
 class RetrieveFavorPLace(MethodView):
@@ -43,8 +45,7 @@ class RetrieveFavorPLace(MethodView):
         favorplaces = favorPlaceModel.objects.filter(UserId=favorplace_data["UserId"])
 
         data = jsonify(favorplaces)
-        return make_response(data,201)
-
+        return make_response(data, 201)
 
 
 @blp.route("/<string:favorplace_id>")
@@ -56,4 +57,4 @@ class favorplaceItem(MethodView):
         if not favorplace:
             abort(404, description="favorplace not found")
         data = jsonify({"message": "favorplace deleted successfully"})
-        return make_response(data,200)
+        return make_response(data, 200)
