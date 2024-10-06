@@ -69,7 +69,7 @@ def retrieve_document_content(query):
                   {context}
 
                   請將回應格式化為符合以下JSON格式的plain text：
-                  {{"Recommandation": [
+                  {{"Recommendation": [
                         {{
                               "Activity": "住宿",
                               "Location": "住宿名稱",
@@ -161,7 +161,7 @@ def retrieve_document_content_green(query):
                   {context}
 
                   請將回應格式化為符合以下JSON格式的plain text：
-                  {{"Recommandation": [
+                  {{"Recommendation": [
                         {{
                               "Activity": "住宿",
                               "Location": "住宿名稱",
@@ -210,6 +210,7 @@ def retrieve_document_content_green(query):
     restaurant_retriever = get_retriever("green", "travel-agent-restaurant", top_k=3)
     restaurant_docs = restaurant_retriever.get_relevant_documents(query)
 
+
     # Format documents with metadata
     context = (
         format_docs_with_metadata(hotel_docs)
@@ -253,7 +254,7 @@ def retrieve_document_content_spot(query):
                   {context}
 
                   請將回應格式化為符合以下JSON格式的plain text：
-                  {{"Recommandation": [
+                  {{"Recommendation": [
                         
                           {{
                               "Activity": "景點參觀",
@@ -314,7 +315,7 @@ def retrieve_document_content_spot_green(query):
                   {context}
 
                   請將回應格式化為符合以下JSON格式的plain text：
-                  {{"Recommandation": [
+                  {{"Recommendation": [
                         
                           {{
                               "Activity": "景點參觀",

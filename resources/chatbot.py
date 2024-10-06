@@ -34,6 +34,8 @@ class Chatbot(MethodView):
     @blp.arguments(ChatbotSchema)
     @jwt_required()
     def post(self, user_data):
+        # Initialize the response format
+        res_format = {"response": {"Note": None, "results": [], "Recommendation": []}}
         user_query = user_data["query"]
 
         if not user_query:
@@ -41,17 +43,20 @@ class Chatbot(MethodView):
 
         llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent(user_query)
-        # travel_planner = TravelPlanner(llm_api_key=llm_api_key)
-        # response = travel_planner.retrieve_document_content(user_query)
-        # json_str = response.replace("'", '"')
-        # print(type(response))
 
-        # data = json.loads(json_str)
-        # json_data = json.dumps(response, ensure_ascii=False)
+        if isinstance(response, str):
+            res_format["response"]["Note"] = response
+        else:
+            if "results" in response:
+                res_format["response"]["results"] = response["results"]
 
-        json_response = jsonify({"response":response})
+            if "Note" in response:
+                res_format["response"]["Note"] = response["Note"]
 
-        return json_response
+            if "Recommendation" in response:
+                res_format["response"]["Recommendation"] = response["Recommendation"]
+
+        return jsonify(res_format)
 
 
 @blp.route("/greenchatbot")
@@ -59,6 +64,7 @@ class GreenChatbot(MethodView):
     @blp.arguments(ChatbotSchema)
     @jwt_required()
     def post(self, user_data):
+        res_format = {"response": {"Note": None, "results": [], "Recommendation": []}}
         user_query = user_data["query"]
 
         if not user_query:
@@ -66,12 +72,19 @@ class GreenChatbot(MethodView):
 
         llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent_green(user_query)
-        # travel_planner = TravelPlanner(llm_api_key=llm_api_key)
-        # response = travel_planner.retrieve_document_content(user_query)
-        # json_str = response.replace("'", '"')
+        if isinstance(response, str):
+            res_format["response"]["Note"] = response
+        else:
+            if "results" in response:
+                res_format["response"]["results"] = response["results"]
 
-        json_response = jsonify({"response":response})
-        return json_response
+            if "Note" in response:
+                res_format["response"]["Note"] = response["Note"]
+
+            if "Recommendation" in response:
+                res_format["response"]["Recommendation"] = response["Recommendation"]
+
+        return jsonify(res_format)
 
 
 @blp.route("/easyMessage")

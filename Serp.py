@@ -22,7 +22,7 @@ def search_hotels(query: str, location: str = "Taipei") -> str:
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    print(data)
+    # print(data)
 
     # Extract the results
     # results = []
@@ -45,7 +45,7 @@ def search_hotels(query: str, location: str = "Taipei") -> str:
                 if ad_entry["title"] and ad_entry["link"]:
                     # print(ad_entry)
                     ads_results.append(ad_entry)
-        print(ads_results)
+        # print(ads_results)
         result = {"results": ads_results}
 
     elif "local_results" in data:
@@ -111,7 +111,7 @@ def search_hotels_green(query: str, location: str = "Taipei") -> str:
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    print(data)
+    # print(data)
 
     # Extract the results
     # results = []
@@ -134,7 +134,7 @@ def search_hotels_green(query: str, location: str = "Taipei") -> str:
                 if ad_entry["title"] and ad_entry["link"]:
                     # print(ad_entry)
                     ads_results.append(ad_entry)
-        print(ads_results)
+        # print(ads_results)
         result = {"results": ads_results}
 
     elif "local_results" in data:
