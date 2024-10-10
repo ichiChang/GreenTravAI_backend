@@ -13,5 +13,6 @@ class StopModel(mg.Document):
     PlaceId = mg.ReferenceField(document_type=PlaceModel)
     DayId = mg.ReferenceField(document_type=DayModel)
     address = mg.StringField()
+    prev_stopId = mg.StringField(null=True, required=False)
 
     # TravelPlan_id = mg.ReferenceField(document_type=TravelPlanModel)

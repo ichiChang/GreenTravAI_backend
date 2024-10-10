@@ -10,18 +10,25 @@ from langchain_core.runnables import RunnablePassthrough
 # from geopy.distance import geodesic
 import os
 import json
+import re
 
 
 def json_format(response):
+
+    # llm_output_clean = re.sub(r'\s+', ' ', response).strip()
+    response = "[" + response + "]"
+
+    # print(llm_output_clean)
     try:
         json_response = json.loads(response)
         return json_response
     except json.JSONDecodeError:
+        print("Failed to convert to JSON")
         return response
 
 
 def get_retriever(category_type, index_name, top_k):
-    embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("LLM_API_KEY"))
+    embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
     dynamic_filter = {"type": category_type}
 
     # Create the retriever
@@ -54,21 +61,25 @@ def retrieve_document_content(query):
     print("Retrieving information...")
 
     llm = ChatOpenAI(
-        temperature=0, model="gpt-4o", openai_api_key=os.getenv("LLM_API_KEY")
+        temperature=0, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template
-    template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。
+    template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。以下為一日遊的規劃回應格式，若使用者所需的規劃為多日，請遵循以下一日遊的回應格式，回應多日行程以滿足使用者需求。
+                  若使用者要求一日遊，或是在多日遊的最後一天，請勿安排住宿
+                  請將回應格式化為符合以下JSON格式的plain text：
+                  若 Recommendation不止一天，除了最後一天的 Recommendation 之外 請務必在 後面加一個 "comma" 
                   限制條件：推薦不可重複。
                   請用繁體中文回答，並在回答結尾NOTE添加 SHORT SUMMARY。
                   回答中請勿包含```json
-                  
+                  回答中請勿包含 \n
+                  天數請以阿拉伯數字表示
+
 
 
 
                   {context}
 
-                  請將回應格式化為符合以下JSON格式的plain text：
                   {{"Recommendation": [
                         {{
                               "Activity": "住宿",
@@ -101,7 +112,9 @@ def retrieve_document_content(query):
                               "Address": "餐廳地址"
                           }}
                       ],
-                      "Note": SHORT SUMMARY
+                      "Note": SHORT SUMMARY,
+                      "第幾天": 天數
+
                   }}
 
                   問題: {question}"""
@@ -109,19 +122,21 @@ def retrieve_document_content(query):
     custom_prompt = PromptTemplate.from_template(template)
 
     # Retrieve documents from each index
-    hotel_retriever = get_retriever("normal", "travel-agent-hotel", top_k=1)
+    hotel_retriever = get_retriever("normal", "travel-agent-hotel", top_k=4)
     hotel_docs = hotel_retriever.get_relevant_documents(query)
 
-    spot_retriever = get_retriever("normal", "travel-agent-spot", top_k=2)
+    spot_retriever = get_retriever("normal", "travel-agent-spot", top_k=8)
     spot_docs = spot_retriever.get_relevant_documents(query)
 
-    restaurant_retriever = get_retriever("normal", "travel-agent-restaurant", top_k=3)
+    restaurant_retriever = get_retriever("normal", "travel-agent-restaurant", top_k=12)
     restaurant_docs = restaurant_retriever.get_relevant_documents(query)
 
     # Format documents with metadata
     context = (
-        format_docs_with_metadata(hotel_docs)
+        "住宿："
+        + format_docs_with_metadata(hotel_docs)
         + "\n\n"
+        + "景點："
         + format_docs_with_metadata(spot_docs)
         + "\n\n"
         + "餐廳："
@@ -146,21 +161,25 @@ def retrieve_document_content_green(query):
     print("Retrieving information...")
 
     llm = ChatOpenAI(
-        temperature=0, model="gpt-4o", openai_api_key=os.getenv("LLM_API_KEY")
+        temperature=0, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template
-    template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。
+    template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。以下為一日遊的規劃回應格式，若使用者所需的規劃為多日，請遵循以下一日遊的回應格式，回應多日行程以滿足使用者需求。
+                  若使用者要求一日遊，或是在多日遊的最後一天，請勿安排住宿
+                  請將回應格式化為符合以下JSON格式的plain text：
+                  若 Recommendation不止一天，除了最後一天的 Recommendation 之外 請務必在 後面加一個 "comma" 
                   限制條件：推薦不可重複。
                   請用繁體中文回答，並在回答結尾NOTE添加 SHORT SUMMARY。
                   回答中請勿包含```json
-                  
+                  回答中請勿包含 \n
+                  天數請以阿拉伯數字表示
+
 
 
 
                   {context}
 
-                  請將回應格式化為符合以下JSON格式的plain text：
                   {{"Recommendation": [
                         {{
                               "Activity": "住宿",
@@ -193,7 +212,9 @@ def retrieve_document_content_green(query):
                               "Address": "餐廳地址"
                           }}
                       ],
-                      "Note": SHORT SUMMARY
+                      "Note": SHORT SUMMARY,
+                      "第幾天": 天數
+
                   }}
 
                   問題: {question}"""
@@ -201,26 +222,26 @@ def retrieve_document_content_green(query):
     custom_prompt = PromptTemplate.from_template(template)
 
     # Retrieve documents from each index
-    hotel_retriever = get_retriever("green", "travel-agent-hotel", top_k=1)
+    hotel_retriever = get_retriever("green", "travel-agent-hotel", top_k=4)
     hotel_docs = hotel_retriever.get_relevant_documents(query)
 
-    spot_retriever = get_retriever("green", "travel-agent-spot", top_k=2)
+    spot_retriever = get_retriever("green", "travel-agent-spot", top_k=8)
     spot_docs = spot_retriever.get_relevant_documents(query)
 
-    restaurant_retriever = get_retriever("green", "travel-agent-restaurant", top_k=3)
+    restaurant_retriever = get_retriever("green", "travel-agent-restaurant", top_k=12)
     restaurant_docs = restaurant_retriever.get_relevant_documents(query)
-
 
     # Format documents with metadata
     context = (
-        format_docs_with_metadata(hotel_docs)
+        "住宿："
+        + format_docs_with_metadata(hotel_docs)
         + "\n\n"
+        + "景點："
         + format_docs_with_metadata(spot_docs)
         + "\n\n"
         + "餐廳："
         + format_docs_with_metadata(restaurant_docs)
     )
-
     # Combine context with the question
     final_prompt = custom_prompt.format(context=context, question=query)
 
@@ -239,7 +260,7 @@ def retrieve_document_content_spot(query):
     print("Retrieving spots...")
 
     llm = ChatOpenAI(
-        temperature=0, model="gpt-4o", openai_api_key=os.getenv("LLM_API_KEY")
+        temperature=0, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template
@@ -300,7 +321,7 @@ def retrieve_document_content_spot_green(query):
     print("Retrieving spots...")
 
     llm = ChatOpenAI(
-        temperature=0, model="gpt-4o", openai_api_key=os.getenv("LLM_API_KEY")
+        temperature=0, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template

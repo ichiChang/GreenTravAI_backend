@@ -6,9 +6,21 @@ from Schema import (
     TransportationSchema,
     AddTransportationSchema,
     UpdateTransportationSchema,
+    ChooseTransportationSchema,
+    ChooseTransportationUpdateSchema,
 )
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify, make_response
+
+from Route import (
+    get_directions,
+    get_duration_in_seconds,
+    print_detailed_route_info,
+    find_optimal_mode,
+)
+import os
+from datetime import timedelta
+
 
 blp = Blueprint("Transportation", __name__, url_prefix="/transportations")
 
@@ -72,4 +84,72 @@ class TransportationItem(MethodView):
         if not transportation:
             abort(404, description="Transportation not found")
         data = jsonify({"message": "Transportation deleted successfully"})
+        return make_response(data, 200)
+
+
+@blp.route("/choose")
+class TransportationChoose(MethodView):
+
+    @blp.arguments(ChooseTransportationSchema)
+    @jwt_required()
+    def post(self, transportation_data):
+        from_stop = StopModel.objects(id=transportation_data["FromStopId"]).first()
+        to_stop = StopModel.objects(id=transportation_data["ToStopId"]).first()
+        if not from_stop or not to_stop:
+            abort(404, description="FromStop or ToStop not found")
+        api_key = os.getenv("GOOGLE_MAP_API_KEY")
+
+        modes = ["driving", "walking", "bicycling", "transit", "TWO_WHEELER"]
+        res = {}
+
+        for mode in modes:
+            directions = get_directions(
+                from_stop.address, to_stop.address, mode, api_key
+            )
+            duration = get_duration_in_seconds(directions)
+
+            # print(f"Mode: {mode}, Duration: {duration} seconds")
+            res[mode] = int(duration / 60)
+        data = jsonify(res)
+        return make_response(data, 201)
+
+    @blp.arguments(ChooseTransportationUpdateSchema)
+    @jwt_required()
+    def put(self, transportation_data):
+        from_stop = StopModel.objects(id=transportation_data["FromStopId"]).first()
+        mode = transportation_data["mode"]
+        TimeSpent = transportation_data["TimeSpent"]
+        if not from_stop:
+            abort(404, description="FromStop not found")
+        new_trans = {
+            "mode": mode,
+            "Timespent": TimeSpent,
+            "LowCarbon": True if mode not in ["driving", "TWO_WHEELER"] else False,
+        }
+        from_stop.transportation = new_trans
+        from_stop.save()
+
+        curr_stop = from_stop
+        next_stop = StopModel.objects(
+            prev_stopId=transportation_data["FromStopId"]
+        ).first()
+        while next_stop :
+            curr_endtime = curr_stop.EndTime
+            curr_timespent = curr_stop.transportation.get("Timespent")
+            next_new_latency = int(
+                (next_stop.EndTime - next_stop.StartTime).total_seconds() / 60
+            )
+            next_stop.StartTime = curr_endtime + timedelta(minutes=curr_timespent)
+            next_stop.EndTime = (
+                curr_endtime + timedelta(minutes=curr_timespent)
+            ) + timedelta(minutes=next_new_latency)
+
+            curr_stop.save()
+            next_stop.save()
+
+            temp_id = next_stop.id
+            curr_stop = next_stop
+            next_stop = StopModel.objects(prev_stopId=str(temp_id)).first()
+
+        data = jsonify({"message": "Transportation updated successfully"})
         return make_response(data, 200)

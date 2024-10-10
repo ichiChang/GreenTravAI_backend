@@ -82,14 +82,10 @@ class EditStopSchema(Schema):
 
 
 class UpdateStopSchema(Schema):
-    Name = fields.Str(validate=validate.Length(min=1))
-    StartTime = fields.DateTime(format="%Y-%m-%d %H:%M")  # time
-    EndTime = fields.DateTime(format="%Y-%m-%d %H:%M")  # time
-    note = fields.Str()
-    # PlaceId = fields.Str()
-    address = fields.Str(required=True)
-    DayId = fields.Str()
-
+    Name = fields.Str(validate=validate.Length(min=1), required=False, allow_none=True)
+    note = fields.Str(required=False, allow_none=True)
+    address = fields.Str(required=False, allow_none=True)
+    latency = fields.Int(required=False, allow_none=True)
 
 class TransportationSchema(Schema):
     id = fields.Str(dump_only=True)
@@ -103,6 +99,16 @@ class TransportationSchema(Schema):
 
 class AddTransportationSchema(TransportationSchema):
     pass
+
+class ChooseTransportationSchema(Schema):
+    FromStopId = fields.Str(required=True)
+    ToStopId = fields.Str(required=True)
+
+class ChooseTransportationUpdateSchema(Schema):
+    FromStopId = fields.Str(required=True)
+    mode = fields.Str(required=True)
+    TimeSpent = fields.Int(required=True)
+    
 
 
 class UpdateTransportationSchema(Schema):

@@ -35,7 +35,9 @@ class Chatbot(MethodView):
     @jwt_required()
     def post(self, user_data):
         # Initialize the response format
-        res_format = {"response": {"Note": None, "results": [], "Recommendation": []}}
+        res_format = {
+            "response": {"Text_ans": None, "results": [], "Recommendation": []}
+        }
         user_query = user_data["query"]
 
         if not user_query:
@@ -43,15 +45,19 @@ class Chatbot(MethodView):
 
         llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent(user_query)
+        # print(response)
 
         if isinstance(response, str):
-            res_format["response"]["Note"] = response
+            res_format["response"]["Text_ans"] = response
+        if isinstance(response, list) and len(response) > 0:
+            if "results" in response[0]:
+                res_format["response"]["results"] = response["results"]
+            if "Recommendation" in response[0]:
+                res_format["response"]["Recommendation"] = response
+
         else:
             if "results" in response:
                 res_format["response"]["results"] = response["results"]
-
-            if "Note" in response:
-                res_format["response"]["Note"] = response["Note"]
 
             if "Recommendation" in response:
                 res_format["response"]["Recommendation"] = response["Recommendation"]
@@ -64,7 +70,9 @@ class GreenChatbot(MethodView):
     @blp.arguments(ChatbotSchema)
     @jwt_required()
     def post(self, user_data):
-        res_format = {"response": {"Note": None, "results": [], "Recommendation": []}}
+        res_format = {
+            "response": {"Text_ans": None, "results": [], "Recommendation": []}
+        }
         user_query = user_data["query"]
 
         if not user_query:
@@ -73,13 +81,16 @@ class GreenChatbot(MethodView):
         llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent_green(user_query)
         if isinstance(response, str):
-            res_format["response"]["Note"] = response
+            res_format["response"]["Text_ans"] = response
+        if isinstance(response, list) and len(response) > 0:
+            if "results" in response[0]:
+                res_format["response"]["results"] = response["results"]
+            if "Recommendation" in response[0]:
+                res_format["response"]["Recommendation"] = response
+
         else:
             if "results" in response:
                 res_format["response"]["results"] = response["results"]
-
-            if "Note" in response:
-                res_format["response"]["Note"] = response["Note"]
 
             if "Recommendation" in response:
                 res_format["response"]["Recommendation"] = response["Recommendation"]
