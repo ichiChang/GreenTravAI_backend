@@ -1,5 +1,5 @@
 # 使用官方 Python
-FROM python
+FROM python:3.12.0
 
 # 設置工作目錄
 WORKDIR /app
