@@ -9,11 +9,11 @@ psycopg2-binary
 requests
 redis
 google-cloud-storage
+pinecone-client
 langchain
 langchain_core
 langchain_pinecone
 langchain_openai
 langchain_community
 openai
-pinecone-client
 certifi
