@@ -101,12 +101,15 @@ class GreenChatbot(MethodView):
             if "results" in response[0]:
                 res_format["response"]["results"] = response["results"]
             if "Recommendation" in response[0]:
+                day_num = 1
                 for recomm in response:
                     date_info = recomm['第幾天']
                     if isinstance(date_info, str):
                         weather_info = check_and_extract_date(date_info)
                         curr_note = recomm['Note']
                         recomm['Note'] = curr_note + weather_info
+                        recomm['第幾天'] = day_num
+                        day_num = day_num + 1
 
                 res_format["response"]["Recommendation"] = response
 

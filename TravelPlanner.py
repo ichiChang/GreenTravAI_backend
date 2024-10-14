@@ -17,7 +17,7 @@ import re
 def fetch_weather_description(year, month, date):
     url = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-063'
     params = {
-        'Authorization': 'CWA-09B2D777-56D6-4A4D-BC80-FC17CBE71E9E',
+        'Authorization': os.getenv("CWA_AUTH_CODE"),
         'locationName': '松山區',
         'elementName': 'WeatherDescription',
         'timeFrom': f'{year}-{month}-{date}T00:00:00',
