@@ -22,6 +22,7 @@ import json
 # from TravelPlanner import TravelPlanner
 import os
 import json
+from TravelPlanner import check_and_extract_date
 from TravelAgent import run_travel_agent, run_travel_agent_green
 
 
@@ -45,7 +46,7 @@ class Chatbot(MethodView):
 
         llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent(user_query)
-        # print(response)
+        print(response)
 
         if isinstance(response, str):
             res_format["response"]["Text_ans"] = response
@@ -53,7 +54,20 @@ class Chatbot(MethodView):
             if "results" in response[0]:
                 res_format["response"]["results"] = response["results"]
             if "Recommendation" in response[0]:
-                res_format["response"]["Recommendation"] = response
+                if "Recommendation" in response[0]:
+                    day_num = 1
+                    for recomm in response:
+                        
+                        date_info = recomm['第幾天']
+                        if isinstance(date_info, str):
+                            weather_info = check_and_extract_date(date_info)
+                            curr_note = recomm['Note']
+                            recomm['Note'] = curr_note + weather_info
+                            recomm['第幾天'] = day_num
+                            day_num = day_num + 1
+
+
+                    res_format["response"]["Recommendation"] = response
 
         else:
             if "results" in response:
@@ -78,14 +92,22 @@ class GreenChatbot(MethodView):
         if not user_query:
             return jsonify({"error": "Query is required"}), 400
 
-        llm_api_key = os.getenv("OPENAI_API_KEY")
+        # llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent_green(user_query)
+        # print(response)
         if isinstance(response, str):
             res_format["response"]["Text_ans"] = response
         if isinstance(response, list) and len(response) > 0:
             if "results" in response[0]:
                 res_format["response"]["results"] = response["results"]
             if "Recommendation" in response[0]:
+                for recomm in response:
+                    date_info = recomm['第幾天']
+                    if isinstance(date_info, str):
+                        weather_info = check_and_extract_date(date_info)
+                        curr_note = recomm['Note']
+                        recomm['Note'] = curr_note + weather_info
+
                 res_format["response"]["Recommendation"] = response
 
         else:

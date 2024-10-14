@@ -10,8 +10,60 @@ from langchain_core.runnables import RunnablePassthrough
 # from geopy.distance import geodesic
 import os
 import json
+import requests
 import re
 
+
+def fetch_weather_description(year, month, date):
+    url = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-063'
+    params = {
+        'Authorization': 'CWA-09B2D777-56D6-4A4D-BC80-FC17CBE71E9E',
+        'locationName': '松山區',
+        'elementName': 'WeatherDescription',
+        'timeFrom': f'{year}-{month}-{date}T00:00:00',
+        'timeTo': f'{year}-{month}-{date}T18:00:00'
+    }
+    headers = {
+        'accept': 'application/json'
+    }
+
+    # Send the request
+    response = requests.get(url, headers=headers, params=params)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Navigate to the weather description
+        try:
+            weather_description = data['records']['locations'][0]['location'][0]['weatherElement'][0]['time'][0]['elementValue'][0]['value']
+            return f'當天台北市的氣象預報為： {weather_description}請在旅遊時留意氣象資訊'
+        except (KeyError, IndexError) as e:
+            return {"error": f"Failed to extract weather description: {str(e)}"}
+    else:
+        return {"error": f"Request failed with status code {response.status_code}"}
+
+
+
+def check_and_extract_date(date_string):
+    # Regular expression to match the format yyyy/mm/dd
+    pattern = r'^(\d{4})/(\d{2})/(\d{2})$'
+    
+    # Match the date string with the pattern
+    
+    match = re.match(pattern, date_string)
+    
+    if match:
+        # Extract year, month, and day and convert to integers
+        year = int(match.group(1))
+        month = int(match.group(2))
+        day = int(match.group(3))
+        
+        # Call your function with the extracted values
+        return fetch_weather_description(year, month, day)
+    else:
+        print("The string doesn't match the format yyyy/mm/dd")
+        return None
 
 def json_format(response):
 
@@ -61,22 +113,19 @@ def retrieve_document_content(query):
     print("Retrieving information...")
 
     llm = ChatOpenAI(
-        temperature=0, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
+        temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template
     template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。以下為一日遊的規劃回應格式，若使用者所需的規劃為多日，請遵循以下一日遊的回應格式，回應多日行程以滿足使用者需求。
-                  若使用者要求一日遊，或是在多日遊的最後一天，請勿安排住宿
+                  若使用者要求一日遊 （一天），請勿安排住宿，兩天一夜 （兩天）請安排一間住宿，三天兩夜 （三天）遊請安排兩間住宿 以此類推
                   請將回應格式化為符合以下JSON格式的plain text：
-                  若 Recommendation不止一天，除了最後一天的 Recommendation 之外 請務必在 後面加一個 "comma" 
                   限制條件：推薦不可重複。
                   請用繁體中文回答，並在回答結尾NOTE添加 SHORT SUMMARY。
                   回答中請勿包含```json
                   回答中請勿包含 \n
-                  天數請以阿拉伯數字表示
-
-
-
+                  第幾天 的 天數若 有提供詳細日期，請填入詳細的 "yyy/mm/dd" 格式的日期，若使用者沒有特指哪一年 那就是  2024年，今年也是 2024 年,若使用者無提供詳細日期請以阿拉伯數字表示天數即可
+                  請勿更改格式的 key 
 
                   {context}
 
@@ -114,8 +163,9 @@ def retrieve_document_content(query):
                       ],
                       "Note": SHORT SUMMARY,
                       "第幾天": 天數
-
+                      
                   }}
+                   ...  （如果有多天的行程，請繼續以相同格式添加，並在每個 Recommendation 物件之間加上逗號，最後一個物件後不要加逗號）
 
                   問題: {question}"""
 
@@ -161,22 +211,19 @@ def retrieve_document_content_green(query):
     print("Retrieving information...")
 
     llm = ChatOpenAI(
-        temperature=0, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
+        temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template
     template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。以下為一日遊的規劃回應格式，若使用者所需的規劃為多日，請遵循以下一日遊的回應格式，回應多日行程以滿足使用者需求。
-                  若使用者要求一日遊，或是在多日遊的最後一天，請勿安排住宿
+                  若使用者要求一日遊 （一天），請勿安排住宿，兩天一夜 （兩天）請安排一間住宿，三天兩夜 （三天）遊請安排兩間住宿 以此類推
                   請將回應格式化為符合以下JSON格式的plain text：
-                  若 Recommendation不止一天，除了最後一天的 Recommendation 之外 請務必在 後面加一個 "comma" 
                   限制條件：推薦不可重複。
                   請用繁體中文回答，並在回答結尾NOTE添加 SHORT SUMMARY。
                   回答中請勿包含```json
                   回答中請勿包含 \n
-                  天數請以阿拉伯數字表示
-
-
-
+                  第幾天 的 天數若 有提供詳細日期，請填入詳細的 "yyy/mm/dd" 格式的日期，若使用者沒有特指哪一年 那就是  2024年，今年也是 2024 年,若使用者無提供詳細日期請以阿拉伯數字表示天數即可
+                  請勿更改格式的 key 
 
                   {context}
 
@@ -214,8 +261,9 @@ def retrieve_document_content_green(query):
                       ],
                       "Note": SHORT SUMMARY,
                       "第幾天": 天數
-
+                      
                   }}
+                   ...  （如果有多天的行程，請繼續以相同格式添加，並在每個 Recommendation 物件之間加上逗號，最後一個物件後不要加逗號）
 
                   問題: {question}"""
 
@@ -268,8 +316,7 @@ def retrieve_document_content_spot(query):
                   限制條件：推薦不可重複。
                   請用繁體中文回答，並在回答結尾NOTE添加 SHORT SUMMARY。
                   回答中請勿包含```json
-
-
+                  第幾天 的 天數若 有提供詳細日期，請填入詳細的 "yyy/mm/dd" 格式的日期，若使用者沒有特指哪一年 那就是  2024年，今年也是 2024 年,若使用者無提供詳細日期請以阿拉伯數字表示天數即可
 
 
                   {context}
@@ -290,7 +337,9 @@ def retrieve_document_content_spot(query):
                           }},
                          
                       ],
-                      "Note": SHORT SUMMARY
+                      "Note": SHORT SUMMARY,
+                      "第幾天": 天數
+
                   }}
 
                   問題: {question}"""
@@ -329,6 +378,7 @@ def retrieve_document_content_spot_green(query):
                   限制條件：推薦不可重複。
                   請用繁體中文回答，並在回答結尾NOTE添加 SHORT SUMMARY。
                   回答中請勿包含```json
+                  第幾天 的 天數若有詳細日期，請填入詳細的 "yyy/mm/dd" 格式的日期，若使用者沒有特指哪一年 那就是  2024年，今年也是 2024 年 ，若使用者沒有特別指出詳細日期，請以阿拉伯數字表示天數即可
 
 
 
@@ -351,7 +401,8 @@ def retrieve_document_content_spot_green(query):
                           }},
                          
                       ],
-                      "Note": SHORT SUMMARY
+                      "Note": SHORT SUMMARY,
+                      "第幾天": 天數
                   }}
 
                   問題: {question}"""
