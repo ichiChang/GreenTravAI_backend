@@ -8,6 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 安裝應用所需的依賴
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # 複製應用程式代碼到容器中
