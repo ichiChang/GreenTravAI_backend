@@ -133,32 +133,39 @@ def retrieve_document_content(query):
                         {{
                               "Activity": "住宿",
                               "Location": "住宿名稱",
-                              "Address": "住宿地址"
+                              "Address": "住宿地址",
+                              "簡述": "住宿簡述"
                           }},
                           {{
                               "Activity": "早餐",
                               "Location": "餐廳名稱",
-                              "Address": "餐廳地址"
+                              "Address": "餐廳地址",
+                              "簡述": "餐廳簡述"
                           }},
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"
                           }},
                           {{
                               "Activity": "午餐",
                               "Location": "餐廳名稱",
-                              "Address": "餐廳地址"
+                              "Address": "餐廳地址",
+                              "簡述": "餐廳簡述"
                           }},
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"
                           }},
                           {{
                               "Activity": "晚餐",
                               "Location": "餐廳名稱",
-                              "Address": "餐廳地址"
+                              "Address": "餐廳地址",
+                               "簡述": "餐廳簡述"
+
                           }}
                       ],
                       "Note": SHORT SUMMARY,
@@ -231,32 +238,39 @@ def retrieve_document_content_green(query):
                         {{
                               "Activity": "住宿",
                               "Location": "住宿名稱",
-                              "Address": "住宿地址"
+                              "Address": "住宿地址",
+                              "簡述": "住宿簡述"
                           }},
                           {{
                               "Activity": "早餐",
                               "Location": "餐廳名稱",
-                              "Address": "餐廳地址"
+                              "Address": "餐廳地址",
+                              "簡述": "餐廳簡述"
                           }},
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"
                           }},
                           {{
                               "Activity": "午餐",
                               "Location": "餐廳名稱",
-                              "Address": "餐廳地址"
+                              "Address": "餐廳地址",
+                              "簡述": "餐廳簡述"
                           }},
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"
                           }},
                           {{
                               "Activity": "晚餐",
                               "Location": "餐廳名稱",
-                              "Address": "餐廳地址"
+                              "Address": "餐廳地址",
+                               "簡述": "餐廳簡述"
+
                           }}
                       ],
                       "Note": SHORT SUMMARY,
@@ -327,13 +341,16 @@ def retrieve_document_content_spot(query):
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"
+
                           }},
                           
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"
                           }},
                          
                       ],
@@ -391,13 +408,15 @@ def retrieve_document_content_spot_green(query):
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"
                           }},
                           
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
-                              "Address": "景點地址"
+                              "Address": "景點地址",
+                              "簡述": "景點簡述"v
                           }},
                          
                       ],
@@ -427,3 +446,5 @@ def retrieve_document_content_spot_green(query):
     json_response = json_format(result.content)
 
     return json_response
+
+

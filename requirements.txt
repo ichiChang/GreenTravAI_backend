@@ -17,3 +17,4 @@ langchain_openai
 langchain_community
 openai
 certifi
+googlemaps
