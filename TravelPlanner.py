@@ -28,6 +28,7 @@ def fetch_weather_description(year, month, date):
     }
 
     # Send the request
+    code = os.getenv("CWA_AUTH_CODE")
     response = requests.get(url, headers=headers, params=params)
 
     # Check if the request was successful
@@ -39,7 +40,7 @@ def fetch_weather_description(year, month, date):
             weather_description = data['records']['locations'][0]['location'][0]['weatherElement'][0]['time'][0]['elementValue'][0]['value']
             return f'當天台北市的氣象預報為： {weather_description}請在旅遊時留意氣象資訊'
         except (KeyError, IndexError) as e:
-            return {"error": f"Failed to extract weather description: {str(e)}"}
+            return {"error": f"Failed to extract weather description: {str(e)} {str(code)}"}
     else:
         return {"error": f"Request failed with status code {response.status_code}"}
 

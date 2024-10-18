@@ -62,7 +62,7 @@ class Chatbot(MethodView):
                         if isinstance(date_info, str):
                             weather_info = check_and_extract_date(date_info)
                             curr_note = recomm['Note']
-                            recomm['Note'] = curr_note + weather_info
+                            recomm['Note'] = curr_note + str(weather_info)
                             recomm['第幾天'] = day_num
                             day_num = day_num + 1
 
