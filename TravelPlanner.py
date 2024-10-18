@@ -47,9 +47,9 @@ def fetch_weather_description(year, month, date):
             weather_description = data['records']['locations'][0]['location'][0]['weatherElement'][0]['time'][0]['elementValue'][0]['value']
             return f'當天台北市的氣象預報為： {weather_description}請在旅遊時留意氣象資訊'
         except (KeyError, IndexError) as e:
-            return {"error": f"Failed to extract weather description: {str(e)} code_exist:{str(check)}"}
+            return {"error": f"Failed to extract weather description: {str(e)}"}
     else:
-        return {"error": f"Request failed with status code {response.status_code}"}
+        return {"error": f"Request failed with status code {response.status_code}, code exist: {str(check)}"}
 
 
 
