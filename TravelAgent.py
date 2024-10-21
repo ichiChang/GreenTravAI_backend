@@ -17,6 +17,7 @@ from TravelPlanner import (
     retrieve_document_content_spot,
     retrieve_document_content_spot_green,
 )
+import datetime
 
 
 # normal tools
@@ -124,6 +125,7 @@ def transoprtation_route_search_green(query: str) -> str:
 
 
 def run_travel_agent(query: str) -> str:
+    print(f' agent init{datetime.datetime.now()}')
     # Define the tools
     tools = [
         Tool(
@@ -234,6 +236,7 @@ only when user talk about 規劃, 安排, then use the Travel Planner
     )
 
     # Run the agent with the provided query
+    print(f' agent work{datetime.datetime.now()}')
     response = agent.run(query)
 
     return response
@@ -290,9 +293,9 @@ def run_travel_agent_green(query: str) -> str:
     # Define the system prompt
     system_prompt = """
 System Prompt:
-You are a highly knowledgeable agent specializing in travel planning. Your primary functions include providing information about hotels, dining options, and tourist attractions to help users arrange comprehensive travel plans.
+#zh-tw You are a highly knowledgeable agent specializing in travel planning. Your primary functions include providing information about hotels, dining options, and tourist attractions to help users arrange comprehensive travel plans.
 The resposne must in JSON format
-if the query is not related to travel, tourist, information, please return a short casual chat to user.
+if the query is not related to travel, tourist, information, please return a short casual chat to user 繁體中文.
 only when user talk about 規劃, 安排, then use the Travel Planner
 
 1. **Arranging a Travel Plan:**
@@ -336,7 +339,7 @@ only when user talk about 規劃, 安排, then use the Travel Planner
    - if the query is not related to travel, tourist, information, please return a short casual chat to user.
 
 8. **Language:**
-   - Respond in the traditioinal Chinese and Must in Json format
+   - Respond in the traditioinal Chinese **繁體中文** and Must in Json format #zh-tw
 """
 
     # Initialize the ChatOpenAI with the system prompt

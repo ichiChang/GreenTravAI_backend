@@ -24,6 +24,7 @@ import os
 import json
 from TravelPlanner import check_and_extract_date
 from TravelAgent import run_travel_agent, run_travel_agent_green
+import datetime
 
 
 blp = Blueprint("Chatbot", __name__)
@@ -44,9 +45,9 @@ class Chatbot(MethodView):
         if not user_query:
             return jsonify({"error": "Query is required"}), 400
 
-        llm_api_key = os.getenv("OPENAI_API_KEY")
+        # llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent(user_query)
-        print(response)
+        # print(response)
 
         if isinstance(response, str):
             res_format["response"]["Text_ans"] = response
@@ -55,19 +56,14 @@ class Chatbot(MethodView):
                 res_format["response"]["results"] = response["results"]
             if "Recommendation" in response[0]:
                 if "Recommendation" in response[0]:
-                    day_num = 1
+                    final_note = ""
                     for recomm in response:
-                        
-                        date_info = recomm['第幾天']
-                        if isinstance(date_info, str):
-                            weather_info = check_and_extract_date(date_info)
-                            curr_note = recomm['Note']
-                            recomm['Note'] = curr_note + str(weather_info)
-                            recomm['第幾天'] = day_num
-                            day_num = day_num + 1
-
+                        final_note += recomm['Note']
+                        del recomm['Note']
 
                     res_format["response"]["Recommendation"] = response
+                    res_format["response"]["Text_ans"] = final_note
+
 
         else:
             if "results" in response:
@@ -94,24 +90,21 @@ class GreenChatbot(MethodView):
 
         # llm_api_key = os.getenv("OPENAI_API_KEY")
         response = run_travel_agent_green(user_query)
-        # print(response)
         if isinstance(response, str):
             res_format["response"]["Text_ans"] = response
         if isinstance(response, list) and len(response) > 0:
             if "results" in response[0]:
                 res_format["response"]["results"] = response["results"]
             if "Recommendation" in response[0]:
-                day_num = 1
-                for recomm in response:
-                    date_info = recomm['第幾天']
-                    if isinstance(date_info, str):
-                        weather_info = check_and_extract_date(date_info)
-                        curr_note = recomm['Note']
-                        recomm['Note'] = curr_note + weather_info
-                        recomm['第幾天'] = day_num
-                        day_num = day_num + 1
+                if "Recommendation" in response[0]:
+                    final_note = ""
+                    for recomm in response:
+                        final_note += recomm['Note']
+                        del recomm['Note']
 
-                res_format["response"]["Recommendation"] = response
+                    res_format["response"]["Recommendation"] = response
+                    res_format["response"]["Text_ans"] = final_note
+
 
         else:
             if "results" in response:
@@ -121,6 +114,7 @@ class GreenChatbot(MethodView):
                 res_format["response"]["Recommendation"] = response["Recommendation"]
 
         return jsonify(res_format)
+
 
 
 @blp.route("/easyMessage")
