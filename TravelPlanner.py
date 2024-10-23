@@ -378,11 +378,12 @@ def retrieve_document_content_spot(query):
     print("Retrieving spots...")
 
     llm = ChatOpenAI(
-        temperature=0, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
+        temperature=0.4, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template
-    template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。
+    template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的對台北景點的知識回答問題。
+                  無法找到合適的景點，請根據你自己的知識推薦景點。
                   限制條件：推薦不可重複。
                   請用繁體中文回答，並在回答結尾NOTE添加 SHORT SUMMARY。
                   回答中請勿包含```json

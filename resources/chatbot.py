@@ -38,7 +38,7 @@ class Chatbot(MethodView):
     def post(self, user_data):
         # Initialize the response format
         res_format = {
-            "response": {"Text_ans": None, "results": [], "Recommendation": []}
+            "response": {"Text_ans": None, "results": [], "Plans": []}
         }
         user_query = user_data["query"]
 
@@ -61,7 +61,7 @@ class Chatbot(MethodView):
                         final_note += recomm['Note']
                         del recomm['Note']
 
-                    res_format["response"]["Recommendation"] = response
+                    res_format["response"]["Plans"] = response
                     res_format["response"]["Text_ans"] = final_note
 
 
@@ -70,7 +70,7 @@ class Chatbot(MethodView):
                 res_format["response"]["results"] = response["results"]
 
             if "Recommendation" in response:
-                res_format["response"]["Recommendation"] = response["Recommendation"]
+                res_format["response"]["Plans"] = response["Recommendation"]
 
         return jsonify(res_format)
 
