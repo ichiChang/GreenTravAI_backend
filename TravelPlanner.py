@@ -125,11 +125,12 @@ def retrieve_document_content(query):
     print("Retrieving information...")
 
     llm = ChatOpenAI(
-        temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
+        temperature=0.6, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
     )
 
     # Define the template
     template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。
+                  若提供的景點無法找到符合使用者的需求的景點，請根據你自己的知識推薦景點，以能符合使用者需求為優先
                   以下為一日遊的規劃回應格式，若使用者所需的規劃為多日，請遵循以下一日遊的回應格式，回應多日行程以滿足使用者需求，如兩天一夜，即需要**兩個獨立的一日遊**，以此類推
                   每一天的行程請使用獨立的一日遊格式回答，不要將兩天合併在一起回應。
                   **多日行程中，行程的最後一天不安排住宿**
