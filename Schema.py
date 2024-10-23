@@ -28,6 +28,28 @@ class UpdateTravelPlanSchema(Schema):
     CreateAt = fields.DateTime(dump_only=True)
     # UserId = fields.Str(required=True, load_only=True)
 
+from marshmallow import Schema, fields
+
+class CreateAllStopSchema(Schema):
+    stopname = fields.Str()
+    Note = fields.Str()
+    latency = fields.Int()
+    address = fields.Str()
+    StartTime = fields.DateTime(
+        format="%Y-%m-%d %H:%M", required=False, example="2024-09-17 08:00"
+    )
+
+class CreateDaySchema(Schema):
+    stops = fields.List(fields.Nested(CreateAllStopSchema), required=True)
+
+class CreateAllSchema(Schema):
+    startdate = fields.Date(format="%Y-%m-%d")  # date
+    enddate = fields.Date(format="%Y-%m-%d")  # date
+    planname = fields.Str()
+    days = fields.List(fields.Nested(CreateDaySchema), required=True)
+
+
+
 
 class PlaceSchema(Schema):
     placename = fields.Str()
