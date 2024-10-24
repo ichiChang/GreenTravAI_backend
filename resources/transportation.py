@@ -106,7 +106,7 @@ class TransportationChoose(MethodView):
             directions = get_directions(
                 from_stop.address, to_stop.address, mode, api_key
             )
-            duration = get_duration_in_seconds(directions)
+            duration, best_distance_km = get_duration_in_seconds(directions)
 
             # print(f"Mode: {mode}, Duration: {duration} seconds")
             res[mode] = int(duration / 60)
