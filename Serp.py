@@ -398,8 +398,6 @@ def get_travel_route_with_google_maps_green(query: str):
         route = get_google_maps_route(departure_location=departure_location, destination=destination, departure_time=departure_datetime)
         return route
 
-<<<<<<< HEAD
-=======
 
 
 def get_current_date_in_taipei() -> str:
@@ -553,7 +551,6 @@ def execute_hotel_query_green(query):
     return search_hotel_new(query=user_input,min_price=hotel_info.get('min_price'), max_price=hotel_info.get('max_price'), hotel_type=hotel_info.get('hotel_type'),check_in_date=hotel_info.get('check_in_date'),check_out_date=hotel_info.get('check_out_date'))
 
 
->>>>>>> 7b86e5b... add hotel search and fix choose trans bug
    
 
 
