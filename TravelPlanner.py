@@ -131,7 +131,7 @@ def retrieve_document_content(query):
     # Define the template
     template = """你是一位台北的旅遊專家，根據以下上下文，結合你自己的知識回答問題。
                   若提供的景點無法找到符合使用者的需求的景點，請根據你自己的知識推薦景點，以能符合使用者需求為優先
-                  Activity 為**綠色景點參觀時，請填入提供的綠色景點，可以儘量推薦地址相近的
+                  Activity 為**綠色景點參觀**時，請填入提供的綠色景點，可以儘量推薦地址相近的
                   以下為一日遊的規劃回應格式，若使用者所需的規劃為多日，請遵循以下一日遊的回應格式，回應多日行程以滿足使用者需求，如兩天一夜，即需要**兩個獨立的一日遊**，以此類推
                   每一天的行程請使用獨立的一日遊格式回答，不要將兩天合併在一起回應。
                   **多日行程中，行程的最後一天不安排住宿**
@@ -212,7 +212,7 @@ def retrieve_document_content(query):
     # restaurant_docs = restaurant_retriever.invoke(query)
     hotel_retriever = get_retriever("normal", "travel-agent-hotel", top_k=4)
     spot_retriever = get_retriever("normal", "travel-agent-spot", top_k=4)
-    spot_retriever_green = get_retriever("normal", "travel-agent-spot", top_k=4)
+    spot_retriever_green = get_retriever("green", "travel-agent-spot", top_k=4)
     restaurant_retriever = get_retriever("normal", "travel-agent-restaurant", top_k=12)
 
 # Use ThreadPoolExecutor to retrieve in parallel
