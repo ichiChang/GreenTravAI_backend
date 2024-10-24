@@ -68,7 +68,7 @@ class StopList(MethodView):
 
             api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-            optimal_mode, duration, best_directions = find_optimal_mode(
+            optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
                 prev_address, current_address, api_key
             )
             print(optimal_mode, duration)
@@ -91,6 +91,7 @@ class StopList(MethodView):
                 prev_stop.transportation = {
                     "mode": optimal_mode,
                     "Timespent": int(duration / 60),
+                    "distance": int(best_distance_km),
                     "LowCarbon": (
                         True
                         if optimal_mode not in ["driving", "TWO_WHEELER"]
@@ -193,12 +194,13 @@ class StopItem(MethodView):
             if prev_stop:
                 api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-                optimal_mode, duration, best_directions = find_optimal_mode(
+                optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
                     prev_stop.address, update_data.get("address"), api_key
                 )
                 prev_stop.transportation = {
                     "mode": optimal_mode,
                     "Timespent": int(duration / 60),
+                    "distance": int(best_distance_km),
                     "LowCarbon": (
                         True
                         if optimal_mode not in ["driving", "TWO_WHEELER"]
@@ -219,12 +221,13 @@ class StopItem(MethodView):
             if next_stop:
                 api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-                optimal_mode, duration, best_directions = find_optimal_mode(
+                optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
                     update_data.get("address"), next_stop.address, api_key
                 )
                 stop.transportation = {
                     "mode": optimal_mode,
                     "Timespent": int(duration / 60),
+                    "distance": int(best_distance_km),
                     "LowCarbon": (
                         True
                         if optimal_mode not in ["driving", "TWO_WHEELER"]
@@ -314,6 +317,7 @@ class EditStop(MethodView):
     @jwt_required()
     def post(self, stop_data):
         stops = stop_data["stops"]
+        day_id = StopModel.objects(id=stops[0]["stop_id"]).first().DayId.id
         res_data = []
         count = 0
         for stop in stops:
@@ -346,7 +350,7 @@ class EditStop(MethodView):
                 prev_addr = prev_stop.address
                 api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-                optimal_mode, duration, best_directions = find_optimal_mode(
+                optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
                     prev_addr, current_addr, api_key
                 )
 
@@ -366,6 +370,7 @@ class EditStop(MethodView):
                     prev_stop.transportation = {
                         "mode": optimal_mode,
                         "Timespent": int(duration / 60),
+                        "distance": int(best_distance_km),
                         "LowCarbon": (
                             True
                             if optimal_mode not in ["driving", "TWO_WHEELER"]
@@ -382,6 +387,6 @@ class EditStop(MethodView):
                     res_data.append(format_stop(prev_stop))
             count += 1
 
-        data = jsonify({"stops": res_data})
+        data = jsonify({"day_id":day_id,"stops": res_data})
 
         return make_response(data, 201)

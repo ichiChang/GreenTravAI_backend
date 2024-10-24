@@ -6,7 +6,12 @@ from models.day import DayModel
 from models.stop import StopModel
 
 from db import mongo
-from Schema import UserSchema, AddTravelPlanSchema, UpdateTravelPlanSchema, CreateAllSchema
+from Schema import (
+    UserSchema,
+    AddTravelPlanSchema,
+    UpdateTravelPlanSchema,
+    CreateAllSchema,
+)
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify, make_response
 from datetime import datetime, timedelta
@@ -20,6 +25,22 @@ from Route import (
 from datetime import datetime, timedelta
 
 blp = Blueprint("TravelPlan", __name__, url_prefix="/travel_plans")
+
+
+def calcarbon(distance, mode):
+    # modes = ["driving", "walking", "bicycling", "transit", "TWO_WHEELER"]
+    #  資料來原：行政院環保署碳排放計算器
+    if mode is None:
+        return 0
+    emission_map = {
+        "driving": 173,
+        "walking": 0,
+        "bicycling": 0,
+        "transit": 4,
+        "TWO_WHEELER": 46,
+    }
+    ans = round(emission_map.get(mode) or 0 * distance, 2)
+    return ans
 
 
 @blp.route("/")
@@ -121,7 +142,7 @@ class TravelPlanItem(MethodView):
         travel_plan.delete()
         data = jsonify({"message": "Travel plan deleted successfully"})
         return make_response(data, 200)
-    
+
 
 @blp.route("/CreateAll")
 class TravelPlanList(MethodView):
@@ -151,9 +172,9 @@ class TravelPlanList(MethodView):
             )
             day.save()  # Save each DayModel instance to the database
 
-            stopListInDay = travel_plan_data['days'][daynum]
+            stopListInDay = travel_plan_data["days"][daynum]
             stop_num = 0
-            for stop in stopListInDay['stops']:
+            for stop in stopListInDay["stops"]:
                 print(stop)
                 latency = stop["latency"]
                 # current_stop = StopModel.objects()
@@ -162,15 +183,15 @@ class TravelPlanList(MethodView):
                 current_address = stop["address"]
                 if not day:
                     abort(404, description="Day not found")
-                if stop_num > 0 :
+                if stop_num > 0:
                     # prev_stop = StopModel.objects(id=stop["prev_stop"]).first()
                     prev_endtime = prev_stop.EndTime
                     prev_address = prev_stop.address
 
                     api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-                    optimal_mode, duration, best_directions = find_optimal_mode(
-                        prev_address, current_address, api_key
+                    optimal_mode, duration, best_directions, best_distance_km = (
+                        find_optimal_mode(prev_address, current_address, api_key)
                     )
                     print(optimal_mode, duration)
 
@@ -192,6 +213,7 @@ class TravelPlanList(MethodView):
                         prev_stop.transportation = {
                             "mode": optimal_mode,
                             "Timespent": int(duration / 60),
+                            "distance": int(best_distance_km),
                             "LowCarbon": (
                                 True
                                 if optimal_mode not in ["driving", "TWO_WHEELER"]
@@ -220,7 +242,6 @@ class TravelPlanList(MethodView):
                     # new_datetime = day.Date.replace(hour=8, minute=0, second=0, microsecond=0)
                     # latency = stop['latency']
 
-
                     # Extract the yyyy-mm-dd part and add 08:00 to it
                     # new_date = parsed_date.replace(hour=8, minute=0, second=0, microsecond=0)
 
@@ -231,7 +252,7 @@ class TravelPlanList(MethodView):
                         StartTime=stop["StartTime"],
                         EndTime=stop["StartTime"] + timedelta(minutes=latency),
                         note=stop["Note"],
-                        address=stop['address'],
+                        address=stop["address"],
                         # PlaceId=place,
                         transportation={},
                         DayId=day,
@@ -240,13 +261,49 @@ class TravelPlanList(MethodView):
                     prev_stop = stp
                 stop_num = stop_num + 1
 
-
             current_date += timedelta(days=1)
             daynum = daynum + 1
-        
-        data = jsonify(
-            {
-                "message": f' Complete is created successfully'
-            }
-        )
+
+        data = jsonify({"message": f" Complete is created successfully"})
         return make_response(data, 201)
+
+
+@blp.route("/CalCarbon")
+class TravelPlanItem(MethodView):
+
+    # @blp.arguments(AddTravelPlanSchema)
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        user = UserModel.objects(id=user_id).first()
+        if not user:
+            abort(404, description="User not found")
+
+        total_emission = 0
+        total_distance = 0
+        plans = TravelPlanModel.objects(userId=user.id)
+
+        for plan in plans:
+            days = DayModel.objects(TravelPlanId=plan.id)
+            for day in days:
+                stops = StopModel.objects(DayId=day.id)
+                for stop in stops:
+                    # Get distance and mode with default values
+                    distance = stop.transportation.get("distance") or 0
+                    mode = stop.transportation.get("mode") or "unknown"  # You can set a default mode if needed
+
+                    total_emission += calcarbon(distance, mode)
+                    print(total_emission)
+                    total_distance += distance
+        print(total_emission)
+        print(total_distance)
+        print(calcarbon(total_distance, "driving"))
+        # Ensure you do not divide by zero
+        if total_distance > 0:
+            final_rate = round(total_emission / calcarbon(total_distance, "driving"), 2)
+        else:
+            final_rate = 0  # Handle case where total_distance is 0
+
+        data = jsonify({"emission_rate": final_rate})
+
+        return make_response(data, 200)

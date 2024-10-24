@@ -9,9 +9,12 @@ def get_directions(origin, destination, mode, api_key):
 
 def get_duration_in_seconds(directions):
     if directions["status"] == "OK":
-        duration = directions["routes"][0]["legs"][0]["duration"]["value"]
-        return duration
-    return float("inf")
+        leg = directions["routes"][0]["legs"][0]
+        duration = leg["duration"]["value"]  # in seconds
+        distance = leg["distance"]["value"]  # in meters
+        distance_km = distance / 1000  # convert to kilometers
+        return duration, distance_km
+    return float("inf"), float("inf")
 
 
 def print_detailed_route_info(directions):
@@ -42,10 +45,12 @@ def find_optimal_mode(origin, destination, api_key):
     optimal_mode = None
     shortest_duration = float("inf")
     best_directions = None
+    best_distance_km = float("inf")
+
 
     for mode in modes:
         directions = get_directions(origin, destination, mode, api_key)
-        duration = get_duration_in_seconds(directions)
+        duration, distance_km = get_duration_in_seconds(directions)
 
         print(f"Mode: {mode}, Duration: {duration} seconds")
 
@@ -53,5 +58,6 @@ def find_optimal_mode(origin, destination, api_key):
             shortest_duration = duration
             optimal_mode = mode
             best_directions = directions
+            best_distance_km = distance_km
 
-    return optimal_mode, shortest_duration, best_directions
+    return optimal_mode, shortest_duration, best_directions, best_distance_km
