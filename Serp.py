@@ -398,6 +398,162 @@ def get_travel_route_with_google_maps_green(query: str):
         route = get_google_maps_route(departure_location=departure_location, destination=destination, departure_time=departure_datetime)
         return route
 
+<<<<<<< HEAD
+=======
+
+
+def get_current_date_in_taipei() -> str:
+    taipei_tz = pytz.timezone('Asia/Taipei')
+    return datetime.now(taipei_tz).strftime('%Y-%m-%d')
+
+def validate_date_format(date_str: str) -> bool:
+    """Helper function to validate if a string is in YYYY-MM-DD format."""
+    try:
+        datetime.strptime(date_str, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
+def extract_hotel_info(query: str) -> dict:
+    prompt_template = """
+        回答中請勿包含```json
+        回答中請勿包含 \n
+        Extract the hotel booking details from the following query:
+        If there is no specified check-in date, fill "no offer".
+        If there is no specified check-out date, fill "no offer.
+        If there is no specified min_price, use Null.
+        If there is no specified max_price, use Null.
+        If there is no specified hotel_type, use 飯店.
+
+
+        Query:
+        "{query}"
+
+        Return the following details in JSON format:
+        - "query": the search query for the hotel (e.g., '5-star hotel in Taipei')
+        - "check_in_date": the check-in date in YYYY-MM-DD format
+        - "check_out_date": the check-out date in YYYY-MM-DD format
+        - "min_price": minimum price (integer)
+        - "max_price": maximum price (integer)
+        - "hotel_type": hotel type (e.g., 飯店, 民宿)
+        """
+
+    try:
+        # Initialize the prompt template
+        template = PromptTemplate(input_variables=["query"], template=prompt_template)
+
+        # Create an LLMChain with the prompt and the OpenAI model
+        chain = LLMChain(llm=llm, prompt=template)
+
+        # Run the chain with the query input
+        hotel_details = chain.run(query)
+
+        # Parse the result into a dictionary
+        print(hotel_details)
+        hotel_details_dict = json.loads(hotel_details)
+
+        # Get current date and next day in Taipei timezone
+        current_date = get_current_date_in_taipei()
+        next_day = (datetime.strptime(current_date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
+
+        # Validate and set default check-in and check-out dates
+        if "check_in_date" in hotel_details_dict:
+            if not validate_date_format(hotel_details_dict["check_in_date"]):
+                hotel_details_dict["check_in_date"] = current_date
+
+        if "check_out_date" in hotel_details_dict:
+            if not validate_date_format(hotel_details_dict["check_out_date"]):
+                hotel_details_dict["check_out_date"] = next_day
+
+        return hotel_details_dict
+
+    except Exception as e:
+        return f"Error occurred while extracting hotel details: {e}"
+    
+
+
+def convert_price_to_int(price_str):
+    # Remove the dollar sign and commas, then convert to an integer
+    return int(price_str.replace('$', '').replace(',', ''))
+
+def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_price=None, hotel_type: str = None,check_in_date=None,check_out_date=None):
+    """
+    Function to call SERP API and return hotel search results with titles and links,
+    and filter based on a given price range.
+
+    Args:
+    - query: The search query for hotels
+    - location: The location to search in
+    - min_price: Minimum price for hotels
+    - max_price: Maximum price for hotels
+    """
+    if hotel_type not in ['飯店','民宿']:
+        hotel_type = '飯店'
+    print(type(min_price))
+    if not isinstance(min_price, int):
+        min_price = 0  # Default value if min_price is not an integer
+    if not isinstance(max_price, int):
+        max_price = 1000000  # Default
+    # Query parameters for SerpAPI using Google Hotels
+    params = {
+        "engine": "google_hotels",
+        "q": f'{query} hotel_type',
+        "location": location,
+        "price_min": min_price,
+        "price_max": max_price,
+        "api_key": API_KEY,
+        "hl": "zh-TW" ,
+        "check_in_date": check_in_date,
+        "check_out_date": check_out_date,
+        "currency":"TWD"
+    }
+
+    # Make the request to SERP API
+    response = requests.get("https://serpapi.com/search", params=params)
+    data = response.json()
+    # print(data)
+    # hotels = []
+    # hotels['properties']
+    # print(data)
+    # print(data['properties'])
+    result =[]
+    properties = data.get('properties', [])
+    for hotel in properties:
+        # print(type(min_price))
+        # print(type(max_price))
+        # print(int(hotel.get('rate_per_night').get('lowest')))
+        price = convert_price_to_int(hotel.get('rate_per_night').get('lowest'))
+        if min_price <= price <= max_price:
+        # print(hotel)
+            res = {
+                    "title": hotel["name"] or None,
+                    "price": price or None,
+                    "extensions": hotel.get('extension') or None,
+                    "link": hotel.get('link') or None,
+                    "address": hotel.get("address") or None,
+                    "rating": hotel.get("location_rating") or None,
+                    "snippet": hotel.get("description") or None,
+                    "place_id": hotel.get('place_id') or None
+                }
+            result.append(res)
+        if len(result)==3:
+             break
+    return {"results":result}
+
+
+def execute_hotel_query(query):
+    hotel_info = extract_hotel_info(query)
+    print(type(hotel_info))
+    print(hotel_info)
+    return search_hotel_new(query=hotel_info.get('query'),min_price=hotel_info.get('min_price'), max_price=hotel_info.get('max_price'), hotel_type=hotel_info.get('hotel_type'),check_in_date=hotel_info.get('check_in_date'),check_out_date=hotel_info.get('check_out_date'))
+    
+def execute_hotel_query_green(query):
+    hotel_info = extract_hotel_info(query)
+    user_input = f"{hotel_info.get('query')} 環保 綠色 低碳"
+    return search_hotel_new(query=user_input,min_price=hotel_info.get('min_price'), max_price=hotel_info.get('max_price'), hotel_type=hotel_info.get('hotel_type'),check_in_date=hotel_info.get('check_in_date'),check_out_date=hotel_info.get('check_out_date'))
+
+
+>>>>>>> 7b86e5b... add hotel search and fix choose trans bug
    
 
 
