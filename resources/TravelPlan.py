@@ -39,7 +39,7 @@ def calcarbon(distance, mode):
         "transit": 4,
         "TWO_WHEELER": 46,
     }
-    ans = round(emission_map.get(mode) or 0 * distance, 2)
+    ans = round((emission_map.get(mode) or 0) * distance, 2)
     return ans
 
 
@@ -291,7 +291,7 @@ class TravelPlanItem(MethodView):
                     # Get distance and mode with default values
                     distance = stop.transportation.get("distance") or 0
                     mode = stop.transportation.get("mode") or "unknown"  # You can set a default mode if needed
-
+                    print(stop.Name, calcarbon(distance, mode))
                     total_emission += calcarbon(distance, mode)
                     print(total_emission)
                     total_distance += distance
@@ -300,7 +300,7 @@ class TravelPlanItem(MethodView):
         print(calcarbon(total_distance, "driving"))
         # Ensure you do not divide by zero
         if total_distance > 0:
-            final_rate = round(total_emission / calcarbon(total_distance, "driving"), 2)
+            final_rate = round(total_emission,2)
         else:
             final_rate = 0  # Handle case where total_distance is 0
 
