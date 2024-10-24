@@ -20,6 +20,7 @@ from Route import (
 )
 import os
 from datetime import timedelta
+from resources.TravelPlan import calcarbon
 
 
 blp = Blueprint("Transportation", __name__, url_prefix="/transportations")
@@ -109,7 +110,15 @@ class TransportationChoose(MethodView):
             duration, best_distance_km = get_duration_in_seconds(directions)
 
             # print(f"Mode: {mode}, Duration: {duration} seconds")
-            res[mode] = int(duration / 60)
+            emission = calcarbon(best_distance_km,mode)
+            car_emission = calcarbon(best_distance_km,'driving')
+            if car_emission > 0:
+                emission_rate = int((1 - round((emission/car_emission),2)) * 100)
+            else:
+                emission_rate = 0
+            res[mode] = {"Timespent":int(duration / 60),"emission_rate":emission_rate}
+
+
         data = jsonify(res)
         return make_response(data, 201)
 

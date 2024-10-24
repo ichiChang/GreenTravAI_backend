@@ -281,6 +281,8 @@ class TravelPlanItem(MethodView):
 
         total_emission = 0
         total_distance = 0
+        green_trans_point = 0
+        total_trans_count = 0
         plans = TravelPlanModel.objects(userId=user.id)
 
         for plan in plans:
@@ -289,21 +291,90 @@ class TravelPlanItem(MethodView):
                 stops = StopModel.objects(DayId=day.id)
                 for stop in stops:
                     # Get distance and mode with default values
+                    if not (
+                        stop.transportation.get("mode") is None
+                        and stop.transportation.get("Timespent") is None
+                        and stop.transportation.get("LowCarbon") is None
+                    ):
+                        total_trans_count+=1
                     distance = stop.transportation.get("distance") or 0
                     mode = stop.transportation.get("mode") or "unknown"  # You can set a default mode if needed
-                    print(stop.Name, calcarbon(distance, mode))
+                    if mode in ["walking", "bicycling", "transit"]:
+                        green_trans_point+=1
+
+                    # print(stop.Name, calcarbon(distance, mode))
                     total_emission += calcarbon(distance, mode)
-                    print(total_emission)
+                    # print(total_emission)
                     total_distance += distance
-        print(total_emission)
-        print(total_distance)
-        print(calcarbon(total_distance, "driving"))
+
+        # print(total_emission)
+        # print(total_distance)
+        # print(calcarbon(total_distance, "driving"))
         # Ensure you do not divide by zero
         if total_distance > 0:
-            final_rate = round(total_emission,2)
+            final_rate = round((calcarbon(total_distance, 'driving'))-total_emission,2)
         else:
             final_rate = 0  # Handle case where total_distance is 0
+        if total_trans_count >0:
+            final_green_trans_rate = round((green_trans_point/total_trans_count),2)
+        else:
+            final_green_trans_rate = 0
+      
+        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate})
 
-        data = jsonify({"emission_rate": final_rate})
+        return make_response(data, 200)
+    
 
+@blp.route("/CalCarbon/<string:plan_id>")
+class TravelPlanItem_carbon(MethodView):
+
+    @jwt_required()
+    def get(self, plan_id):
+        # user_id = get_jwt_identity()
+        plan = TravelPlanModel.objects(id=plan_id).first()
+        if not plan:
+            abort(404, description="Travel plan not found")
+        
+        total_emission = 0
+        total_distance = 0
+        green_trans_point = 0
+        total_trans_count = 0
+        days = DayModel.objects(TravelPlanId=plan.id)
+        for day in days:
+            stops = StopModel.objects(DayId=day.id)
+            for stop in stops:
+                    # Get distance and mode with default values
+                if not (
+                            stop.transportation.get("mode") is None
+                            and stop.transportation.get("Timespent") is None
+                            and stop.transportation.get("LowCarbon") is None
+                        ):
+                            total_trans_count+=1
+                            # print(stop.transportation)
+                distance = stop.transportation.get("distance") or 0
+                mode = stop.transportation.get("mode") or "unknown"  # You can set a default mode if needed
+                if mode in ["walking", "bicycling", "transit"]:
+                            green_trans_point+=1
+
+                        # print(stop.Name, calcarbon(distance, mode))
+                total_emission += calcarbon(distance, mode)
+                        # print(total_emission)
+                total_distance += distance
+
+        # print(total_emission)
+        # print(total_distance)
+        # print(calcarbon(total_distance, "driving"))
+        # Ensure you do not divide by zero
+        if total_distance > 0:
+            final_rate = round((calcarbon(total_distance, 'driving'))-total_emission,2)
+        else:
+            final_rate = 0  # Handle case where total_distance is 0
+        if total_trans_count >0:
+            final_green_trans_rate = round((green_trans_point/total_trans_count),2)
+        else:
+            final_green_trans_rate = 0
+      
+        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate})
+        
+        
         return make_response(data, 200)
