@@ -3,13 +3,14 @@ import requests
 import os
 import openai
 import googlemaps
-from datetime import datetime
+from datetime import datetime,timedelta
 from langchain import PromptTemplate, LLMChain
 from langchain.llms import OpenAI
 import json
 import re
 import html
 from dotenv import load_dotenv
+import pytz
 
 # load_dotenv()
 load_dotenv(dotenv_path='./.env')
@@ -43,7 +44,7 @@ def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> d
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    print(data)
+    # print(data)
 
     # Extract hotel information
     hotels = []
@@ -83,7 +84,7 @@ def search_hotels_green(query: str, location: str = "Taipei", budget: str = None
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    print(data)
+    # print(data)
 
     # Extract hotel information
     hotels = []
@@ -121,7 +122,7 @@ def search_dining(query: str, location: str = "Taipei") -> str:
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    print(data)
+    # print(data)
     places = []
     for result in data.get("local_results", [])[:3]:
         prompt_parts = []
@@ -169,7 +170,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    print(data)
+    # print(data)
     places = []
     for result in data.get("local_results", [])[:3]:
         prompt_parts = []
@@ -215,7 +216,7 @@ def search_ticket(query: str, location: str = "Taipei") -> str:
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    print(data)
+    # print(data)
     # print(data)
 
     if 'organic_results' in data:
@@ -292,7 +293,7 @@ def extract_travel_details(query: str) -> dict:
         travel_details = chain.run(query)
         
         # Parse the result into a dictionary
-        print(travel_details)
+        # print(travel_details)
         travel_details_dict = json.loads(travel_details)
         if "arrival_time" in travel_details_dict:
             if not validate_time_format(travel_details_dict["arrival_time"]):
@@ -414,8 +415,7 @@ def validate_date_format(date_str: str) -> bool:
 
 def extract_hotel_info(query: str) -> dict:
     prompt_template = """
-        回答中請勿包含```json
-        回答中請勿包含 \n
+        回答中請勿包含```json或```格式。
         Extract the hotel booking details from the following query:
         If there is no specified check-in date, fill "no offer".
         If there is no specified check-out date, fill "no offer.
@@ -447,7 +447,7 @@ def extract_hotel_info(query: str) -> dict:
         hotel_details = chain.run(query)
 
         # Parse the result into a dictionary
-        print(hotel_details)
+        # print(hotel_details)
         hotel_details_dict = json.loads(hotel_details)
 
         # Get current date and next day in Taipei timezone
@@ -487,7 +487,7 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
     """
     if hotel_type not in ['飯店','民宿']:
         hotel_type = '飯店'
-    print(type(min_price))
+    # print(type(min_price))
     if not isinstance(min_price, int):
         min_price = 0  # Default value if min_price is not an integer
     if not isinstance(max_price, int):
@@ -495,7 +495,7 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
     # Query parameters for SerpAPI using Google Hotels
     params = {
         "engine": "google_hotels",
-        "q": f'{query} hotel_type',
+        "q": f'{query} {hotel_type}',
         "location": location,
         "price_min": min_price,
         "price_max": max_price,
@@ -503,7 +503,8 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
         "hl": "zh-TW" ,
         "check_in_date": check_in_date,
         "check_out_date": check_out_date,
-        "currency":"TWD"
+        "currency":"TWD",
+        "gl":"tw"
     }
 
     # Make the request to SERP API
@@ -522,7 +523,7 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
         # print(int(hotel.get('rate_per_night').get('lowest')))
         price = convert_price_to_int(hotel.get('rate_per_night').get('lowest'))
         if min_price <= price <= max_price:
-        # print(hotel)
+            # print(hotel)
             res = {
                     "title": hotel["name"] or None,
                     "price": price or None,
@@ -542,7 +543,7 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
 def execute_hotel_query(query):
     hotel_info = extract_hotel_info(query)
     print(type(hotel_info))
-    print(hotel_info)
+    # print(hotel_info)
     return search_hotel_new(query=hotel_info.get('query'),min_price=hotel_info.get('min_price'), max_price=hotel_info.get('max_price'), hotel_type=hotel_info.get('hotel_type'),check_in_date=hotel_info.get('check_in_date'),check_out_date=hotel_info.get('check_out_date'))
     
 def execute_hotel_query_green(query):

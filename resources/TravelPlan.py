@@ -238,18 +238,18 @@ class TravelPlanList(MethodView):
                         )
 
                 else:
-                    # parsed_date = datetime.strptime(day.Date, "%Y-%m-%dT%H:%M:%S.%f%z")
+                    parsed_date = datetime.strptime(str(day.Date), "%Y-%m-%d")
                     # new_datetime = day.Date.replace(hour=8, minute=0, second=0, microsecond=0)
                     # latency = stop['latency']
 
                     # Extract the yyyy-mm-dd part and add 08:00 to it
-                    # new_date = parsed_date.replace(hour=8, minute=0, second=0, microsecond=0)
+                    new_date = parsed_date.replace(hour=8, minute=0, second=0, microsecond=0)
 
                     # Convert back to string in yyyy-mm-dd hh:mm format
                     # formatted_date = new_date.strftime("%Y-%m-%d %H:%M"
                     stp = StopModel(
                         Name=stop["Location"],
-                        StartTime=stop["StartTime"],
+                        StartTime=parsed_date,
                         EndTime=stop["StartTime"] + timedelta(minutes=latency),
                         note=stop["Description"],
                         address=stop["Address"],

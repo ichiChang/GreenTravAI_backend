@@ -3,8 +3,8 @@ from langchain.agents import initialize_agent, Tool, AgentType
 from langchain.chat_models import ChatOpenAI
 import os
 from Serp import (
-    search_hotels,
-    search_hotels_green,
+    execute_hotel_query,
+    execute_hotel_query_green,
     search_dining,
     search_dining_green,
     search_ticket,
@@ -26,8 +26,8 @@ def hotel_search(query: str, location: str = "Taipei") -> str:
     """
     Tool to search for hotels using SERP API and return titles and links of the results.
     """
-    res = search_hotels(query, location)
-    print(res)
+    res = execute_hotel_query(query)
+    # print(res)
     return res
 
 
@@ -100,8 +100,8 @@ def hotel_search_green(query: str, location: str = "Taipei") -> str:
     """
     Tool to search for hotels using SERP API and return titles and links of the results.
     """
-    res = search_hotels_green(query, location)
-    print(res)
+    res = execute_hotel_query_green(query)
+    # print(res)
     return res
 
 
