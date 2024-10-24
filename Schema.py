@@ -31,10 +31,10 @@ class UpdateTravelPlanSchema(Schema):
 from marshmallow import Schema, fields
 
 class CreateAllStopSchema(Schema):
-    stopname = fields.Str()
-    Note = fields.Str()
+    Location = fields.Str()
+    Description = fields.Str()
     latency = fields.Int()
-    address = fields.Str()
+    Address = fields.Str()
     StartTime = fields.DateTime(
         format="%Y-%m-%d %H:%M", required=False, example="2024-09-17 08:00"
     )

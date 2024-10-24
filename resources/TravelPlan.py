@@ -180,7 +180,7 @@ class TravelPlanList(MethodView):
                 # current_stop = StopModel.objects()
                 # place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
                 # day = DayModel.objects(id=stop["DayId"]).first()
-                current_address = stop["address"]
+                current_address = stop["Address"]
                 if not day:
                     abort(404, description="Day not found")
                 if stop_num > 0:
@@ -199,10 +199,10 @@ class TravelPlanList(MethodView):
 
                         starttime = prev_endtime + timedelta(minutes=int(duration / 60))
                         stp = StopModel(
-                            Name=stop["stopname"],
+                            Name=stop["Location"],
                             StartTime=starttime,
                             EndTime=starttime + timedelta(minutes=latency),
-                            note=stop["Note"],
+                            note=stop["Description"],
                             address=current_address,
                             transportation={},
                             # PlaceId=place.id,
@@ -248,11 +248,11 @@ class TravelPlanList(MethodView):
                     # Convert back to string in yyyy-mm-dd hh:mm format
                     # formatted_date = new_date.strftime("%Y-%m-%d %H:%M"
                     stp = StopModel(
-                        Name=stop["stopname"],
+                        Name=stop["Location"],
                         StartTime=stop["StartTime"],
                         EndTime=stop["StartTime"] + timedelta(minutes=latency),
-                        note=stop["Note"],
-                        address=stop["address"],
+                        note=stop["Description"],
+                        address=stop["Address"],
                         # PlaceId=place,
                         transportation={},
                         DayId=day,
