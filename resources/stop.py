@@ -21,6 +21,7 @@ from Route import (
     get_duration_in_seconds,
     print_detailed_route_info,
     find_optimal_mode,
+    get_lat_long
 )
 
 # from models.transportation import TransportationModel
@@ -46,6 +47,7 @@ def format_stop(stop):
         "EndTime": stop.EndTime.strftime("%Y-%m-%d %H:%M"),
         "Note": stop.note,
         "Address": stop.address,
+        "coordinates":stop.coordinates.get('coordinates'),
         "prev_stop": stop.prev_stopId,
         "Isgreen":stop.Isgreen,
         "transportationToNext": {
@@ -80,7 +82,8 @@ class StopList(MethodView):
             optimal_mode, duration, best_directions, best_distance_km = (
                 find_optimal_mode(prev_address, current_address, api_key)
             )
-            print(optimal_mode, duration)
+            long, lat = get_lat_long(current_address,api_key)
+            # print(optimal_mode, duration)
 
             if optimal_mode:
 
@@ -95,7 +98,8 @@ class StopList(MethodView):
                     # PlaceId=place.id,
                     DayId=day.id,
                     prev_stopId=stop_data["prev_stop"],
-                    Isgreen=check_green(stop_data["Name"])
+                    Isgreen=check_green(stop_data["Name"]),
+                    coordinates=[long,lat]
                 )
                 stop.save()
                 prev_stop.transportation = {
@@ -125,7 +129,8 @@ class StopList(MethodView):
                 )
 
         else:
-
+            
+            long, lat = get_lat_long(current_address,api_key)
             stop = StopModel(
                 Name=stop_data["Name"],
                 StartTime=stop_data["StartTime"],
@@ -135,7 +140,8 @@ class StopList(MethodView):
                 # PlaceId=place,
                 transportation={},
                 DayId=day,
-                Isgreen=check_green(stop_data["Name"])
+                Isgreen=check_green(stop_data["Name"]),
+                coordinates=[long,lat]
             )
             stop.save()
         data = jsonify({"message": f'Stop {stop_data["Name"]} created successfully'})
@@ -198,9 +204,12 @@ class StopItem(MethodView):
             update_data.get("Name") is not None
             and update_data.get("address") is not None
         ):
+            long, lat = get_lat_long(update_data.get("address"),api_key)
             is_effectNext = True
             stop.Name = update_data.get("Name")
             stop.address = update_data.get("address")
+            # coordinates=[long,lat]
+            stop.coordinates=[long,lat]
             stop.Isgreen=check_green(update_data.get("Name"))
             prev_stop = StopModel.objects(id=stop.prev_stopId).first()
             if prev_stop:
@@ -311,6 +320,7 @@ class StopinDay(MethodView):
                 "EndTime": stop.EndTime.strftime("%Y-%m-%d %H:%M"),
                 "Note": stop.note,
                 "Address": stop.address,
+                "coordinates":stop.coordinates.get('coordinates'),
                 "prev_stop": stop.prev_stopId,
                 "Isgreen":stop.Isgreen,
                 "transportationToNext": {

@@ -61,3 +61,25 @@ def find_optimal_mode(origin, destination, api_key):
             best_distance_km = distance_km
 
     return optimal_mode, shortest_duration, best_directions, best_distance_km
+
+
+def get_lat_long(address, api_key):
+    base_url = "https://maps.googleapis.com/maps/api/geocode/json"
+    params = {
+        "address": address,
+        "key": api_key
+    }
+    
+    response = requests.get(base_url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        if data["status"] == "OK":
+            # Extract latitude and longitude from the response
+            latitude = data["results"][0]["geometry"]["location"]["lat"]
+            longitude = data["results"][0]["geometry"]["location"]["lng"]
+            return  longitude, latitude
+        else:
+            print("Error:", data["status"])
+    else:
+        print("Request failed with status code:", response.status_code)
+    return None, None

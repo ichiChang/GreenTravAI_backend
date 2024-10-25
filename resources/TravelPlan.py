@@ -21,6 +21,7 @@ from Route import (
     get_duration_in_seconds,
     print_detailed_route_info,
     find_optimal_mode,
+    get_lat_long,
 )
 from datetime import datetime, timedelta
 from resources.stop import check_green
@@ -156,7 +157,7 @@ class TravelPlanList(MethodView):
         user = UserModel.objects(id=user_id).first()
         if not user:
             abort(404, description="User not found")
-
+        api_key = os.getenv("GOOGLE_MAP_API_KEY")
         travel_plan = TravelPlanModel(
             planname=travel_plan_data["planname"],
             startdate=travel_plan_data["startdate"],
@@ -177,7 +178,6 @@ class TravelPlanList(MethodView):
             stopListInDay = travel_plan_data["days"][daynum]
             stop_num = 0
             for stop in stopListInDay["stops"]:
-                print(stop)
                 latency = stop["latency"]
                 # current_stop = StopModel.objects()
                 # place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
@@ -190,13 +190,14 @@ class TravelPlanList(MethodView):
                     prev_endtime = prev_stop.EndTime
                     prev_address = prev_stop.address
 
-                    api_key = os.getenv("GOOGLE_MAP_API_KEY")
+                    
 
                     optimal_mode, duration, best_directions, best_distance_km = (
                         find_optimal_mode(prev_address, current_address, api_key)
                     )
-                    # print(optimal_mode, duration)
 
+                    # print(optimal_mode, duration)
+                    long, lat = get_lat_long(current_address, api_key)
                     if optimal_mode:
 
                         starttime = prev_endtime + timedelta(minutes=int(duration / 60))
@@ -210,7 +211,8 @@ class TravelPlanList(MethodView):
                             # PlaceId=place.id,
                             DayId=day.id,
                             prev_stopId=str(prev_stop.id),
-                            Isgreen=check_green(stop["Location"])
+                            Isgreen=check_green(stop["Location"]),
+                            coordinates=[long, lat],
                         )
                         stp.save()
                         prev_stop.transportation = {
@@ -242,24 +244,22 @@ class TravelPlanList(MethodView):
 
                 else:
                     parsed_date = datetime.strptime(str(day.Date), "%Y-%m-%d")
-                    # new_datetime = day.Date.replace(hour=8, minute=0, second=0, microsecond=0)
-                    # latency = stop['latency']
-
-                    # Extract the yyyy-mm-dd part and add 08:00 to it
-                    new_date = parsed_date.replace(hour=8, minute=0, second=0, microsecond=0)
-
+                    new_date = parsed_date.replace(
+                        hour=8, minute=0, second=0, microsecond=0
+                    )
+                    long, lat = get_lat_long(current_address, api_key)
                     # Convert back to string in yyyy-mm-dd hh:mm format
-                    # formatted_date = new_date.strftime("%Y-%m-%d %H:%M"
                     stp = StopModel(
                         Name=stop["Location"],
                         StartTime=new_date,
-                        EndTime=new_date+ timedelta(minutes=latency),
+                        EndTime=new_date + timedelta(minutes=latency),
                         note=stop["Description"],
                         address=stop["Address"],
                         # PlaceId=place,
                         transportation={},
                         DayId=day,
-                        Isgreen=check_green(stop["Location"])
+                        Isgreen=check_green(stop["Location"]),
+                        coordinates=[long, lat],
                     )
                     stp.save()
                     prev_stop = stp
@@ -268,7 +268,7 @@ class TravelPlanList(MethodView):
             current_date += timedelta(days=1)
             daynum = daynum + 1
 
-        data = jsonify({"message": f" Complete is created successfully"})
+        data = jsonify({"message": f" Complete travelplan is created successfully"})
         return make_response(data, 201)
 
 
@@ -299,44 +299,56 @@ class TravelPlanItem(MethodView):
                 for stop in stops:
                     # Get distance and mode with default values
                     if stop.Isgreen:
-                        green_spot_coount+=1
+                        green_spot_coount += 1
                     if not (
                         stop.transportation.get("mode") is None
                         and stop.transportation.get("Timespent") is None
                         and stop.transportation.get("LowCarbon") is None
                     ):
-                        total_trans_count+=1
+                        total_trans_count += 1
                     distance = stop.transportation.get("distance") or 0
-                    mode = stop.transportation.get("mode") or "unknown"  # You can set a default mode if needed
+                    mode = (
+                        stop.transportation.get("mode") or "unknown"
+                    )  # You can set a default mode if needed
                     if mode in ["walking", "bicycling", "transit"]:
-                        green_trans_point+=1
+                        green_trans_point += 1
 
                     # print(stop.Name, calcarbon(distance, mode))
                     total_emission += calcarbon(distance, mode)
                     # print(total_emission)
                     total_distance += distance
 
- 
         # Ensure you do not divide by zero
         if total_distance > 0:
-            final_rate = round((calcarbon(total_distance, 'driving'))-total_emission,2)
+            final_rate = round(
+                (calcarbon(total_distance, "driving")) - total_emission, 2
+            )
         else:
             final_rate = 0  # Handle case where total_distance is 0
         if total_trans_count > 0:
-            final_green_trans_rate = int(round((green_trans_point/total_trans_count),2) * 100)
+            final_green_trans_rate = int(
+                round((green_trans_point / total_trans_count), 2) * 100
+            )
             # int((1 - round((emission/car_emission),2)) * 100)
         else:
             final_green_trans_rate = 0
         if total_stop_count > 0:
-            final_green_spot_rate = int(round((green_spot_coount/total_stop_count),2) * 100)
+            final_green_spot_rate = int(
+                round((green_spot_coount / total_stop_count), 2) * 100
+            )
         else:
             final_green_spot_rate = 0
-        
-      
-        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate,"green_spot_rate":final_green_spot_rate})
+
+        data = jsonify(
+            {
+                "emission_rate": final_rate,
+                "green_trans_rate": final_green_trans_rate,
+                "green_spot_rate": final_green_spot_rate,
+            }
+        )
 
         return make_response(data, 200)
-    
+
 
 @blp.route("/CalCarbon/<string:plan_id>")
 class TravelPlanItem_carbon(MethodView):
@@ -347,7 +359,7 @@ class TravelPlanItem_carbon(MethodView):
         plan = TravelPlanModel.objects(id=plan_id).first()
         if not plan:
             abort(404, description="Travel plan not found")
-        
+
         total_emission = 0
         total_distance = 0
         green_trans_point = 0
@@ -360,42 +372,54 @@ class TravelPlanItem_carbon(MethodView):
             total_stop_count += stops.count()
             for stop in stops:
                 if stop.Isgreen:
-                        green_spot_coount+=1
-                    # Get distance and mode with default values
+                    green_spot_coount += 1
+                # Get distance and mode with default values
                 if not (
-                            stop.transportation.get("mode") is None
-                            and stop.transportation.get("Timespent") is None
-                            and stop.transportation.get("LowCarbon") is None
-                        ):
-                            total_trans_count+=1
-                            # print(stop.transportation)
+                    stop.transportation.get("mode") is None
+                    and stop.transportation.get("Timespent") is None
+                    and stop.transportation.get("LowCarbon") is None
+                ):
+                    total_trans_count += 1
+                    # print(stop.transportation)
                 distance = stop.transportation.get("distance") or 0
-                mode = stop.transportation.get("mode") or "unknown"  # You can set a default mode if needed
+                mode = (
+                    stop.transportation.get("mode") or "unknown"
+                )  # You can set a default mode if needed
                 if mode in ["walking", "bicycling", "transit"]:
-                            green_trans_point+=1
+                    green_trans_point += 1
 
-                        # print(stop.Name, calcarbon(distance, mode))
+                # print(stop.Name, calcarbon(distance, mode))
                 total_emission += calcarbon(distance, mode)
-                        # print(total_emission)
+                # print(total_emission)
                 total_distance += distance
-
 
         # Ensure you do not divide by zero
         if total_distance > 0:
-            final_rate = round((calcarbon(total_distance, 'driving'))-total_emission,2)
+            final_rate = round(
+                (calcarbon(total_distance, "driving")) - total_emission, 2
+            )
         else:
             final_rate = 0  # Handle case where total_distance is 0
         if total_trans_count > 0:
-            final_green_trans_rate = int(round((green_trans_point/total_trans_count),2) * 100)
+            final_green_trans_rate = int(
+                round((green_trans_point / total_trans_count), 2) * 100
+            )
         else:
             final_green_trans_rate = 0
-        
+
         if total_stop_count > 0:
-            final_green_spot_rate = int(round((green_spot_coount/total_stop_count),2) * 100)
+            final_green_spot_rate = int(
+                round((green_spot_coount / total_stop_count), 2) * 100
+            )
         else:
             final_green_spot_rate = 0
-      
-        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate,"green_spot_rate":final_green_spot_rate})
-        
-        
+
+        data = jsonify(
+            {
+                "emission_rate": final_rate,
+                "green_trans_rate": final_green_trans_rate,
+                "green_spot_rate": final_green_spot_rate,
+            }
+        )
+
         return make_response(data, 200)
