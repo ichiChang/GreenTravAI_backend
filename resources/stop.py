@@ -47,13 +47,13 @@ def format_stop(stop):
         "EndTime": stop.EndTime.strftime("%Y-%m-%d %H:%M"),
         "Note": stop.note,
         "Address": stop.address,
-        "coordinates":stop.coordinates.get('coordinates'),
+        "coordinates": stop.coordinates.get('coordinates') if stop.coordinates is not None else None,
         "prev_stop": stop.prev_stopId,
         "Isgreen":stop.Isgreen,
         "transportationToNext": {
-            "Mode": stop.transportation.get("mode"),
-            "TimeSpent": stop.transportation.get("Timespent"),
-            "LowCarbon": stop.transportation.get("LowCarbon"),
+            "Mode": stop.transportation.get("mode") if stop.transportation is not None else None,
+            "TimeSpent": stop.transportation.get("Timespent") if stop.transportation is not None else None,
+            "LowCarbon": stop.transportation.get("LowCarbon") if stop.transportation is not None else None,
         },
     }
 
@@ -320,13 +320,13 @@ class StopinDay(MethodView):
                 "EndTime": stop.EndTime.strftime("%Y-%m-%d %H:%M"),
                 "Note": stop.note,
                 "Address": stop.address,
-                "coordinates":stop.coordinates.get('coordinates'),
+                "coordinates":stop.coordinates.get('coordinates') if stop.coordinates is not None else None,
                 "prev_stop": stop.prev_stopId,
                 "Isgreen":stop.Isgreen,
                 "transportationToNext": {
-                    "Mode": stop.transportation.get("mode"),
-                    "TimeSpent": stop.transportation.get("Timespent"),
-                    "LowCarbon": stop.transportation.get("LowCarbon"),
+                    "Mode": stop.transportation.get("mode") if stop.transportation is not None else None,
+                    "TimeSpent": stop.transportation.get("Timespent") if stop.transportation is not None else None,
+                    "LowCarbon": stop.transportation.get("LowCarbon") if stop.transportation is not None else None,
                 },
             }
             for stop in stops
