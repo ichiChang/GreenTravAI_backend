@@ -72,6 +72,9 @@ class StopList(MethodView):
         current_address = stop_data["address"]
         if not day:
             abort(404, description="Day not found")
+        if "prev_stop" not in stop_data:
+            print()
+            abort(400, description="prev_stop is required (value can be null)")
         if stop_data["prev_stop"] is not None:
             prev_stop = StopModel.objects(id=stop_data["prev_stop"]).first()
             prev_endtime = prev_stop.EndTime
