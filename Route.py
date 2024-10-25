@@ -31,9 +31,9 @@ def print_detailed_route_info(directions):
                 vehicle_type = step["transit_details"]["line"]["vehicle"]["type"]
                 departure_stop = step["transit_details"]["departure_stop"]["name"]
                 arrival_stop = step["transit_details"]["arrival_stop"]["name"]
-                print(
-                    f"Take {vehicle_type} ({line_name}) from {departure_stop} to {arrival_stop}."
-                )
+                # print(
+                #     f"Take {vehicle_type} ({line_name}) from {departure_stop} to {arrival_stop}."
+                # )
             else:
                 print(f"{instructions} for {distance}, taking about {duration}.")
     else:
@@ -52,7 +52,7 @@ def find_optimal_mode(origin, destination, api_key):
         directions = get_directions(origin, destination, mode, api_key)
         duration, distance_km = get_duration_in_seconds(directions)
 
-        print(f"Mode: {mode}, Duration: {duration} seconds")
+        # print(f"Mode: {mode}, Duration: {duration} seconds")
 
         if duration < shortest_duration:
             shortest_duration = duration

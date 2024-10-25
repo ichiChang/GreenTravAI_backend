@@ -3,7 +3,7 @@ import requests
 import os
 import openai
 import googlemaps
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from langchain import PromptTemplate, LLMChain
 from langchain.llms import OpenAI
 import json
@@ -13,15 +13,15 @@ from dotenv import load_dotenv
 import pytz
 
 # load_dotenv()
-load_dotenv(dotenv_path='./.env')
+load_dotenv(dotenv_path="./.env")
 
 API_KEY = os.getenv("SERP_API_KEY")
 # print('ooook')
 # print(API_KEY)
 
 llm = ChatOpenAI(
-        temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
-    )
+    temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
+)
 
 
 def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> dict:
@@ -35,10 +35,10 @@ def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> d
     # Query parameters
     params = {
         "engine": "google",
-        "q": f'{query} site: booking.com',  # The search query
+        "q": f"{query} site: booking.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": '4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046'
+        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
     }
 
     # Make the request to SERP API
@@ -52,19 +52,21 @@ def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> d
         hotel = {
             "title": result.get("title") or None,
             "price": result.get("price") or None,
-            "extensions": result.get('extensions') or None,
-            "link": result.get('link') or None,
+            "extensions": result.get("extensions") or None,
+            "link": result.get("link") or None,
             "address": result.get("address") or None,
             "rating": result.get("rating") or None,
             "snippet": result.get("description") or None,
-            "place_id": result.get('place_id') or None
+            "place_id": result.get("place_id") or None,
         }
         hotels.append(hotel)
 
     return {"results": hotels}
 
 
-def search_hotels_green(query: str, location: str = "Taipei", budget: str = None) -> dict:
+def search_hotels_green(
+    query: str, location: str = "Taipei", budget: str = None
+) -> dict:
     """
     Function to call SERP API and return hotel search results with titles and links, including a budget.
     """
@@ -75,10 +77,10 @@ def search_hotels_green(query: str, location: str = "Taipei", budget: str = None
     # Query parameters
     params = {
         "engine": "google",
-        "q": f'{query} site: booking.com',  # The search query
+        "q": f"{query} site: booking.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": '4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046'
+        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
     }
 
     # Make the request to SERP API
@@ -92,12 +94,12 @@ def search_hotels_green(query: str, location: str = "Taipei", budget: str = None
         hotel = {
             "title": result.get("title") or None,
             "price": result.get("price") or None,
-            "extensions": result.get('extensions') or None,
-            "link": result.get('link') or None,
+            "extensions": result.get("extensions") or None,
+            "link": result.get("link") or None,
             "address": result.get("address") or None,
             "rating": result.get("rating") or None,
             "snippet": result.get("description") or None,
-            "place_id": result.get('place_id') or None
+            "place_id": result.get("place_id") or None,
         }
         hotels.append(hotel)
 
@@ -106,6 +108,7 @@ def search_hotels_green(query: str, location: str = "Taipei", budget: str = None
 
 # place planner
 
+
 def search_dining(query: str, location: str = "Taipei") -> str:
     """
     Function to call SERP API and return hotel search results with titles and links.
@@ -113,10 +116,10 @@ def search_dining(query: str, location: str = "Taipei") -> str:
     # Query parameters
     params = {
         "engine": "google_maps",
-        "q": f'{query}',  # The search query
+        "q": f"{query}",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": '4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046'
+        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
     }
 
     # Make the request to SERP API
@@ -126,33 +129,38 @@ def search_dining(query: str, location: str = "Taipei") -> str:
     places = []
     for result in data.get("local_results", [])[:3]:
         prompt_parts = []
-        if result.get('title'):
-                prompt_parts.append(f"Title: {result.get('title')}")
-        if result.get('snippet'):
-                prompt_parts.append(f"Snippet: {result.get('snippet')}")
-        if result.get('extensions'):
-                prompt_parts.append(f"Extensions: {result.get('extensions')}")
-        if result.get('rating'):
-                prompt_parts.append(f"Rating: {result.get('rating')}")
+        if result.get("title"):
+            prompt_parts.append(f"Title: {result.get('title')}")
+        if result.get("snippet"):
+            prompt_parts.append(f"Snippet: {result.get('snippet')}")
+        if result.get("extensions"):
+            prompt_parts.append(f"Extensions: {result.get('extensions')}")
+        if result.get("rating"):
+            prompt_parts.append(f"Rating: {result.get('rating')}")
         prompt = "\n".join(prompt_parts) + "\nSummary:"
         place = {
             "title": result.get("title") or None,
             "price": result.get("price") or None,
-            "extensions": result.get('extensions') or None,
-            "link": result.get('link') or None,
+            "extensions": result.get("extensions") or None,
+            "link": result.get("link") or None,
             "address": result.get("address") or None,
             "rating": result.get("rating") or None,
             "snippet": result.get("description") or None,
-            "place_id": result.get('place_id') or None,
-            "summary": (llm.invoke('the resposne must in traditional Chinese please remove any markdown tags and also the newline tags' + prompt )).content
+            "place_id": result.get("place_id") or None,
+            "summary": (
+                llm.invoke(
+                    "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags"
+                    + prompt
+                )
+            ).content,
         }
         places.append(place)
 
     return {"results": places}
 
 
-
 # place planner
+
 
 def search_dining_green(query: str, location: str = "Taipei") -> str:
     """
@@ -161,10 +169,10 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
     # Query parameters
     params = {
         "engine": "google_maps",
-        "q": f'{query} 有機 環保 素',  # The search query
+        "q": f"{query} 有機 環保 素",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": '4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046'
+        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
     }
 
     # Make the request to SERP API
@@ -174,32 +182,37 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
     places = []
     for result in data.get("local_results", [])[:3]:
         prompt_parts = []
-        if result.get('title'):
-                prompt_parts.append(f"Title: {result.get('title')}")
-        if result.get('snippet'):
-                prompt_parts.append(f"Snippet: {result.get('snippet')}")
-        if result.get('extensions'):
-                prompt_parts.append(f"Extensions: {result.get('extensions')}")
-        if result.get('rating'):
-                prompt_parts.append(f"Rating: {result.get('rating')}")
+        if result.get("title"):
+            prompt_parts.append(f"Title: {result.get('title')}")
+        if result.get("snippet"):
+            prompt_parts.append(f"Snippet: {result.get('snippet')}")
+        if result.get("extensions"):
+            prompt_parts.append(f"Extensions: {result.get('extensions')}")
+        if result.get("rating"):
+            prompt_parts.append(f"Rating: {result.get('rating')}")
         prompt = "\n".join(prompt_parts) + "\nSummary:"
         place = {
             "title": result.get("title") or None,
             "price": result.get("price") or None,
-            "extensions": result.get('extensions') or None,
-            "link": result.get('link') or None,
+            "extensions": result.get("extensions") or None,
+            "link": result.get("link") or None,
             "address": result.get("address") or None,
             "rating": result.get("rating") or None,
             "snippet": result.get("description") or None,
-            "place_id": result.get('place_id') or None,
-            "summary": (llm.invoke('the resposne must in traditional Chinese please remove any markdown tags and also the newline tags' + prompt )).content
+            "place_id": result.get("place_id") or None,
+            "summary": (
+                llm.invoke(
+                    "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags"
+                    + prompt
+                )
+            ).content,
         }
         places.append(place)
 
     return {"results": places}
 
 
-#ticket planner
+# ticket planner
 def search_ticket(query: str, location: str = "Taipei") -> str:
     """
     Function to call SERP API and return hotel search results with titles and links.
@@ -207,10 +220,10 @@ def search_ticket(query: str, location: str = "Taipei") -> str:
     # Query parameters
     params = {
         "engine": "google",
-        "q": f'{query} site: klook.com',  # The search query
+        "q": f"{query} site: klook.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": '4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046'
+        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
     }
 
     # Make the request to SERP API
@@ -219,43 +232,47 @@ def search_ticket(query: str, location: str = "Taipei") -> str:
     # print(data)
     # print(data)
 
-    if 'organic_results' in data:
-      organic_results = []
-      for res in data['organic_results']:
-        if res.get('position') <=2:
-            prompt_parts = []
-            if res.get('title'):
+    if "organic_results" in data:
+        organic_results = []
+        for res in data["organic_results"]:
+            if res.get("position") <= 2:
+                prompt_parts = []
+                if res.get("title"):
                     prompt_parts.append(f"Title: {res.get('title')}")
-            if res.get('snippet'):
+                if res.get("snippet"):
                     prompt_parts.append(f"Snippet: {res.get('snippet')}")
-            if res.get('extensions'):
+                if res.get("extensions"):
                     prompt_parts.append(f"Extensions: {res.get('extensions')}")
-            if res.get('rating'):
+                if res.get("rating"):
                     prompt_parts.append(f"Rating: {res.get('rating')}")
-            prompt = "\n".join(prompt_parts) + "\nSummary:"
-            organic_entry = {
-                    "title": res.get('title') ,
-                    "price": res.get('price') or None,
-                    "rating": res.get('rating') or None,
-                    "extensions": res.get('extensions') or None,
-                    "link": res.get('link'),
-                    "address": res.get('address') or None,
-                    "snippet": res.get('snippet') or None,
-                    "place_id": res.get('place_id') or None,
-                    "summary": (llm.invoke('the resposne must in traditional Chinese please remove any markdown tags and also the newline tags' + prompt )).content
-                    
+                prompt = "\n".join(prompt_parts) + "\nSummary:"
+                organic_entry = {
+                    "title": res.get("title"),
+                    "price": res.get("price") or None,
+                    "rating": res.get("rating") or None,
+                    "extensions": res.get("extensions") or None,
+                    "link": res.get("link"),
+                    "address": res.get("address") or None,
+                    "snippet": res.get("snippet") or None,
+                    "place_id": res.get("place_id") or None,
+                    "summary": (
+                        llm.invoke(
+                            "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags"
+                            + prompt
+                        )
+                    ).content,
                 }
-            if organic_entry["title"]:
+                if organic_entry["title"]:
                     organic_results.append(organic_entry)
                     result = {"results": organic_results}
                     return result
-            else:
-                 return {"error":"ticket not found"}
-    
+                else:
+                    return {"error": "ticket not found"}
+
 
 def validate_time_format(time_str: str) -> bool:
     # Regular expression for 24-hour time format hh:mm
-    time_pattern = re.compile(r'^([01]\d|2[0-3]):([0-5]\d)$')
+    time_pattern = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
     return bool(time_pattern.match(time_str))
 
 
@@ -285,31 +302,37 @@ def extract_travel_details(query: str) -> dict:
     try:
         # Step 4: Initialize the prompt template
         template = PromptTemplate(input_variables=["query"], template=prompt_template)
-        
+
         # Step 5: Create an LLMChain with the prompt and the OpenAI model
         chain = LLMChain(llm=llm, prompt=template)
-      
+
         # Step 6: Run the chain with the query input
         travel_details = chain.run(query)
-        
+
         # Parse the result into a dictionary
         # print(travel_details)
         travel_details_dict = json.loads(travel_details)
         if "arrival_time" in travel_details_dict:
             if not validate_time_format(travel_details_dict["arrival_time"]):
                 travel_details_dict["arrival_time"] = None
-        
-        return travel_details_dict
-    
-    except Exception as e:
-        return f"Error occurred while extracting travel details: {e}"
-    
-    except Exception as e:
-        return f"Error occurred while extracting travel details: {e}"
-    
 
-def get_google_maps_route(departure_location: str, destination: str, departure_time: datetime = None, arrival_time: datetime = None, mode:str ='transit'):
-    gmaps = googlemaps.Client(key='AIzaSyAMncPb3INeUVKzl3gA8S0DRwgVUUvecwE') 
+        return travel_details_dict
+
+    except Exception as e:
+        return f"Error occurred while extracting travel details: {e}"
+
+    except Exception as e:
+        return f"Error occurred while extracting travel details: {e}"
+
+
+def get_google_maps_route(
+    departure_location: str,
+    destination: str,
+    departure_time: datetime = None,
+    arrival_time: datetime = None,
+    mode: str = "transit",
+):
+    gmaps = googlemaps.Client(key="AIzaSyAMncPb3INeUVKzl3gA8S0DRwgVUUvecwE")
     try:
         if arrival_time:
             directions_result = gmaps.directions(
@@ -317,7 +340,7 @@ def get_google_maps_route(departure_location: str, destination: str, departure_t
                 destination=destination,
                 mode=mode,  # You can also use 'transit', 'walking', 'bicycling', etc.
                 arrival_time=arrival_time,
-                language="zh-TW"
+                language="zh-TW",
             )
         else:
             directions_result = gmaps.directions(
@@ -325,93 +348,126 @@ def get_google_maps_route(departure_location: str, destination: str, departure_t
                 destination=destination,
                 mode=mode,  # You can also use 'transit', 'walking', 'bicycling', etc.
                 departure_time=departure_time,
-                language="zh-TW"
+                language="zh-TW",
             )
         if directions_result:
-            route_description = directions_result[0]['legs'][0]['steps']
+            route_description = directions_result[0]["legs"][0]["steps"]
             directions = ""
             for idx, step in enumerate(route_description, 1):
-                instructions = step['html_instructions']
+                instructions = step["html_instructions"]
                 # Remove HTML tags
-                instructions = re.sub('<[^<]+?>', '', instructions)
+                instructions = re.sub("<[^<]+?>", "", instructions)
                 # Unescape HTML entities
                 instructions = html.unescape(instructions)
-                distance = step['distance']['text']
-                duration = step['duration']['text']
-                directions += f"{idx}. {instructions} （距離：{distance}，時間：{duration}）\n"
+                distance = step["distance"]["text"]
+                duration = step["duration"]["text"]
+                directions += (
+                    f"{idx}. {instructions} （距離：{distance}，時間：{duration}）\n"
+                )
             return directions.strip()
         else:
             return "No route found."
-    
+
     except Exception as e:
         return f"Error occurred while fetching route: {e}"
- 
-  
+
 
 # route planner
 def get_travel_route_with_google_maps(query: str):
     # Extract travel details using LLM
     travel_details = extract_travel_details(query)
-    
+
     if isinstance(travel_details, str):  # Error handling
         return travel_details
-    
+
     destination = travel_details.get("destination")
-    departure_location = travel_details.get("departure_location", "台北市中正區北平西路3號100臺灣")
+    departure_location = travel_details.get(
+        "departure_location", "台北市中正區北平西路3號100臺灣"
+    )
     departure_date = travel_details.get("departure_date")
     departure_time = travel_details.get("departure_time")
     mode = travel_details.get("mode")
     arrival_time = travel_details.get("arrival_time")
-    
+
     # Parse date and time for Google Maps
     if arrival_time:
-        arrival_datetime = datetime.strptime(f"{departure_date} {arrival_time}", "%Y-%m-%d %H:%M")
-        route = get_google_maps_route(departure_location=departure_location, destination=destination,arrival_time=arrival_datetime, mode=mode)
+        arrival_datetime = datetime.strptime(
+            f"{departure_date} {arrival_time}", "%Y-%m-%d %H:%M"
+        )
+        route = get_google_maps_route(
+            departure_location=departure_location,
+            destination=destination,
+            arrival_time=arrival_datetime,
+            mode=mode,
+        )
         return route
     else:
-        departure_datetime = datetime.strptime(f"{departure_date} {departure_time}", "%Y-%m-%d %H:%M")
-        route = get_google_maps_route(departure_location=departure_location, destination=destination, departure_time=departure_datetime, mode=mode)
+        departure_datetime = datetime.strptime(
+            f"{departure_date} {departure_time}", "%Y-%m-%d %H:%M"
+        )
+        route = get_google_maps_route(
+            departure_location=departure_location,
+            destination=destination,
+            departure_time=departure_datetime,
+            mode=mode,
+        )
         return route
 
     return route
 
+
 def get_travel_route_with_google_maps_green(query: str):
     # Extract travel details using LLM
     travel_details = extract_travel_details(query)
-    
+
     if isinstance(travel_details, str):  # Error handling
         return travel_details
-    
+
     destination = travel_details.get("destination")
-    departure_location = travel_details.get("departure_location", "台北市中正區北平西路3號100臺灣")
+    departure_location = travel_details.get(
+        "departure_location", "台北市中正區北平西路3號100臺灣"
+    )
     departure_date = travel_details.get("departure_date")
     departure_time = travel_details.get("departure_time")
     # mode = travel_details.get("mode")
     arrival_time = travel_details.get("arrival_time")
-    
+
     # Parse date and time for Google Maps
     if arrival_time:
-        arrival_datetime = datetime.strptime(f"{departure_date} {arrival_time}", "%Y-%m-%d %H:%M")
-        route = get_google_maps_route(departure_location=departure_location, destination=destination,arrival_time=arrival_datetime)
+        arrival_datetime = datetime.strptime(
+            f"{departure_date} {arrival_time}", "%Y-%m-%d %H:%M"
+        )
+        route = get_google_maps_route(
+            departure_location=departure_location,
+            destination=destination,
+            arrival_time=arrival_datetime,
+        )
         return route
     else:
-        departure_datetime = datetime.strptime(f"{departure_date} {departure_time}", "%Y-%m-%d %H:%M")
-        route = get_google_maps_route(departure_location=departure_location, destination=destination, departure_time=departure_datetime)
+        departure_datetime = datetime.strptime(
+            f"{departure_date} {departure_time}", "%Y-%m-%d %H:%M"
+        )
+        route = get_google_maps_route(
+            departure_location=departure_location,
+            destination=destination,
+            departure_time=departure_datetime,
+        )
         return route
-
 
 
 def get_current_date_in_taipei() -> str:
-    taipei_tz = pytz.timezone('Asia/Taipei')
-    return datetime.now(taipei_tz).strftime('%Y-%m-%d')
+    taipei_tz = pytz.timezone("Asia/Taipei")
+    return datetime.now(taipei_tz).strftime("%Y-%m-%d")
+
 
 def validate_date_format(date_str: str) -> bool:
     """Helper function to validate if a string is in YYYY-MM-DD format."""
     try:
-        datetime.strptime(date_str, '%Y-%m-%d')
+        datetime.strptime(date_str, "%Y-%m-%d")
         return True
     except ValueError:
         return False
+
 
 def extract_hotel_info(query: str) -> dict:
     prompt_template = """
@@ -452,7 +508,9 @@ def extract_hotel_info(query: str) -> dict:
 
         # Get current date and next day in Taipei timezone
         current_date = get_current_date_in_taipei()
-        next_day = (datetime.strptime(current_date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
+        next_day = (
+            datetime.strptime(current_date, "%Y-%m-%d") + timedelta(days=1)
+        ).strftime("%Y-%m-%d")
 
         # Validate and set default check-in and check-out dates
         if "check_in_date" in hotel_details_dict:
@@ -467,14 +525,42 @@ def extract_hotel_info(query: str) -> dict:
 
     except Exception as e:
         return f"Error occurred while extracting hotel details: {e}"
-    
 
 
 def convert_price_to_int(price_str):
     # Remove the dollar sign and commas, then convert to an integer
-    return int(price_str.replace('$', '').replace(',', ''))
+    return int(price_str.replace("$", "").replace(",", ""))
 
-def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_price=None, hotel_type: str = None,check_in_date=None,check_out_date=None):
+
+def get_address(latitude, longitude, api_key):
+    url = "https://maps.googleapis.com/maps/api/geocode/json"
+    params = {
+        "latlng": f"{latitude},{longitude}",
+        "key": api_key,
+        "language": "zh-TW",  # Traditional Chinese
+    }
+
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        result = response.json()
+        if result["status"] == "OK":
+            address = result["results"][0]["formatted_address"]
+            return str(address)
+        else:
+            return f"Error: {result['status']}"
+    else:
+        return f"HTTP Error: {response.status_code}"
+
+
+def search_hotel_new(
+    query: str,
+    location: str = "Taipei",
+    min_price=None,
+    max_price=None,
+    hotel_type: str = None,
+    check_in_date=None,
+    check_out_date=None,
+):
     """
     Function to call SERP API and return hotel search results with titles and links,
     and filter based on a given price range.
@@ -485,8 +571,8 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
     - min_price: Minimum price for hotels
     - max_price: Maximum price for hotels
     """
-    if hotel_type not in ['飯店','民宿']:
-        hotel_type = '飯店'
+    if hotel_type not in ["飯店", "民宿"]:
+        hotel_type = "飯店"
     # print(type(min_price))
     if not isinstance(min_price, int):
         min_price = 0  # Default value if min_price is not an integer
@@ -495,16 +581,16 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
     # Query parameters for SerpAPI using Google Hotels
     params = {
         "engine": "google_hotels",
-        "q": f'{query} {hotel_type}',
+        "q": f"{query} {hotel_type}",
         "location": location,
         "price_min": min_price,
         "price_max": max_price,
         "api_key": API_KEY,
-        "hl": "zh-TW" ,
+        "hl": "zh-TW",
         "check_in_date": check_in_date,
         "check_out_date": check_out_date,
-        "currency":"TWD",
-        "gl":"tw"
+        "currency": "TWD",
+        "gl": "tw",
     }
 
     # Make the request to SERP API
@@ -515,43 +601,61 @@ def search_hotel_new(query: str, location: str = "Taipei", min_price=None, max_p
     # hotels['properties']
     # print(data)
     # print(data['properties'])
-    result =[]
-    properties = data.get('properties', [])
+    result = []
+    properties = data.get("properties", [])
     for hotel in properties:
         # print(type(min_price))
         # print(type(max_price))
         # print(int(hotel.get('rate_per_night').get('lowest')))
-        price = convert_price_to_int(hotel.get('rate_per_night').get('lowest'))
+        price = convert_price_to_int(hotel.get("rate_per_night").get("lowest"))
         if min_price <= price <= max_price:
-            # print(hotel)
-            res = {
+            if hotel.get("link"):
+                # print(hotel)
+                res = {
                     "title": hotel["name"] or None,
                     "price": price or None,
-                    "extensions": hotel.get('extension') or None,
-                    "link": hotel.get('link') or None,
-                    "address": hotel.get("address") or None,
+                    "extensions": hotel.get("extension") or None,
+                    "link": hotel.get("link") or None,
+                    "address": get_address(
+                        hotel.get("gps_coordinates")["latitude"],
+                        hotel.get("gps_coordinates")["longitude"],
+                        os.getenv("GOOGLE_MAP_API_KEY"),
+                    )
+                    or None,
+                    # "address": hotel.get("address") or None,
                     "rating": hotel.get("location_rating") or None,
                     "snippet": hotel.get("description") or None,
-                    "place_id": hotel.get('place_id') or None
+                    "place_id": hotel.get("place_id") or None,
                 }
-            result.append(res)
-        if len(result)==3:
-             break
-    return {"results":result}
+
+                result.append(res)
+            if len(result) == 3:
+                break
+    return {"results": result}
 
 
 def execute_hotel_query(query):
     hotel_info = extract_hotel_info(query)
     print(type(hotel_info))
     # print(hotel_info)
-    return search_hotel_new(query=hotel_info.get('query'),min_price=hotel_info.get('min_price'), max_price=hotel_info.get('max_price'), hotel_type=hotel_info.get('hotel_type'),check_in_date=hotel_info.get('check_in_date'),check_out_date=hotel_info.get('check_out_date'))
-    
+    return search_hotel_new(
+        query=hotel_info.get("query"),
+        min_price=hotel_info.get("min_price"),
+        max_price=hotel_info.get("max_price"),
+        hotel_type=hotel_info.get("hotel_type"),
+        check_in_date=hotel_info.get("check_in_date"),
+        check_out_date=hotel_info.get("check_out_date"),
+    )
+
+
 def execute_hotel_query_green(query):
     hotel_info = extract_hotel_info(query)
     user_input = f"{hotel_info.get('query')} 環保 綠色 低碳"
-    return search_hotel_new(query=user_input,min_price=hotel_info.get('min_price'), max_price=hotel_info.get('max_price'), hotel_type=hotel_info.get('hotel_type'),check_in_date=hotel_info.get('check_in_date'),check_out_date=hotel_info.get('check_out_date'))
-
-
-   
-
-
+    return search_hotel_new(
+        query=user_input,
+        min_price=hotel_info.get("min_price"),
+        max_price=hotel_info.get("max_price"),
+        hotel_type=hotel_info.get("hotel_type"),
+        check_in_date=hotel_info.get("check_in_date"),
+        check_out_date=hotel_info.get("check_out_date"),
+    )

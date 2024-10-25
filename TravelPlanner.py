@@ -146,13 +146,7 @@ def retrieve_document_content(query):
                   {context}
 
                   {{"Recommendation": [
-                        {{
-                              "Activity": "住宿",
-                              "Location": "住宿名稱",
-                              "Address": "住宿地址",
-                              "Description": "住宿簡述",
-                              "latency":"480",
-                          }},
+                       
                           {{
                               "Activity": "早餐",
                               "Location": "餐廳名稱",
@@ -188,6 +182,13 @@ def retrieve_document_content(query):
                               "Description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
 
+                          }},
+                          {{
+                              "Activity": "住宿",
+                              "Location": "住宿名稱",
+                              "Address": "住宿地址",
+                              "Description": "住宿簡述",
+                              "latency":"480",
                           }}
                       ],
                       "Note": SHORT SUMMARY,
@@ -285,13 +286,7 @@ def retrieve_document_content_green(query):
                   {context}
 
                   {{"Recommendation": [
-                        {{
-                              "Activity": "住宿",
-                              "Location": "住宿名稱",
-                              "Address": "住宿地址",
-                              "Description": "住宿簡述",
-                              "latency":"480",
-                          }},
+                        
                           {{
                               "Activity": "早餐",
                               "Location": "餐廳名稱",
@@ -327,6 +322,13 @@ def retrieve_document_content_green(query):
                               "Description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
 
+                          }},
+                          {{
+                              "Activity": "住宿",
+                              "Location": "住宿名稱",
+                              "Address": "住宿地址",
+                              "Description": "住宿簡述",
+                              "latency":"480",
                           }}
                       ],
                       "Note": SHORT SUMMARY,
