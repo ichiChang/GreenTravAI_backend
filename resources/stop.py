@@ -64,7 +64,7 @@ class StopList(MethodView):
     @blp.arguments(AddStopSchema)
     @jwt_required()
     def post(self, stop_data):
-
+        api_key = os.getenv("GOOGLE_MAP_API_KEY")
         latency = stop_data["latency"]
         # current_stop = StopModel.objects()
         # place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
@@ -77,7 +77,7 @@ class StopList(MethodView):
             prev_endtime = prev_stop.EndTime
             prev_address = prev_stop.address
 
-            api_key = os.getenv("GOOGLE_MAP_API_KEY")
+            
 
             optimal_mode, duration, best_directions, best_distance_km = (
                 find_optimal_mode(prev_address, current_address, api_key)
@@ -129,7 +129,7 @@ class StopList(MethodView):
                 )
 
         else:
-            
+             
             long, lat = get_lat_long(current_address,api_key)
             stop = StopModel(
                 Name=stop_data["Name"],
