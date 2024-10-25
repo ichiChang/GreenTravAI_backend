@@ -28,27 +28,29 @@ class UpdateTravelPlanSchema(Schema):
     CreateAt = fields.DateTime(dump_only=True)
     # UserId = fields.Str(required=True, load_only=True)
 
+
 from marshmallow import Schema, fields
+
 
 class CreateAllStopSchema(Schema):
     Location = fields.Str()
     Description = fields.Str()
     latency = fields.Int()
     Address = fields.Str()
-    StartTime = fields.DateTime(
-        format="%Y-%m-%d %H:%M", required=False, example="2024-09-17 08:00"
-    )
+    # StartTime = fields.DateTime(
+    #     format="%Y-%m-%d %H:%M", required=False, example="2024-09-17 08:00"
+    # )
+
 
 class CreateDaySchema(Schema):
     stops = fields.List(fields.Nested(CreateAllStopSchema), required=True)
+
 
 class CreateAllSchema(Schema):
     startdate = fields.Date(format="%Y-%m-%d")  # date
     enddate = fields.Date(format="%Y-%m-%d")  # date
     planname = fields.Str()
     days = fields.List(fields.Nested(CreateDaySchema), required=True)
-
-
 
 
 class PlaceSchema(Schema):
@@ -109,6 +111,7 @@ class UpdateStopSchema(Schema):
     address = fields.Str(required=False, allow_none=True)
     latency = fields.Int(required=False, allow_none=True)
 
+
 class TransportationSchema(Schema):
     id = fields.Str(dump_only=True)
     Name = fields.Str(required=True, validate=validate.Length(min=1))
@@ -122,15 +125,16 @@ class TransportationSchema(Schema):
 class AddTransportationSchema(TransportationSchema):
     pass
 
+
 class ChooseTransportationSchema(Schema):
     FromStopId = fields.Str(required=True)
     ToStopId = fields.Str(required=True)
+
 
 class ChooseTransportationUpdateSchema(Schema):
     FromStopId = fields.Str(required=True)
     mode = fields.Str(required=True)
     TimeSpent = fields.Int(required=True)
-    
 
 
 class UpdateTransportationSchema(Schema):
@@ -172,3 +176,7 @@ class FavorPlaceSchema(Schema):
 
 class RetrieveFavorPlaceSchema(Schema):
     UserId = fields.Str(required=True)
+
+
+class InsertGreenSchema(Schema):
+    spot_names = fields.List(fields.String(), required=True)

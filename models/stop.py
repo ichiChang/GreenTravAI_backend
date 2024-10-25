@@ -14,5 +14,6 @@ class StopModel(mg.Document):
     DayId = mg.ReferenceField(document_type=DayModel)
     address = mg.StringField()
     prev_stopId = mg.StringField(null=True, required=False)
+    Isgreen = mg.BooleanField()
 
     # TravelPlan_id = mg.ReferenceField(document_type=TravelPlanModel)

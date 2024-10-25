@@ -4,6 +4,7 @@ from flask_smorest import Blueprint, abort
 from models.stop import StopModel
 from models.place import PlaceModel
 from models.day import DayModel
+from models.green_dict import GreenDictModel
 from models.travelPlan import TravelPlanModel
 from Schema import (
     StopSchema,
@@ -27,7 +28,14 @@ from bson import ObjectId
 import os
 from datetime import timedelta
 
+
 blp = Blueprint("Stop", __name__, url_prefix="/stops")
+
+
+def check_green(stop_name):
+
+    return GreenDictModel.objects(spot_name=stop_name).first() is not None
+
 
 
 def format_stop(stop):
@@ -39,6 +47,7 @@ def format_stop(stop):
         "Note": stop.note,
         "Address": stop.address,
         "prev_stop": stop.prev_stopId,
+        "Isgreen":stop.Isgreen,
         "transportationToNext": {
             "Mode": stop.transportation.get("mode"),
             "TimeSpent": stop.transportation.get("Timespent"),
@@ -55,7 +64,7 @@ class StopList(MethodView):
     def post(self, stop_data):
 
         latency = stop_data["latency"]
-        current_stop = StopModel.objects()
+        # current_stop = StopModel.objects()
         # place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
         day = DayModel.objects(id=stop_data["DayId"]).first()
         current_address = stop_data["address"]
@@ -68,8 +77,8 @@ class StopList(MethodView):
 
             api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-            optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
-                prev_address, current_address, api_key
+            optimal_mode, duration, best_directions, best_distance_km = (
+                find_optimal_mode(prev_address, current_address, api_key)
             )
             print(optimal_mode, duration)
 
@@ -86,6 +95,7 @@ class StopList(MethodView):
                     # PlaceId=place.id,
                     DayId=day.id,
                     prev_stopId=stop_data["prev_stop"],
+                    Isgreen=check_green(stop_data["Name"])
                 )
                 stop.save()
                 prev_stop.transportation = {
@@ -125,6 +135,7 @@ class StopList(MethodView):
                 # PlaceId=place,
                 transportation={},
                 DayId=day,
+                Isgreen=check_green(stop_data["Name"])
             )
             stop.save()
         data = jsonify({"message": f'Stop {stop_data["Name"]} created successfully'})
@@ -190,12 +201,15 @@ class StopItem(MethodView):
             is_effectNext = True
             stop.Name = update_data.get("Name")
             stop.address = update_data.get("address")
+            stop.Isgreen=check_green(update_data.get("Name"))
             prev_stop = StopModel.objects(id=stop.prev_stopId).first()
             if prev_stop:
                 api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-                optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
-                    prev_stop.address, update_data.get("address"), api_key
+                optimal_mode, duration, best_directions, best_distance_km = (
+                    find_optimal_mode(
+                        prev_stop.address, update_data.get("address"), api_key
+                    )
                 )
                 prev_stop.transportation = {
                     "mode": optimal_mode,
@@ -221,8 +235,10 @@ class StopItem(MethodView):
             if next_stop:
                 api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-                optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
-                    update_data.get("address"), next_stop.address, api_key
+                optimal_mode, duration, best_directions, best_distance_km = (
+                    find_optimal_mode(
+                        update_data.get("address"), next_stop.address, api_key
+                    )
                 )
                 stop.transportation = {
                     "mode": optimal_mode,
@@ -262,7 +278,7 @@ class StopItem(MethodView):
                 temp_id = next_stop.id
                 curr_stop = next_stop
                 next_stop = StopModel.objects(prev_stopId=str(temp_id)).first()
-                print('ok')
+                print("ok")
 
         data = jsonify({"message": "Stop updated successfully"})
         return make_response(data, 200)
@@ -296,6 +312,7 @@ class StopinDay(MethodView):
                 "Note": stop.note,
                 "Address": stop.address,
                 "prev_stop": stop.prev_stopId,
+                "Isgreen":stop.Isgreen,
                 "transportationToNext": {
                     "Mode": stop.transportation.get("mode"),
                     "TimeSpent": stop.transportation.get("Timespent"),
@@ -350,8 +367,8 @@ class EditStop(MethodView):
                 prev_addr = prev_stop.address
                 api_key = os.getenv("GOOGLE_MAP_API_KEY")
 
-                optimal_mode, duration, best_directions,best_distance_km = find_optimal_mode(
-                    prev_addr, current_addr, api_key
+                optimal_mode, duration, best_directions, best_distance_km = (
+                    find_optimal_mode(prev_addr, current_addr, api_key)
                 )
 
                 # current_stop.StartTime = prev_stop.EndTime
@@ -387,6 +404,6 @@ class EditStop(MethodView):
                     res_data.append(format_stop(prev_stop))
             count += 1
 
-        data = jsonify({"day_id":day_id,"stops": res_data})
+        data = jsonify({"day_id": day_id, "stops": res_data})
 
         return make_response(data, 201)

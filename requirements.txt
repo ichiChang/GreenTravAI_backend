@@ -19,3 +19,4 @@ openai
 certifi
 googlemaps
 pytz
+pandas

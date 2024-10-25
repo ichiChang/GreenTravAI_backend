@@ -3,7 +3,8 @@ from flask import request, jsonify, make_response
 from flask.views import MethodView
 from flask_smorest import Blueprint
 from models.place import PlaceModel
-from Schema import PlaceSchema
+from models.green_dict import GreenDictModel
+from Schema import PlaceSchema, InsertGreenSchema
 from services.google_storage import upload_image_to_gcs
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
@@ -119,3 +120,17 @@ class Place(MethodView):
         else:
             data = jsonify({"error": "Place not found"})
             return make_response(data, 404)
+
+
+@blp.route("/green/insert")
+class InsertGreenSpot(MethodView):
+
+    @blp.arguments(InsertGreenSchema)
+    @jwt_required()
+    def post(self, place_data):
+        for place in place_data["spot_names"]:
+            if not GreenDictModel.objects(spot_name=place).first():  # Avoid duplicates
+                new_spot = GreenDictModel(spot_name=place)
+                new_spot.save()
+        data = jsonify({"message": "green spot insert to mongo db successfully"})
+        return make_response(data, 201)

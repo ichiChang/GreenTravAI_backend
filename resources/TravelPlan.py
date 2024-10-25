@@ -23,6 +23,8 @@ from Route import (
     find_optimal_mode,
 )
 from datetime import datetime, timedelta
+from resources.stop import check_green
+
 
 blp = Blueprint("TravelPlan", __name__, url_prefix="/travel_plans")
 
@@ -193,7 +195,7 @@ class TravelPlanList(MethodView):
                     optimal_mode, duration, best_directions, best_distance_km = (
                         find_optimal_mode(prev_address, current_address, api_key)
                     )
-                    print(optimal_mode, duration)
+                    # print(optimal_mode, duration)
 
                     if optimal_mode:
 
@@ -208,6 +210,7 @@ class TravelPlanList(MethodView):
                             # PlaceId=place.id,
                             DayId=day.id,
                             prev_stopId=str(prev_stop.id),
+                            Isgreen=check_green(stop["Location"])
                         )
                         stp.save()
                         prev_stop.transportation = {
@@ -249,13 +252,14 @@ class TravelPlanList(MethodView):
                     # formatted_date = new_date.strftime("%Y-%m-%d %H:%M"
                     stp = StopModel(
                         Name=stop["Location"],
-                        StartTime=parsed_date,
-                        EndTime=stop["StartTime"] + timedelta(minutes=latency),
+                        StartTime=new_date,
+                        EndTime=new_date+ timedelta(minutes=latency),
                         note=stop["Description"],
                         address=stop["Address"],
                         # PlaceId=place,
                         transportation={},
                         DayId=day,
+                        Isgreen=check_green(stop["Location"])
                     )
                     stp.save()
                     prev_stop = stp
@@ -283,14 +287,19 @@ class TravelPlanItem(MethodView):
         total_distance = 0
         green_trans_point = 0
         total_trans_count = 0
+        green_spot_coount = 0
+        total_stop_count = 0
         plans = TravelPlanModel.objects(userId=user.id)
 
         for plan in plans:
             days = DayModel.objects(TravelPlanId=plan.id)
             for day in days:
                 stops = StopModel.objects(DayId=day.id)
+                total_stop_count += stops.count()
                 for stop in stops:
                     # Get distance and mode with default values
+                    if stop.Isgreen:
+                        green_spot_coount+=1
                     if not (
                         stop.transportation.get("mode") is None
                         and stop.transportation.get("Timespent") is None
@@ -307,20 +316,24 @@ class TravelPlanItem(MethodView):
                     # print(total_emission)
                     total_distance += distance
 
-        # print(total_emission)
-        # print(total_distance)
-        # print(calcarbon(total_distance, "driving"))
+ 
         # Ensure you do not divide by zero
         if total_distance > 0:
             final_rate = round((calcarbon(total_distance, 'driving'))-total_emission,2)
         else:
             final_rate = 0  # Handle case where total_distance is 0
-        if total_trans_count >0:
-            final_green_trans_rate = round((green_trans_point/total_trans_count),2)
+        if total_trans_count > 0:
+            final_green_trans_rate = int(round((green_trans_point/total_trans_count),2) * 100)
+            # int((1 - round((emission/car_emission),2)) * 100)
         else:
             final_green_trans_rate = 0
+        if total_stop_count > 0:
+            final_green_spot_rate = int(round((green_spot_coount/total_stop_count),2) * 100)
+        else:
+            final_green_spot_rate = 0
+        
       
-        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate})
+        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate,"green_spot_rate":final_green_spot_rate})
 
         return make_response(data, 200)
     
@@ -339,10 +352,15 @@ class TravelPlanItem_carbon(MethodView):
         total_distance = 0
         green_trans_point = 0
         total_trans_count = 0
+        green_spot_coount = 0
+        total_stop_count = 0
         days = DayModel.objects(TravelPlanId=plan.id)
         for day in days:
             stops = StopModel.objects(DayId=day.id)
+            total_stop_count += stops.count()
             for stop in stops:
+                if stop.Isgreen:
+                        green_spot_coount+=1
                     # Get distance and mode with default values
                 if not (
                             stop.transportation.get("mode") is None
@@ -361,20 +379,23 @@ class TravelPlanItem_carbon(MethodView):
                         # print(total_emission)
                 total_distance += distance
 
-        # print(total_emission)
-        # print(total_distance)
-        # print(calcarbon(total_distance, "driving"))
+
         # Ensure you do not divide by zero
         if total_distance > 0:
             final_rate = round((calcarbon(total_distance, 'driving'))-total_emission,2)
         else:
             final_rate = 0  # Handle case where total_distance is 0
-        if total_trans_count >0:
-            final_green_trans_rate = round((green_trans_point/total_trans_count),2)
+        if total_trans_count > 0:
+            final_green_trans_rate = int(round((green_trans_point/total_trans_count),2) * 100)
         else:
             final_green_trans_rate = 0
+        
+        if total_stop_count > 0:
+            final_green_spot_rate = int(round((green_spot_coount/total_stop_count),2) * 100)
+        else:
+            final_green_spot_rate = 0
       
-        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate})
+        data = jsonify({"emission_rate": final_rate,"green_trans_rate":final_green_trans_rate,"green_spot_rate":final_green_spot_rate})
         
         
         return make_response(data, 200)
