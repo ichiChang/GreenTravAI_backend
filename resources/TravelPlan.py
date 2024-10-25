@@ -155,6 +155,10 @@ class TravelPlanList(MethodView):
     def post(self, travel_plan_data):
         user_id = get_jwt_identity()
         user = UserModel.objects(id=user_id).first()
+        actual_days = (travel_plan_data["enddate"] - travel_plan_data["startdate"]).days + 1
+        if actual_days != len(travel_plan_data["Plans"]):
+            abort(400, description="travel plan phase and the plans of day is inconsistent")
+
         if not user:
             abort(404, description="User not found")
         api_key = os.getenv("GOOGLE_MAP_API_KEY")
@@ -174,10 +178,11 @@ class TravelPlanList(MethodView):
                 TravelPlanId=travel_plan.id,  # Associate the day with the travel plan
             )
             day.save()  # Save each DayModel instance to the database
-
-            stopListInDay = travel_plan_data["days"][daynum]
+            # days --> Plans
+            stopListInDay = travel_plan_data["Plans"][daynum]
             stop_num = 0
-            for stop in stopListInDay["stops"]:
+            # stops --> Recommendation
+            for stop in stopListInDay["Recommendation"]:
                 latency = stop["latency"]
                 # current_stop = StopModel.objects()
                 # place = PlaceModel.objects(id=stop_data["PlaceId"]).first()

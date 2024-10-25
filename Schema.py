@@ -37,20 +37,25 @@ class CreateAllStopSchema(Schema):
     Description = fields.Str()
     latency = fields.Int()
     Address = fields.Str()
+    Activity = fields.Str()
     # StartTime = fields.DateTime(
     #     format="%Y-%m-%d %H:%M", required=False, example="2024-09-17 08:00"
     # )
 
 
 class CreateDaySchema(Schema):
-    stops = fields.List(fields.Nested(CreateAllStopSchema), required=True)
+    # stops = fields.List(fields.Nested(CreateAllStopSchema), required=True)
+    Recommendation = fields.List(fields.Nested(CreateAllStopSchema), required=True)
 
 
 class CreateAllSchema(Schema):
     startdate = fields.Date(format="%Y-%m-%d")  # date
     enddate = fields.Date(format="%Y-%m-%d")  # date
     planname = fields.Str()
-    days = fields.List(fields.Nested(CreateDaySchema), required=True)
+    # days = fields.List(fields.Nested(CreateDaySchema), required=True)
+    Plans = fields.List(fields.Nested(CreateDaySchema), required=True)
+
+
 
 
 class PlaceSchema(Schema):
