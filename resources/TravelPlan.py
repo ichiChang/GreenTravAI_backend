@@ -44,7 +44,7 @@ def calcarbon(distance, mode):
     }
     ans = round((emission_map.get(mode) or 0) * distance, 2)
     return ans
-
+GREEEN_SPOT_REDUCTION_AMOUNT = 3000
 
 @blp.route("/")
 class TravelPlanList(MethodView):
@@ -327,7 +327,7 @@ class TravelPlanItem(MethodView):
         if total_distance > 0:
             final_rate = round(
                 (calcarbon(total_distance, "driving")) - total_emission, 2
-            )
+            ) + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
         else:
             final_rate = 0  # Handle case where total_distance is 0
         if total_trans_count > 0:
@@ -402,7 +402,7 @@ class TravelPlanItem_carbon(MethodView):
         if total_distance > 0:
             final_rate = round(
                 (calcarbon(total_distance, "driving")) - total_emission, 2
-            )
+            ) + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
         else:
             final_rate = 0  # Handle case where total_distance is 0
         if total_trans_count > 0:
