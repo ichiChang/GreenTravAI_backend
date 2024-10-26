@@ -346,7 +346,7 @@ class TravelPlanItem(MethodView):
 
         data = jsonify(
             {
-                "emission_rate": final_rate,
+                "emission_reduction": final_rate,
                 "green_trans_rate": final_green_trans_rate,
                 "green_spot_rate": final_green_spot_rate,
             }
@@ -421,7 +421,7 @@ class TravelPlanItem_carbon(MethodView):
 
         data = jsonify(
             {
-                "emission_rate": final_rate,
+                "emission_reduction": final_rate,
                 "green_trans_rate": final_green_trans_rate,
                 "green_spot_rate": final_green_spot_rate,
             }
