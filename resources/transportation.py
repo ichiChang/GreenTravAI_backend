@@ -102,22 +102,31 @@ class TransportationChoose(MethodView):
 
         modes = ["driving", "walking", "bicycling", "transit", "TWO_WHEELER"]
         res = {}
-
+        car_directions = get_directions(
+            from_stop.address, to_stop.address, "driving", api_key
+        )
+        car_duration, car_best_distance_km = get_duration_in_seconds(car_directions)
+        car_emission = calcarbon(car_best_distance_km, "driving")
         for mode in modes:
-            directions = get_directions(
-                from_stop.address, to_stop.address, mode, api_key
-            )
-            duration, best_distance_km = get_duration_in_seconds(directions)
+            if mode == "driving":
+                emission = car_emission
+                duration = car_duration
+            else:
+                directions = get_directions(
+                    from_stop.address, to_stop.address, mode, api_key
+                )
+                duration, best_distance_km = get_duration_in_seconds(directions)
 
-            # print(f"Mode: {mode}, Duration: {duration} seconds")
-            emission = calcarbon(best_distance_km,mode)
-            car_emission = calcarbon(best_distance_km,'driving')
+                emission = calcarbon(best_distance_km, mode)
             if car_emission > 0:
-                emission_rate = int((1 - round((emission/car_emission),2)) * 100)
+                # emission_rate = int((1 - round((emission/car_emission),2)) * 100)
+                emission_rate = int(car_emission - emission)
             else:
                 emission_rate = 0
-            res[mode] = {"Timespent":int(duration / 60),"emission_rate":emission_rate}
-
+            res[mode] = {
+                "Timespent": int(duration / 60),
+                "emission_reduction_amount": emission_rate,
+            }
 
         data = jsonify(res)
         return make_response(data, 201)
@@ -142,7 +151,7 @@ class TransportationChoose(MethodView):
         next_stop = StopModel.objects(
             prev_stopId=transportation_data["FromStopId"]
         ).first()
-        while next_stop :
+        while next_stop:
             curr_endtime = curr_stop.EndTime
             curr_timespent = curr_stop.transportation.get("Timespent")
             next_new_latency = int(
