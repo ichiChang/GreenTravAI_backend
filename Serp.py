@@ -332,7 +332,8 @@ def get_google_maps_route(
     arrival_time: datetime = None,
     mode: str = "transit",
 ):
-    gmaps = googlemaps.Client(key="AIzaSyAMncPb3INeUVKzl3gA8S0DRwgVUUvecwE")
+    key = os.getenv("GOOGLE_MAP_API_KEY")
+    gmaps = googlemaps.Client(key=key)
     try:
         if arrival_time:
             directions_result = gmaps.directions(

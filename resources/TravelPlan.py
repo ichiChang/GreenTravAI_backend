@@ -385,7 +385,7 @@ class TravelPlanItem(MethodView):
         )
         # data = jsonify({"message": "update green stats successfully"})
 
-        return make_response(data, 201)
+        return make_response(data, 200)
 
 
 @blp.route("/CalCarbon/<string:plan_id>")
@@ -497,4 +497,4 @@ class TravelPlanItem_carbon(MethodView):
         )
         # data = jsonify({"message": "update green stats successfully"})
 
-        return make_response(data, 201)
+        return make_response(data, 200)
