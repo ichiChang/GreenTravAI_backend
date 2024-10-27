@@ -396,13 +396,26 @@ class TravelPlanItem_carbon(MethodView):
         plan = TravelPlanModel.objects(id=plan_id).first()
         if not plan:
             abort(404, description="Travel plan not found")
-        green_stats = plan.green_stats
-        if not green_stats:
-            green_stats = {
-                "emission_reduction": None,
-                "green_trans_rate": None,
-                "green_spot_rate": None,
-            }
+        
+        # Retrieve green_stats and set default values if fields are None
+        green_stats = plan.green_stats or {}
+        # print(plan.green_stats.get("emission_reduction"))
+        # print(green_stats)
+        emission_reduction = green_stats.get("emission_reduction", None)
+        green_spot_rate = green_stats.get("green_spot_rate", None)
+        green_trans_rate = green_stats.get("green_trans_rate", None)
+        
+        # print(emission_reduction)  # Should print 0 if emission_reduction is None
+        
+        # Populate green_stats with default values if needed
+        green_stats = {
+            "emission_reduction": emission_reduction,
+            "green_trans_rate": green_trans_rate,
+            "green_spot_rate": green_spot_rate,
+        }
+        # green_stats = plan.green_stats
+
+        
         data = jsonify(green_stats)
         return make_response(data, 200)
 
@@ -473,6 +486,7 @@ class TravelPlanItem_carbon(MethodView):
             "green_spot_rate": final_green_spot_rate,
         }
         plan.green_stats = green_stats
+        print(plan.green_stats)
         plan.save()
         # data = jsonify(
         #     {
