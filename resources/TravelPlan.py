@@ -293,7 +293,14 @@ class TravelPlanItem(MethodView):
         user = UserModel.objects(id=user_id).first()
         if not user:
             abort(404, description="User not found")
+
         green_stats = user.green_stats
+        if not green_stats:
+            green_stats = {
+                "emission_reduction": None,
+                "green_trans_rate": None,
+                "green_spot_rate": None,
+            }
         data = jsonify(green_stats)
         return make_response(data, 200)
 
@@ -378,7 +385,7 @@ class TravelPlanItem(MethodView):
         # )
         data = jsonify({"message": "update green stats successfully"})
 
-        return make_response(data, 200)
+        return make_response(data, 201)
 
 
 @blp.route("/CalCarbon/<string:plan_id>")
@@ -390,6 +397,12 @@ class TravelPlanItem_carbon(MethodView):
         if not plan:
             abort(404, description="Travel plan not found")
         green_stats = plan.green_stats
+        if not green_stats:
+            green_stats = {
+                "emission_reduction": None,
+                "green_trans_rate": None,
+                "green_spot_rate": None,
+            }
         data = jsonify(green_stats)
         return make_response(data, 200)
 
@@ -470,4 +483,4 @@ class TravelPlanItem_carbon(MethodView):
         # )
         data = jsonify({"message": "update green stats successfully"})
 
-        return make_response(data, 200)
+        return make_response(data, 201)
