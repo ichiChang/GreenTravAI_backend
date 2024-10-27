@@ -4,6 +4,7 @@ from models.user import UserModel
 from models.travelPlan import TravelPlanModel
 from models.day import DayModel
 from models.stop import StopModel
+from models.user import UserModel
 
 from db import mongo
 from Schema import (
@@ -42,9 +43,12 @@ def calcarbon(distance, mode):
         "transit": 4,
         "TWO_WHEELER": 46,
     }
-    ans = round((emission_map.get(mode) or 0) * distance, 2)
+    ans = round((emission_map.get(mode) or 0) * distance, 3)
     return ans
+
+
 GREEEN_SPOT_REDUCTION_AMOUNT = 3000
+
 
 @blp.route("/")
 class TravelPlanList(MethodView):
@@ -155,9 +159,14 @@ class TravelPlanList(MethodView):
     def post(self, travel_plan_data):
         user_id = get_jwt_identity()
         user = UserModel.objects(id=user_id).first()
-        actual_days = (travel_plan_data["enddate"] - travel_plan_data["startdate"]).days + 1
+        actual_days = (
+            travel_plan_data["enddate"] - travel_plan_data["startdate"]
+        ).days + 1
         if actual_days != len(travel_plan_data["Plans"]):
-            abort(400, description="travel plan phase and the plans of day is inconsistent")
+            abort(
+                400,
+                description="travel plan phase and the plans of day is inconsistent",
+            )
 
         if not user:
             abort(404, description="User not found")
@@ -195,8 +204,6 @@ class TravelPlanList(MethodView):
                     prev_endtime = prev_stop.EndTime
                     prev_address = prev_stop.address
 
-                    
-
                     optimal_mode, duration, best_directions, best_distance_km = (
                         find_optimal_mode(prev_address, current_address, api_key)
                     )
@@ -223,7 +230,7 @@ class TravelPlanList(MethodView):
                         prev_stop.transportation = {
                             "mode": optimal_mode,
                             "Timespent": int(duration / 60),
-                            "distance": int(best_distance_km),
+                            "distance": best_distance_km,
                             "LowCarbon": (
                                 True
                                 if optimal_mode not in ["driving", "TWO_WHEELER"]
@@ -280,9 +287,19 @@ class TravelPlanList(MethodView):
 @blp.route("/CalCarbon")
 class TravelPlanItem(MethodView):
 
-    # @blp.arguments(AddTravelPlanSchema)
     @jwt_required()
     def get(self):
+        user_id = get_jwt_identity()
+        user = UserModel.objects(id=user_id).first()
+        if not user:
+            abort(404, description="User not found")
+        green_stats = user.green_stats
+        data = jsonify(green_stats)
+        return make_response(data, 200)
+
+    # @blp.arguments(AddTravelPlanSchema)
+    @jwt_required()
+    def post(self):
         user_id = get_jwt_identity()
         user = UserModel.objects(id=user_id).first()
         if not user:
@@ -325,9 +342,10 @@ class TravelPlanItem(MethodView):
 
         # Ensure you do not divide by zero
         if total_distance > 0:
-            final_rate = round(
-                (calcarbon(total_distance, "driving")) - total_emission, 2
-            ) + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
+            final_rate = (
+                round((calcarbon(total_distance, "driving")) - total_emission, 2)
+                + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
+            )
         else:
             final_rate = 0  # Handle case where total_distance is 0
         if total_trans_count > 0:
@@ -344,13 +362,21 @@ class TravelPlanItem(MethodView):
         else:
             final_green_spot_rate = 0
 
-        data = jsonify(
-            {
-                "emission_reduction": final_rate,
-                "green_trans_rate": final_green_trans_rate,
-                "green_spot_rate": final_green_spot_rate,
-            }
-        )
+        green_stats = {
+            "emission_reduction": final_rate,
+            "green_trans_rate": final_green_trans_rate,
+            "green_spot_rate": final_green_spot_rate,
+        }
+        user.green_stats = green_stats
+        user.save()
+        # data = jsonify(
+        #     {
+        #         "emission_reduction": final_rate,
+        #         "green_trans_rate": final_green_trans_rate,
+        #         "green_spot_rate": final_green_spot_rate,
+        #     }
+        # )
+        data = jsonify({"message": "update green stats successfully"})
 
         return make_response(data, 200)
 
@@ -360,6 +386,15 @@ class TravelPlanItem_carbon(MethodView):
 
     @jwt_required()
     def get(self, plan_id):
+        plan = TravelPlanModel.objects(id=plan_id).first()
+        if not plan:
+            abort(404, description="Travel plan not found")
+        green_stats = plan.green_stats
+        data = jsonify(green_stats)
+        return make_response(data, 200)
+
+    @jwt_required()
+    def post(self, plan_id):
         # user_id = get_jwt_identity()
         plan = TravelPlanModel.objects(id=plan_id).first()
         if not plan:
@@ -400,9 +435,10 @@ class TravelPlanItem_carbon(MethodView):
 
         # Ensure you do not divide by zero
         if total_distance > 0:
-            final_rate = round(
-                (calcarbon(total_distance, "driving")) - total_emission, 2
-            ) + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
+            final_rate = (
+                round((calcarbon(total_distance, "driving")) - total_emission, 2)
+                + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
+            )
         else:
             final_rate = 0  # Handle case where total_distance is 0
         if total_trans_count > 0:
@@ -418,13 +454,20 @@ class TravelPlanItem_carbon(MethodView):
             )
         else:
             final_green_spot_rate = 0
-
-        data = jsonify(
-            {
-                "emission_reduction": final_rate,
-                "green_trans_rate": final_green_trans_rate,
-                "green_spot_rate": final_green_spot_rate,
-            }
-        )
+        green_stats = {
+            "emission_reduction": final_rate,
+            "green_trans_rate": final_green_trans_rate,
+            "green_spot_rate": final_green_spot_rate,
+        }
+        plan.green_stats = green_stats
+        plan.save()
+        # data = jsonify(
+        #     {
+        #         "emission_reduction": final_rate,
+        #         "green_trans_rate": final_green_trans_rate,
+        #         "green_spot_rate": final_green_spot_rate,
+        #     }
+        # )
+        data = jsonify({"message": "update green stats successfully"})
 
         return make_response(data, 200)

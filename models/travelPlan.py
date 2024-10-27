@@ -12,3 +12,5 @@ class TravelPlanModel(mg.Document):
         document_type=UserModel,
     )
     is_liked = mg.BooleanField()
+    green_stats = mg.DictField()
+

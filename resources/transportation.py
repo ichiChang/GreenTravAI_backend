@@ -135,13 +135,25 @@ class TransportationChoose(MethodView):
     @jwt_required()
     def put(self, transportation_data):
         from_stop = StopModel.objects(id=transportation_data["FromStopId"]).first()
+        to_stop = StopModel.objects(
+            prev_stopId=transportation_data["FromStopId"]
+        ).first()
+        if not from_stop or not to_stop:
+            abort(404, description="FromStop or to_stop not found")
+
+        api_key = os.getenv("GOOGLE_MAP_API_KEY")
         mode = transportation_data["mode"]
         TimeSpent = transportation_data["TimeSpent"]
-        if not from_stop:
-            abort(404, description="FromStop not found")
+
+        directions = get_directions(
+                    from_stop.address, to_stop.address, mode, api_key
+                )
+        duration, best_distance_km = get_duration_in_seconds(directions)
+        
         new_trans = {
             "mode": mode,
             "Timespent": TimeSpent,
+            "distance":best_distance_km,
             "LowCarbon": True if mode not in ["driving", "TWO_WHEELER"] else False,
         }
         from_stop.transportation = new_trans
