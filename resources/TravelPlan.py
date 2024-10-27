@@ -287,26 +287,26 @@ class TravelPlanList(MethodView):
 @blp.route("/CalCarbon")
 class TravelPlanItem(MethodView):
 
-    @jwt_required()
-    def get(self):
-        user_id = get_jwt_identity()
-        user = UserModel.objects(id=user_id).first()
-        if not user:
-            abort(404, description="User not found")
+    # @jwt_required()
+    # def get(self):
+    #     user_id = get_jwt_identity()
+    #     user = UserModel.objects(id=user_id).first()
+    #     if not user:
+    #         abort(404, description="User not found")
 
-        green_stats = user.green_stats
-        if not green_stats:
-            green_stats = {
-                "emission_reduction": None,
-                "green_trans_rate": None,
-                "green_spot_rate": None,
-            }
-        data = jsonify(green_stats)
-        return make_response(data, 200)
+    #     green_stats = user.green_stats
+    #     if not green_stats:
+    #         green_stats = {
+    #             "emission_reduction": None,
+    #             "green_trans_rate": None,
+    #             "green_spot_rate": None,
+    #         }
+    #     data = jsonify(green_stats)
+    #     return make_response(data, 200)
 
     # @blp.arguments(AddTravelPlanSchema)
     @jwt_required()
-    def post(self):
+    def get(self):
         user_id = get_jwt_identity()
         user = UserModel.objects(id=user_id).first()
         if not user:
@@ -376,14 +376,14 @@ class TravelPlanItem(MethodView):
         }
         user.green_stats = green_stats
         user.save()
-        # data = jsonify(
-        #     {
-        #         "emission_reduction": final_rate,
-        #         "green_trans_rate": final_green_trans_rate,
-        #         "green_spot_rate": final_green_spot_rate,
-        #     }
-        # )
-        data = jsonify({"message": "update green stats successfully"})
+        data = jsonify(
+            {
+                "emission_reduction": final_rate,
+                "green_trans_rate": final_green_trans_rate,
+                "green_spot_rate": final_green_spot_rate,
+            }
+        )
+        # data = jsonify({"message": "update green stats successfully"})
 
         return make_response(data, 201)
 
@@ -391,36 +391,36 @@ class TravelPlanItem(MethodView):
 @blp.route("/CalCarbon/<string:plan_id>")
 class TravelPlanItem_carbon(MethodView):
 
+    # @jwt_required()
+    # def get(self, plan_id):
+    #     plan = TravelPlanModel.objects(id=plan_id).first()
+    #     if not plan:
+    #         abort(404, description="Travel plan not found")
+        
+    #     # Retrieve green_stats and set default values if fields are None
+    #     green_stats = plan.green_stats or {}
+    #     # print(plan.green_stats.get("emission_reduction"))
+    #     # print(green_stats)
+    #     emission_reduction = green_stats.get("emission_reduction", None)
+    #     green_spot_rate = green_stats.get("green_spot_rate", None)
+    #     green_trans_rate = green_stats.get("green_trans_rate", None)
+        
+    #     # print(emission_reduction)  # Should print 0 if emission_reduction is None
+        
+    #     # Populate green_stats with default values if needed
+    #     green_stats = {
+    #         "emission_reduction": emission_reduction,
+    #         "green_trans_rate": green_trans_rate,
+    #         "green_spot_rate": green_spot_rate,
+    #     }
+    #     # green_stats = plan.green_stats
+
+        
+    #     data = jsonify(green_stats)
+    #     return make_response(data, 200)
+
     @jwt_required()
     def get(self, plan_id):
-        plan = TravelPlanModel.objects(id=plan_id).first()
-        if not plan:
-            abort(404, description="Travel plan not found")
-        
-        # Retrieve green_stats and set default values if fields are None
-        green_stats = plan.green_stats or {}
-        # print(plan.green_stats.get("emission_reduction"))
-        # print(green_stats)
-        emission_reduction = green_stats.get("emission_reduction", None)
-        green_spot_rate = green_stats.get("green_spot_rate", None)
-        green_trans_rate = green_stats.get("green_trans_rate", None)
-        
-        # print(emission_reduction)  # Should print 0 if emission_reduction is None
-        
-        # Populate green_stats with default values if needed
-        green_stats = {
-            "emission_reduction": emission_reduction,
-            "green_trans_rate": green_trans_rate,
-            "green_spot_rate": green_spot_rate,
-        }
-        # green_stats = plan.green_stats
-
-        
-        data = jsonify(green_stats)
-        return make_response(data, 200)
-
-    @jwt_required()
-    def post(self, plan_id):
         # user_id = get_jwt_identity()
         plan = TravelPlanModel.objects(id=plan_id).first()
         if not plan:
@@ -488,13 +488,13 @@ class TravelPlanItem_carbon(MethodView):
         plan.green_stats = green_stats
         print(plan.green_stats)
         plan.save()
-        # data = jsonify(
-        #     {
-        #         "emission_reduction": final_rate,
-        #         "green_trans_rate": final_green_trans_rate,
-        #         "green_spot_rate": final_green_spot_rate,
-        #     }
-        # )
-        data = jsonify({"message": "update green stats successfully"})
+        data = jsonify(
+            {
+                "emission_reduction": final_rate,
+                "green_trans_rate": final_green_trans_rate,
+                "green_spot_rate": final_green_spot_rate,
+            }
+        )
+        # data = jsonify({"message": "update green stats successfully"})
 
         return make_response(data, 201)
