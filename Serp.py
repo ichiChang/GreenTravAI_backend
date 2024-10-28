@@ -14,13 +14,34 @@ import re
 import html
 from dotenv import load_dotenv
 import pytz
+from bs4 import BeautifulSoup
+from zenrows import ZenRowsClient
 
 # load_dotenv()
 load_dotenv(dotenv_path="./.env")
 
 API_KEY = os.getenv("SERP_API_KEY")
-# print('ooook')
-# print(API_KEY)
+
+
+def get_ticket_price_and_details(link: str) -> dict:
+    """
+    Function to fetch the ticket page and extract the price, description, and other details.
+    """
+    client = ZenRowsClient(os.getenv('ZENROWS_API_KEY'))
+    url = link
+
+    response = client.get(url)
+
+    html_source = response.text
+    soup = BeautifulSoup(html_source, 'html.parser')
+    status = False
+    price_content = soup.find('meta', {'property': 'product:price:amount'}).get('content', None) if soup.find('meta', {'property': 'product:price:amount'}) else None
+    price_content = int(price_content) if price_content and price_content.isdigit() else None
+    description_content = soup.find('meta', {'name': 'description'}).get('content', None) if soup.find('meta', {'name': 'description'}) else None
+    if price_content and description_content:
+      status = True
+
+    return {"price":price_content, "description":description_content,"status":status}
 
 llm = ChatOpenAI(
     temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
@@ -67,7 +88,7 @@ def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> d
         "q": f"{query} site: booking.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
+        "api_key": API_KEY
     }
 
     # Make the request to SERP API
@@ -109,7 +130,7 @@ def search_hotels_green(
         "q": f"{query} site: booking.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
+        "api_key": API_KEY
     }
 
     # Make the request to SERP API
@@ -148,7 +169,7 @@ def search_dining(query: str, location: str = "Taipei") -> str:
         "q": f"{query}",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
+        "api_key": API_KEY
     }
 
     # Make the request to SERP API
@@ -174,14 +195,13 @@ def search_dining(query: str, location: str = "Taipei") -> str:
             "link": result.get("link") or None,
             "address": result.get("address") or None,
             "rating": result.get("rating") or None,
-            "snippet": result.get("description") or None,
-            "place_id": result.get("place_id") or None,
-            "summary": (
+            "snippet": (
                 llm.invoke(
                     "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags"
                     + prompt
                 )
             ).content,
+            "place_id": result.get("place_id") or None,
         }
         places.append(place)
 
@@ -201,7 +221,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
         "q": f"{query} 有機 環保 素",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
+        "api_key":API_KEY
     }
 
     # Make the request to SERP API
@@ -227,14 +247,14 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
             "link": result.get("link") or None,
             "address": result.get("address") or None,
             "rating": result.get("rating") or None,
-            "snippet": result.get("description") or None,
-            "place_id": result.get("place_id") or None,
-            "summary": (
+            # "snippet": result.get("description") or None,
+            "snippet": (
                 llm.invoke(
                     "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags"
                     + prompt
                 )
             ).content,
+            "place_id": result.get("place_id") or None,
         }
         places.append(place)
 
@@ -252,51 +272,36 @@ def search_ticket(query: str, location: str = "Taipei") -> str:
         "q": f"{query} site: klook.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": "4be3db34b5ea94bbf897bf2b05dd9427b1baeb18f2cc7eb24a5332439fc6f046",
+        "api_key": API_KEY,
     }
 
     # Make the request to SERP API
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
-    # print(data)
-    # print(data)
-
     if "organic_results" in data:
         organic_results = []
         for res in data["organic_results"]:
-            if res.get("position") <= 2:
-                prompt_parts = []
-                if res.get("title"):
-                    prompt_parts.append(f"Title: {res.get('title')}")
-                if res.get("snippet"):
-                    prompt_parts.append(f"Snippet: {res.get('snippet')}")
-                if res.get("extensions"):
-                    prompt_parts.append(f"Extensions: {res.get('extensions')}")
-                if res.get("rating"):
-                    prompt_parts.append(f"Rating: {res.get('rating')}")
-                prompt = "\n".join(prompt_parts) + "\nSummary:"
-                organic_entry = {
-                    "title": res.get("title"),
-                    "price": res.get("price") or None,
-                    "rating": res.get("rating") or None,
-                    "extensions": res.get("extensions") or None,
-                    "link": res.get("link"),
-                    "address": res.get("address") or None,
-                    "snippet": res.get("snippet") or None,
-                    "place_id": res.get("place_id") or None,
-                    "summary": (
-                        llm.invoke(
-                            "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags"
-                            + prompt
-                        )
-                    ).content,
-                }
-                if organic_entry["title"]:
-                    organic_results.append(organic_entry)
-                    result = {"results": organic_results}
-                    return result
-                else:
-                    return {"error": "ticket not found"}
+            if res.get("position") <= 5:
+              if res.get("link"):
+                print(res.get("link"))
+                ticket_detail = get_ticket_price_and_details(res.get("link"))
+                if ticket_detail.get("status"):
+                  organic_entry = {
+                        "title": res.get("title"),
+                        "price": ticket_detail.get("price") or None,
+                        "rating": res.get("rating") or None,
+                        "extensions": res.get("extensions") or None,
+                        "link": res.get("link"),
+                        "address": res.get("address") or None,
+                        "snippet": ticket_detail.get("description") or None,
+                        "place_id": res.get("place_id") or None,
+                    }
+                  organic_results.append(organic_entry)
+                  if len(organic_results)==1:
+                      break
+        result = {"results": organic_results}
+        return result
+                  
 
 
 def validate_time_format(time_str: str) -> bool:

@@ -20,3 +20,5 @@ certifi
 googlemaps
 pytz
 pandas
+zenrows
+bs4
