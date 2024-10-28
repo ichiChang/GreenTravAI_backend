@@ -5,6 +5,9 @@ import openai
 import googlemaps
 from datetime import datetime, timedelta
 from langchain import PromptTemplate, LLMChain
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_pinecone import PineconeVectorStore
+
 from langchain.llms import OpenAI
 import json
 import re
@@ -22,6 +25,32 @@ API_KEY = os.getenv("SERP_API_KEY")
 llm = ChatOpenAI(
     temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
 )
+
+
+def get_retriever(index_name, top_k, min_budget, max_budget):
+    embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
+
+    # Update the dynamic filter to include price constraints
+    dynamic_filter = {
+        "price": {
+            "$gte": min_budget,
+            "$lte": max_budget,
+        }  # Filter price within budget range
+    }
+
+    # Create the retriever
+    retriever = PineconeVectorStore.from_existing_index(
+        index_name=index_name, embedding=embeddings, text_key="name"
+    )
+
+    # Set the filter and top_k
+    retriever = retriever.as_retriever(
+        search_kwargs={
+            "filter": dynamic_filter,
+            "k": top_k,
+        }
+    )
+    return retriever
 
 
 def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> dict:
@@ -479,6 +508,7 @@ def extract_hotel_info(query: str) -> dict:
         If there is no specified min_price, use Null.
         If there is no specified max_price, use Null.
         If there is no specified hotel_type, use 飯店.
+        The current is 2024, if there is no specified year in date/
 
 
         Query:
@@ -561,6 +591,7 @@ def search_hotel_new(
     hotel_type: str = None,
     check_in_date=None,
     check_out_date=None,
+    eco_certified=False,
 ):
     """
     Function to call SERP API and return hotel search results with titles and links,
@@ -635,9 +666,43 @@ def search_hotel_new(
     return {"results": result}
 
 
+def search_hotel_new_green(query, min_price, max_price):
+    # print(type(min_price))
+    if not isinstance(min_price, int):
+        min_price = 0  # Default value if min_price is not an integer
+    if not isinstance(max_price, int):
+        max_price = 1000000  # Default
+    green_hotel_retriever_for_search = get_retriever(
+        index_name="green-hotel-for-search", min_budget=min_price, max_budget=max_price, top_k=3
+    )
+    green_hotel_for_search = green_hotel_retriever_for_search.get_relevant_documents(
+        query
+    )
+    result = []
+
+    for hotel in green_hotel_for_search:
+        name = hotel.page_content or None
+        detail = hotel.metadata
+
+        res = {
+            "title": name,
+            "price": detail.get("price") or None,
+            "extensions": detail.get("extension") or None,
+            "link": detail.get("link") or None,
+            "address": detail.get("address") or None,
+            "rating": detail.get("location_rating") or None,
+            "snippet": detail.get("description") or None,
+            "place_id": detail.get("place_id") or None,
+        }
+
+        result.append(res)
+    return {"results": result}
+
+
 def execute_hotel_query(query):
     hotel_info = extract_hotel_info(query)
     print(type(hotel_info))
+    # print(hotel_info)
     # print(hotel_info)
     return search_hotel_new(
         query=hotel_info.get("query"),
@@ -651,12 +716,11 @@ def execute_hotel_query(query):
 
 def execute_hotel_query_green(query):
     hotel_info = extract_hotel_info(query)
-    user_input = f"{hotel_info.get('query')} 環保 綠色 低碳"
-    return search_hotel_new(
-        query=user_input,
+    # print(hotel_info)
+
+    return search_hotel_new_green(
+        query=hotel_info.get("query"),
         min_price=hotel_info.get("min_price"),
         max_price=hotel_info.get("max_price"),
-        hotel_type=hotel_info.get("hotel_type"),
-        check_in_date=hotel_info.get("check_in_date"),
-        check_out_date=hotel_info.get("check_out_date"),
+       
     )
