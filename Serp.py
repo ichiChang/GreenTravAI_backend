@@ -289,18 +289,20 @@ def search_ticket(query: str, location: str = "Taipei") -> str:
                         prompt_parts.append(f"Snippet: {ticket_detail.get('description')}")
                     if ticket_detail.get("price"):
                         prompt_parts.append(f"Price: {ticket_detail.get('price')}")
+                    if res.get("link"):
+                        prompt_parts.append(f"link: {res.get('link')}")
                     
                     prompt = "\n".join(prompt_parts) + "\nSummary:"
                     summary = llm.invoke(
-                                "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words and highlight the ticket price with **"
+                                "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words and highlight the ticket price with **, also attacht the link with markdown link tag"
                                 + prompt).content   
                   
                     organic_entry = {
-                            "name": res.get("title"),
+                            # "name": res.get("title"),
                             # "price": ticket_detail.get("price") or None,
                             # "rating": res.get("rating") or None,
                             # "extensions": res.get("extensions") or None,
-                            "link": res.get("link"),
+                            # "link": res.get("link"),
                             # "address": res.get("address") or None,
                             "summary": f'{summary}',
                             # "place_id": res.get("place_id") or None,
@@ -308,8 +310,9 @@ def search_ticket(query: str, location: str = "Taipei") -> str:
                     organic_results.append(organic_entry)
                     if len(organic_results)==1:
                         break
-        result = {"results": organic_results}
-        return result
+        # result = {"results": organic_results}
+        return organic_results[0]['summary']
+
                   
 
 
@@ -727,6 +730,7 @@ def search_hotel_new_green(query, min_price, max_price):
             prompt_parts.append(f"Rating: {detail.get('location_rating')}")
         if detail.get("price"):
             prompt_parts.append(f"price: {detail.get('price')}")
+
         prompt = "\n".join(prompt_parts) + "\nSummary:"
         summary = llm.invoke(
                     "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words, please hightlight the price with ** "
