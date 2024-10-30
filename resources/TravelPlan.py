@@ -28,6 +28,7 @@ from datetime import datetime, timedelta
 from resources.stop import check_green
 
 
+
 blp = Blueprint("TravelPlan", __name__, url_prefix="/travel_plans")
 
 
@@ -376,11 +377,31 @@ class TravelPlanItem(MethodView):
         }
         user.green_stats = green_stats
         user.save()
+
+        total_users = UserModel.objects.count()
+        print(total_users)
+        users_below = UserModel.objects.aggregate([
+            {
+                "$match": {
+                    "$or": [
+                        {"green_stats.emission_reduction": {"$lte": final_rate}}, 
+                        {"green_stats.emission_reduction": {"$exists": False}}      
+                    ]
+                }
+            },
+            {"$count": "below_count"}
+        ])
+        users_below_count = list(users_below)
+        below_count = users_below_count[0]["below_count"] if users_below_count else 0
+        user_percentile = int((below_count / total_users) * 100) if total_users > 0 else 0
+
+
         data = jsonify(
             {
                 "emission_reduction": final_rate,
                 "green_trans_rate": final_green_trans_rate,
                 "green_spot_rate": final_green_spot_rate,
+                "green_percentile": user_percentile
             }
         )
         # data = jsonify({"message": "update green stats successfully"})
