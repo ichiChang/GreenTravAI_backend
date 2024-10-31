@@ -352,7 +352,7 @@ class TravelPlanItem(MethodView):
         if total_distance > 0:
             final_rate = (
                 round((calcarbon(total_distance, "driving")) - total_emission, 2)
-                + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
+                # + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
             )
         else:
             final_rate = 0  # Handle case where total_distance is 0
@@ -484,7 +484,7 @@ class TravelPlanItem_carbon(MethodView):
         if total_distance > 0:
             final_rate = (
                 round((calcarbon(total_distance, "driving")) - total_emission, 2)
-                + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
+                # + green_spot_coount * GREEEN_SPOT_REDUCTION_AMOUNT
             )
         else:
             final_rate = 0  # Handle case where total_distance is 0
