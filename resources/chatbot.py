@@ -81,7 +81,7 @@ class GreenChatbot(MethodView):
     @jwt_required()
     def post(self, user_data):
         res_format = {
-            "response": {"Text_ans": None, "results": [], "Recommendation": []}
+            "response": {"Text_ans": None, "results": [], "Plans": []}
         }
         user_query = user_data["query"]
 
@@ -102,7 +102,7 @@ class GreenChatbot(MethodView):
                         final_note += recomm['Note']
                         del recomm['Note']
 
-                    res_format["response"]["Recommendation"] = response
+                    res_format["response"]["Plans"] = response
                     res_format["response"]["Text_ans"] = final_note
 
 
@@ -111,7 +111,7 @@ class GreenChatbot(MethodView):
                 res_format["response"]["results"] = response["results"]
 
             if "Recommendation" in response:
-                res_format["response"]["Recommendation"] = response["Recommendation"]
+                res_format["response"]["Plans"] = response["Recommendation"]
 
         return jsonify(res_format)
 
