@@ -766,7 +766,7 @@ class TravelPlanList(MethodView):
     def post(self):
         travel_plan_data = {
                     "startdate": "2024-11-20",
-                    "enddate": "2024-11-21",
+                    "enddate": "2024-11-20",
                     "planname": "台北兩天一夜",
                     "Plans": [
                         {
