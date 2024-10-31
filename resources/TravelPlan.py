@@ -753,3 +753,194 @@ class TravelPlanList(MethodView):
 
         data = jsonify({"message": f" Complete travelplan is created successfully"})
         return make_response(data, 201)
+
+
+
+
+
+@blp.route("/CreateAll_demo_normal")
+class TravelPlanList(MethodView):
+
+    # @blp.arguments(CreateAllSchema)
+    @jwt_required()
+    def post(self):
+        travel_plan_data = {
+                    "startdate": "2024-11-20",
+                    "enddate": "2024-11-21",
+                    "planname": "台北兩天一夜",
+                    "Plans": [
+                        {
+                            "Recommendation": [
+                                {
+                                    "Activity": "早餐",
+                                    "Address": "台北市中正區忠孝東路一段108號2樓 ",
+                                    "Description": "台北著名的早餐店，以傳統的豆漿和燒餅油條聞名。",
+                                    "Location": "阜杭豆漿",
+                                    "latency": 60
+                                },
+                                {
+                                    "Activity": "景點參觀",
+                                    "Address": "臺北市士林區雨聲街120號  ",
+                                    "Description": "位於台北市的綠色生態園區，提供豐富的自然景觀和文化體驗。",
+                                    "Location": "芝山文化生態綠園",
+                                    "latency": 90
+                                },
+                                {
+                                    "Activity": "午餐",
+                                    "Address": "台北市信義區光復南路260巷39號",
+                                    "Description": "氣氛輕鬆的餐廳採用復古時尚風裝潢，並供應各式種類的餐點。  ",
+                                    "Location": "ABV Bar & Kitchen 地中海餐酒館 台北創始店",
+                                    "latency": 90
+                                },
+                                {
+                                    "Activity": "景點參觀",
+                                    "Address": "台北市士林區至善路二段221號",
+                                    "Description": "擁有豐富的中國古代藝術珍品，為世界著名的博物館之一",
+                                    "Location": "國立故宮博物院",
+                                    "latency": 180
+                                },
+                                {
+                                    "Activity": "晚餐",
+                                    "Address": "105台灣台北市松山區饒河街",
+                                    "Description": "歷史悠久的熱鬧夜市，有各式商店和街頭小吃攤。",
+                                    "Location": "饒河街觀光夜市",
+                                    "latency": 120
+                                }
+                                
+                            ]
+                        },
+                        
+                    ]
+                }
+
+        # user_id = get_jwt_identity()
+        travel_plan_data["startdate"] = datetime.strptime(travel_plan_data["startdate"], "%Y-%m-%d")
+        travel_plan_data["enddate"] = datetime.strptime(travel_plan_data["enddate"], "%Y-%m-%d")
+        print('ok')
+        user_id = '672330196b182d387e7a240a'
+        user = UserModel.objects(id=user_id).first()
+        actual_days = (
+            travel_plan_data["enddate"] - travel_plan_data["startdate"]
+        ).days + 1
+        if actual_days != len(travel_plan_data["Plans"]):
+            abort(
+                400,
+                description="travel plan phase and the plans of day is inconsistent",
+            )
+
+        if not user:
+            abort(404, description="User not found")
+        api_key = os.getenv("GOOGLE_MAP_API_KEY")
+        travel_plan = TravelPlanModel(
+            planname=travel_plan_data["planname"],
+            startdate=travel_plan_data["startdate"],
+            enddate=travel_plan_data["enddate"],
+            createAt=datetime.now(),
+            userId=user.id,
+        )
+        travel_plan.save()
+        daynum = 0
+        current_date = travel_plan_data["startdate"]
+        while current_date <= travel_plan_data["enddate"]:
+            day = DayModel(
+                Date=current_date,
+                TravelPlanId=travel_plan.id,  # Associate the day with the travel plan
+            )
+            day.save()  # Save each DayModel instance to the database
+            # days --> Plans
+            stopListInDay = travel_plan_data["Plans"][daynum]
+            stop_num = 0
+            # stops --> Recommendation
+            for stop in stopListInDay["Recommendation"]:
+                latency = stop["latency"]
+                # current_stop = StopModel.objects()
+                # place = PlaceModel.objects(id=stop_data["PlaceId"]).first()
+                # day = DayModel.objects(id=stop["DayId"]).first()
+                current_address = stop["Address"]
+                if not day:
+                    abort(404, description="Day not found")
+                if stop_num > 0:
+                    # prev_stop = StopModel.objects(id=stop["prev_stop"]).first()
+                    prev_endtime = prev_stop.EndTime
+                    prev_address = prev_stop.address
+
+                    optimal_mode, duration, best_directions, best_distance_km = (
+                        find_optimal_mode(prev_address, current_address, api_key)
+                    )
+
+                    # print(optimal_mode, duration)
+                    long, lat = get_lat_long(current_address, api_key)
+                    if optimal_mode:
+
+                        starttime = prev_endtime + timedelta(minutes=int(duration / 60))
+                        stp = StopModel(
+                            Name=stop["Location"],
+                            StartTime=starttime,
+                            EndTime=starttime + timedelta(minutes=latency),
+                            note=stop["Description"],
+                            address=current_address,
+                            transportation={},
+                            # PlaceId=place.id,
+                            DayId=day.id,
+                            prev_stopId=str(prev_stop.id),
+                            Isgreen=check_green(stop["Location"]),
+                            coordinates=[long, lat],
+                        )
+                        stp.save()
+                        prev_stop.transportation = {
+                            "mode": optimal_mode,
+                            "Timespent": int(duration / 60),
+                            "distance": best_distance_km,
+                            "LowCarbon": (
+                                True
+                                if optimal_mode not in ["driving", "TWO_WHEELER"]
+                                else False
+                            ),
+                        }
+                        prev_stop.save()
+                        prev_stop = stp
+                    #     transportation = TransportationModel(
+                    # Name=optimal_mode,
+                    # TimeSpent= int(duration/60),
+                    # LowCarbon=True if optimal_mode != "driving" else False,
+                    # FromStopId=prev_stop.id,
+                    # ToStopId=stop.id,
+                    #     )
+                    #     transportation.save()
+
+                    else:
+                        abort(
+                            500,
+                            description=f"Fail to obtain the transportation between {prev_stop.Name} and {stop.Name}",
+                        )
+
+                else:
+                    # parsed_date = datetime.strptime(str(day.Date), "%Y-%m-%d")
+                    parsed_date = datetime.strptime(str(day.Date), "%Y-%m-%d %H:%M:%S")
+
+                    new_date = parsed_date.replace(
+                        hour=8, minute=0, second=0, microsecond=0
+                    )
+                    long, lat = get_lat_long(current_address, api_key)
+                    # Convert back to string in yyyy-mm-dd hh:mm format
+                    stp = StopModel(
+                        Name=stop["Location"],
+                        StartTime=new_date,
+                        EndTime=new_date + timedelta(minutes=latency),
+                        note=stop["Description"],
+                        address=stop["Address"],
+                        # PlaceId=place,
+                        transportation={},
+                        DayId=day,
+                        Isgreen=check_green(stop["Location"]),
+                        coordinates=[long, lat],
+                    )
+                    stp.save()
+                    prev_stop = stp
+                stop_num = stop_num + 1
+
+            current_date += timedelta(days=1)
+            daynum = daynum + 1
+
+        data = jsonify({"message": f" Complete travelplan is created successfully"})
+        return make_response(data, 201)
