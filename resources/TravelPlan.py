@@ -626,7 +626,8 @@ class TravelPlanList(MethodView):
         travel_plan_data["startdate"] = datetime.strptime(travel_plan_data["startdate"], "%Y-%m-%d")
         travel_plan_data["enddate"] = datetime.strptime(travel_plan_data["enddate"], "%Y-%m-%d")
         print('ok')
-        user_id = '672330196b182d387e7a240a'
+        user_id = '66faae85a9e03997a20f5609' # for demo
+        # user_id = '672330196b182d387e7a240a'  #for test
         user = UserModel.objects(id=user_id).first()
         actual_days = (
             travel_plan_data["enddate"] - travel_plan_data["startdate"]
@@ -817,7 +818,8 @@ class TravelPlanList(MethodView):
         travel_plan_data["startdate"] = datetime.strptime(travel_plan_data["startdate"], "%Y-%m-%d")
         travel_plan_data["enddate"] = datetime.strptime(travel_plan_data["enddate"], "%Y-%m-%d")
         print('ok')
-        user_id = '672330196b182d387e7a240a'
+        user_id = '66faae85a9e03997a20f5609' # for demo
+        # user_id = '672330196b182d387e7a240a' # for test
         user = UserModel.objects(id=user_id).first()
         actual_days = (
             travel_plan_data["enddate"] - travel_plan_data["startdate"]
