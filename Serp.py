@@ -327,7 +327,7 @@ def extract_travel_details(query: str) -> dict:
         Extract the travel details from the following query:
         If there is no specified departure_location using "台北市中正區北平西路3號100臺灣"
         If there is no specified departure_time using "10:00"
-        If there is no specified departure_date using "2024-10-22"
+        If there is no specified departure_date using "2024-12-22"
         If there is so specified arrival_time using "no specified"
         If the departure_time is in words please fill a estimated time
         If mode can not be selected from "transit", "walking", "driving", "TOW_WHEELER", "bicycling", please use "transit"
@@ -763,7 +763,6 @@ def search_hotel_new_green(query, min_price, max_price):
 
 def execute_hotel_query(query):
     hotel_info = extract_hotel_info(query)
-    print(type(hotel_info))
     # print(hotel_info)
     # print(hotel_info)
     return search_hotel_new(
