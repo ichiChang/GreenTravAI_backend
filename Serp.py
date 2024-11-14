@@ -432,7 +432,7 @@ def get_google_maps_route(
                 )
             return directions.strip()
         else:
-            return f"No route found. departure_location: {departure_location} destination: {destination}", 
+            return f"No route found. ", 
 
     except Exception as e:
         return f"Error occurred while fetching route: {e}"
