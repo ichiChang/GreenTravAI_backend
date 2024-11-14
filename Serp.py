@@ -22,6 +22,28 @@ load_dotenv(dotenv_path="./.env")
 
 API_KEY = os.getenv("SERP_API_KEY")
 
+def get_place(query):
+    # Google Places API URL
+    places_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+    
+    # Step 1: Find place based on query
+    params = {
+        'query': query,
+        'key': os.getenv("GOOGLE_MAP_API_KEY")
+    }
+    places_response = requests.get(places_url, params=params)
+    places_data = places_response.json()
+    
+    if places_data['status'] != 'OK':
+        print("Place search failed:", places_data['status'])
+        return None
+    
+    place_address = places_data['results'][0]['formatted_address']
+
+    return place_address
+    
+
+
 
 def get_ticket_price_and_details(link: str) -> dict:
     """
@@ -78,9 +100,6 @@ def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> d
     """
     Function to call SERP API and return hotel search results with titles and links, including a budget.
     """
-    # Add budget to query if provided
-    # if budget:
-    #     query += f" {budget}"
 
     # Query parameters
     params = {
@@ -423,14 +442,15 @@ def get_google_maps_route(
 def get_travel_route_with_google_maps(query: str):
     # Extract travel details using LLM
     travel_details = extract_travel_details(query)
+    print(travel_details)
 
     if isinstance(travel_details, str):  # Error handling
         return travel_details
 
-    destination = travel_details.get("destination")
-    departure_location = travel_details.get(
+    destination = get_place(travel_details.get("destination"))
+    departure_location = get_place(travel_details.get(
         "departure_location", "台北市中正區北平西路3號100臺灣"
-    )
+    ))
     departure_date = travel_details.get("departure_date")
     departure_time = travel_details.get("departure_time")
     mode = travel_details.get("mode")
