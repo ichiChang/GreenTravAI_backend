@@ -432,7 +432,7 @@ def get_google_maps_route(
                 )
             return directions.strip()
         else:
-            return "No route found."
+            return f"No route found. departure_location: {departure_location} destination: {destination}", 
 
     except Exception as e:
         return f"Error occurred while fetching route: {e}"
@@ -442,7 +442,7 @@ def get_google_maps_route(
 def get_travel_route_with_google_maps(query: str):
     # Extract travel details using LLM
     travel_details = extract_travel_details(query)
-    print(travel_details)
+    # print(travel_details)
 
     if isinstance(travel_details, str):  # Error handling
         return travel_details
