@@ -180,48 +180,56 @@ def search_hotels_green(
 
 def search_dining(query: str, location: str = "Taipei") -> str:
     """
-    Function to call SERP API and return hotel search results with titles and links.
+    Function to call Google Maps API and return dining search results with titles and links.
     """
-    # Query parameters
+    # Base URL for the Google Places API Text Search
+    base_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+
+    # Define the parameters
+    print(query)
     params = {
-        "engine": "google_maps",
-        "q": f"{query}",  # The search query
-        "location": location,
-        "hl": "zh-TW",
-        "api_key": API_KEY
+        "query": f"{query} 美食",  # The search query
+        "key": os.getenv("GOOGLE_MAP_API_KEY"),
+        "language": "zh-TW"  # Set the language to Traditional Chinese
     }
 
-    # Make the request to SERP API
-    response = requests.get("https://serpapi.com/search", params=params)
+    # Make the request to the Google Places API
+    response = requests.get(base_url, params=params)
     data = response.json()
-    # print(data)
+
+    # Print the response data for debugging
+    
+    (data)
+
+    # Extract the places from the response
     places = []
-    for result in data.get("local_results", [])[:3]:
+    for result in data.get("results", [])[:3]:
         prompt_parts = []
-        if result.get("title"):
-            prompt_parts.append(f"Title: {result.get('title')}")
-        if result.get("snippet"):
-            prompt_parts.append(f"Snippet: {result.get('snippet')}")
-        if result.get("extensions"):
-            prompt_parts.append(f"Extensions: {result.get('extensions')}")
+        if result.get("name"):
+            prompt_parts.append(f"Title: {result.get('name')}")
+        if result.get("formatted_address"):
+            prompt_parts.append(f"Address: {result.get('formatted_address')}")
         if result.get("rating"):
             prompt_parts.append(f"Rating: {result.get('rating')}")
         prompt = "\n".join(prompt_parts) + "\nSummary:"
+        
+        # Generate the summary using your LLM
         summary = llm.invoke(
-                    "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words"
-                    + prompt).content
+            "the response must be in traditional Chinese please remove any markdown tags and also the newline tags, more than 20 words"
+            + prompt
+        ).content
+
+        # Construct the place dictionary
         place = {
-            "name": result.get("title") or None,
-            # "price": result.get("price") or None,
-            # "extensions": result.get("extensions") or None,
-            "link": result.get("link") or None,
-            # "address": result.get("address") or None,
-            # "rating": result.get("rating") or None,
-            "summary": f"店名:{result.get('title')} {summary}",
-            # "place_id": result.get("place_id") or None,
+            "name": result.get("name"),
+            "address": result.get("formatted_address"),
+            "rating": result.get("rating"),
+            "summary": f"店名: {result.get('name')} {summary}",
+            "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
 
+    # Return the results
     return {"results": places}
 
 
@@ -230,49 +238,56 @@ def search_dining(query: str, location: str = "Taipei") -> str:
 
 def search_dining_green(query: str, location: str = "Taipei") -> str:
     """
-    Function to call SERP API and return hotel search results with titles and links.
+    Function to call Google Maps API and return dining search results with titles and links.
     """
-    # Query parameters
+    # Base URL for the Google Places API Text Search
+    base_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+
+    # Define the parameters
+    print(query)
     params = {
-        "engine": "google_maps",
-        "q": f"{query} 有機 環保 素",  # The search query
-        "location": location,
-        "hl": "zh-TW",
-        "api_key":API_KEY
+        "query": f"{query} 有機 環保 素",  # The search query
+        "key": os.getenv("GOOGLE_MAP_API_KEY"),
+        "language": "zh-TW"  # Set the language to Traditional Chinese
     }
 
-    # Make the request to SERP API
-    response = requests.get("https://serpapi.com/search", params=params)
+    # Make the request to the Google Places API
+    response = requests.get(base_url, params=params)
     data = response.json()
-    # print(data)
+
+    # Print the response data for debugging
+    
+    (data)
+
+    # Extract the places from the response
     places = []
-    for result in data.get("local_results", [])[:3]:
+    for result in data.get("results", [])[:3]:
         prompt_parts = []
-        if result.get("title"):
-            prompt_parts.append(f"Title: {result.get('title')}")
-        if result.get("snippet"):
-            prompt_parts.append(f"Snippet: {result.get('snippet')}")
-        if result.get("extensions"):
-            prompt_parts.append(f"Extensions: {result.get('extensions')}")
+        if result.get("name"):
+            prompt_parts.append(f"Title: {result.get('name')}")
+        if result.get("formatted_address"):
+            prompt_parts.append(f"Address: {result.get('formatted_address')}")
         if result.get("rating"):
             prompt_parts.append(f"Rating: {result.get('rating')}")
         prompt = "\n".join(prompt_parts) + "\nSummary:"
+        
+        # Generate the summary using your LLM
         summary = llm.invoke(
-                    "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words"
-                    + prompt).content
+            "the response must be in traditional Chinese please remove any markdown tags and also the newline tags, more than 20 words"
+            + prompt
+        ).content
+
+        # Construct the place dictionary
         place = {
-            "name": result.get("title") or None,
-            # "price": result.get("price") or None,
-            # "extensions": result.get("extensions") or None,
-            "link": result.get("link") or None,
-            # "address": result.get("address") or None,
-            # "rating": result.get("rating") or None,
-            # "snippet": result.get("description") or None,
-            "summary": f"店名:{result.get('title')} {summary}",
-            # "place_id": result.get("place_id") or None,
+            "name": result.get("name"),
+            "address": result.get("formatted_address"),
+            "rating": result.get("rating"),
+            "summary": f"店名: {result.get('name')} {summary}",
+            "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
 
+    # Return the results
     return {"results": places}
 
 
