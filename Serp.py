@@ -376,7 +376,7 @@ def extract_travel_details(query: str) -> dict:
         - "departure_date": the date they want to depart (in 2024-mm-dd format)
         - "departure_time": the time they want to depart (in 24-hour hh:mm format)
         - "arrival_time": the time they want to arrive at destination (in 24-hour hh:mm format)
-        - "departure_location": (if specified) where the user is departing from
+        - "departure_location": (if specified) where the user is departing from (出發, 起點, 開始)
         - "mode" : the means of transportation they want to use (please select from, "transit", "walking", "driving", "TOW_WHEELER", "bicycling")
         """
     try:
@@ -457,7 +457,7 @@ def get_google_maps_route(
 def get_travel_route_with_google_maps(query: str):
     # Extract travel details using LLM
     travel_details = extract_travel_details(query)
-    # print(travel_details)
+    print(travel_details)
 
     if isinstance(travel_details, str):  # Error handling
         return travel_details
