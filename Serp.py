@@ -186,10 +186,11 @@ def search_dining(query: str, location: str = "Taipei") -> str:
     base_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 
     # Define the parameters
-    print(query)
+    # print(query)
     params = {
-        "query": f"{query} 美食",  # The search query
+        "query": f"{query}",  # The search query
         "key": os.getenv("GOOGLE_MAP_API_KEY"),
+
         "language": "zh-TW"  # Set the language to Traditional Chinese
     }
 
@@ -197,9 +198,11 @@ def search_dining(query: str, location: str = "Taipei") -> str:
     response = requests.get(base_url, params=params)
     data = response.json()
 
+
     # Print the response data for debugging
     
-    (data)
+    # (data)
+    # print(data)
 
     # Extract the places from the response
     places = []
@@ -220,17 +223,20 @@ def search_dining(query: str, location: str = "Taipei") -> str:
         ).content
 
         # Construct the place dictionary
+        link = f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"
         place = {
-            "name": result.get("name"),
-            "address": result.get("formatted_address"),
-            "rating": result.get("rating"),
-            "summary": f"店名: {result.get('name')} {summary}",
-            "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
+            "Activity": "美食&景點推薦",
+            "Location": result.get("name"),
+            "Address": result.get("formatted_address"),
+            # "rating": result.get("rating"),
+            "description": f"店名: {result.get('name')} {summary} \n 連結: {link}",
+            "latency":120
+            # "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
 
     # Return the results
-    return {"results": places}
+    return {"Recommendation":{"Recommendation": places}}
 
 
 # place planner
@@ -278,17 +284,20 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
         ).content
 
         # Construct the place dictionary
+        link = f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"
         place = {
-            "name": result.get("name"),
-            "address": result.get("formatted_address"),
-            "rating": result.get("rating"),
-            "summary": f"店名: {result.get('name')} {summary}",
-            "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
+            "Activity": "美食&景點推薦",
+            "Location": result.get("name"),
+            "Address": result.get("formatted_address"),
+            # "rating": result.get("rating"),
+            "description": f"店名: {result.get('name')} {summary} \n 連結: {link}",
+            "latency": 120
+            # "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
 
     # Return the results
-    return {"results": places}
+    return {"Recommendation":{"Recommendation": places}}
 
 
 # ticket planner
@@ -717,27 +726,24 @@ def search_hotel_new(
                             + prompt).content    
                 # print(hotel)
                 res = {
-                    "name": hotel["name"] or None,
+                    "Activity":"住宿",
+                    "Location": hotel["name"] or None,
                     # "price": price or None,
                     # "extensions": hotel.get("extension") or None,
-                    "link": hotel.get("link") or None,
-                    # "address": get_address(
-                    #     hotel.get("gps_coordinates")["latitude"],
-                    #     hotel.get("gps_coordinates")["longitude"],
-                    #     os.getenv("GOOGLE_MAP_API_KEY"),
-                    # )
+                    # "link": hotel.get("link") or None,
+                    "Address": address,
                     # or None,
                     # "address": hotel.get("address") or None,
                     # "rating": hotel.get("location_rating") or None,
-                    "summary": f'住宿:{hotel["name"]} {summary}',
+                    "description": f'住宿:{hotel["name"]} {summary} \n 訂房連結: {hotel.get("link") or None}',
+                    "latency": 600
                     # "place_id": hotel.get("place_id") or None,
                 }
 
                 result.append(res)
             if len(result) == 3:
                 break
-    return {"results": result}
-
+    return {"Recommendation":{"Recommendation": result}}
 
 def search_hotel_new_green(query, min_price, max_price):
     # print(type(min_price))
@@ -771,14 +777,17 @@ def search_hotel_new_green(query, min_price, max_price):
                     "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words, please hightlight the price with ** "
                     + prompt).content
         res = {
-            "name": name,
+            "Activity":"住宿",
+            "Location":name,
+            # "name": name,
             # "price": result.get("price") or None,
             # "extensions": result.get("extensions") or None,
-            "link": detail.get("link") or None,
-            # "address": result.get("address") or None,
+            # "link": detail.get("link") or None,
+            "Address": detail.get("address") or None,
             # "rating": result.get("rating") or None,
             # "snippet": result.get("description") or None,
-            "summary": f"住宿:{name} {summary}",
+            "description": f"住宿:{name} {summary} \n 訂房連結: {detail.get('link') or None}",
+            "latency": 600
             # "place_id": result.get("place_id") or None,
         }
         # res = {
@@ -793,7 +802,7 @@ def search_hotel_new_green(query, min_price, max_price):
         # }
 
         result.append(res)
-    return {"results": result}
+    return {"Recommendation":{"Recommendation": result}}
 
 
 def execute_hotel_query(query):

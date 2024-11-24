@@ -40,17 +40,17 @@ def travel_plan_retriever(query: str) -> str:
 
 
 @tool
-def spot_recommanadation_tool(query: str) -> str:
+def formal_spot_recommanadation_tool(query: str) -> str:
     """
-    Tool only for reomnnad tourist spot
+    Tool only for reomnnad formal tourist spot (e.g. 博物館, 公園, 古蹟, 商圈, 大自然景觀)
     """
     return retrieve_document_content_spot(query)
 
 
 @tool
-def dining_search(query: str, location: str = "Taipei") -> str:
+def dining_and_casual_spot_search(query: str, location: str = "Taipei") -> str:
     """
-    Tool to search for dining using SERP API and return titles and links of the results.
+    Tool to search for dining and casual spot using SERP API and return titles and links of the results.
     """
     print("using dining search")
     res = search_dining(query, location)
@@ -88,9 +88,9 @@ def travel_plan_retriever_green(query: str) -> str:
 
 
 @tool
-def spot_recommanadation_tool_green(query: str) -> str:
+def formal_spot_recommanadation_tool_green(query: str) -> str:
     """
-    Tool only for reomnnad tourist spot
+    Tool only for reomnnad formal tourist spot (e.g. 博物館, 公園, 古蹟, 商圈, 大自然景觀, 自然保留區, 風景區)
     """
     return retrieve_document_content_spot_green(query)
 
@@ -106,9 +106,9 @@ def hotel_search_green(query: str, location: str = "Taipei") -> str:
 
 
 @tool
-def dining_search_green(query: str, location: str = "Taipei") -> str:
+def dining_and_casual_spot_search_green(query: str, location: str = "Taipei") -> str:
     """
-    Tool to search for dining using SERP API and return titles and links of the results.
+    Tool to search for dining casual spot using SERP API and return titles and links of the results.
     """
     print("using dining search")
     res = search_dining_green(query, location)
@@ -141,15 +141,15 @@ def run_travel_agent(query: str) -> str:
             return_direct=True,
         ),
         Tool(
-            name="spot_recommanadation_tool",
-            func=spot_recommanadation_tool,
-            description="Use this tool only to give spot recommandation",
+            name="formal_spot_recommanadation_tool",
+            func=formal_spot_recommanadation_tool,
+            description="Use this tool only to give formal spot (e.g. 博物館, 公園, 古蹟, 商圈, 大自然景觀) recommandation",
             return_direct=True,
         ),
         Tool(
-            name="Dining Search",
-            func=dining_search,
-            description="Use this tool to search for dining information.",
+            name="dining_and_casual_spot_search",
+            func=dining_and_casual_spot_search,
+            description="Use this tool to search for dining and casual spot information.",
             return_direct=True,
         ),
         Tool(
@@ -191,12 +191,12 @@ only when user talk about 規劃, 安排, then use the Travel Planner
 3. **Spot recommandation:**
     **Indicators:** Queries that include phrases like "去哪", "去哪裡","推薦", "有什麼" etc.
    - **Tool to Use:**
-     - `spot_recommanadation_tool`: Only for single or serveral spot recommandation
+     - `formal_spot_recommanadation_tool`: Only for single or serveral formal spot recommandation
    - **Usage:**
      - When the user just ask for some spot to go, please just use spot_recommanadation_tool
-4. **Dining Search and recommendation:**
+4. **Dining and casual spot Search and recommendation:**
    - **Tool to Use:**
-     - `"Dining Search`: Only for search resturant information or dining stands.
+     - `dining_and_casual_spot_search`: Only for search resturant information or dining stands also for the casual spot recommandation.
    - **Usage:**
      - When the user just ask for some spot to go, please just use spot_recommanadation_tool
 5. **Ticket Search:**
@@ -265,14 +265,14 @@ def run_travel_agent_green(query: str) -> str:
             return_direct=True,
         ),
         Tool(
-            name="spot_recommanadation_tool",
-            func=spot_recommanadation_tool_green,
+            name="formal_spot_recommanadation_tool",
+            func=formal_spot_recommanadation_tool_green,
             description="Use this tool only to give spot recommandation",
             return_direct=True,
         ),
         Tool(
-            name="Dining Search",
-            func=dining_search_green,
+            name="dining_and_casual_spot_search",
+            func=dining_and_casual_spot_search_green,
             description="Use this tool to search for dining information.",
             return_direct=True,
         ),
@@ -312,15 +312,15 @@ only when user talk about 規劃, 安排, then use the Travel Planner
      - `Hotel information searching tool`: For tourist information such as hotel recommendations, and some genral, non-specific tourist information.
    - **Usage:**
      - When the user's request does not pertain to arranging a complete travel plan but seeks hotel recommendations or information, utilize the `Hotel information searching tool`.
-3. **Spot recommandation:**
-    **Indicators:** Queries that include phrases like "去哪", "去哪裡","推薦", "有什麼" etc.
+3. **Spot recommandation (formal):**
+    **Indicators:** Queries that include phrases like "去哪", "去哪裡","推薦", "有什麼" etc. and the formal spot can meet the requirements
    - **Tool to Use:**
-     - `spot_recommanadation_tool`: Only for single or serveral spot recommandation
+     - `formal_spot_recommanadation_tool`: Only for single or serveral foraml spot recommandation
    - **Usage:**
      - When the user just ask for some spot to go, please just use spot_recommanadation_tool
-4. **Dining Search and recommendation:**
+4. **Dining  and casual spot Search and recommendation:**
    - **Tool to Use:**
-     - `"Dining Search`: Only for search resturant information or dining stands.
+     - `dining_and_casual_spot_search`: Only for search resturant information or dining stands, also the casual spot that can meet user's requirements
    - **Usage:**
      - When the user just ask for some spot to go, please just use spot_recommanadation_tool
 5. **Ticket Search:**
