@@ -22,27 +22,23 @@ load_dotenv(dotenv_path="./.env")
 
 API_KEY = os.getenv("SERP_API_KEY")
 
+
 def get_place(query):
     # Google Places API URL
     places_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-    
+
     # Step 1: Find place based on query
-    params = {
-        'query': query,
-        'key': os.getenv("GOOGLE_MAP_API_KEY")
-    }
+    params = {"query": query, "key": os.getenv("GOOGLE_MAP_API_KEY")}
     places_response = requests.get(places_url, params=params)
     places_data = places_response.json()
-    
-    if places_data['status'] != 'OK':
-        print("Place search failed:", places_data['status'])
+
+    if places_data["status"] != "OK":
+        print("Place search failed:", places_data["status"])
         return None
-    
-    place_address = places_data['results'][0]['formatted_address']
+
+    place_address = places_data["results"][0]["formatted_address"]
 
     return place_address
-    
-
 
 
 def get_ticket_price_and_details(link: str) -> dict:
@@ -55,15 +51,30 @@ def get_ticket_price_and_details(link: str) -> dict:
     response = client.get(url)
 
     html_source = response.text
-    soup = BeautifulSoup(html_source, 'html.parser')
+    soup = BeautifulSoup(html_source, "html.parser")
     status = False
-    price_content = soup.find('meta', {'property': 'product:price:amount'}).get('content', None) if soup.find('meta', {'property': 'product:price:amount'}) else None
-    price_content = int(price_content) if price_content and price_content.isdigit() else None
-    description_content = soup.find('meta', {'name': 'description'}).get('content', None) if soup.find('meta', {'name': 'description'}) else None
+    price_content = (
+        soup.find("meta", {"property": "product:price:amount"}).get("content", None)
+        if soup.find("meta", {"property": "product:price:amount"})
+        else None
+    )
+    price_content = (
+        int(price_content) if price_content and price_content.isdigit() else None
+    )
+    description_content = (
+        soup.find("meta", {"name": "description"}).get("content", None)
+        if soup.find("meta", {"name": "description"})
+        else None
+    )
     if price_content and description_content:
-      status = True
+        status = True
 
-    return {"price":price_content, "description":description_content,"status":status}
+    return {
+        "price": price_content,
+        "description": description_content,
+        "status": status,
+    }
+
 
 llm = ChatOpenAI(
     temperature=0.2, model="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY")
@@ -107,7 +118,7 @@ def search_hotels(query: str, location: str = "Taipei", budget: str = None) -> d
         "q": f"{query} site: booking.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": API_KEY
+        "api_key": API_KEY,
     }
 
     # Make the request to SERP API
@@ -149,7 +160,7 @@ def search_hotels_green(
         "q": f"{query} site: booking.com",  # The search query
         "location": location,
         "hl": "zh-TW",
-        "api_key": API_KEY
+        "api_key": API_KEY,
     }
 
     # Make the request to SERP API
@@ -190,17 +201,15 @@ def search_dining(query: str, location: str = "Taipei") -> str:
     params = {
         "query": f"{query}",  # The search query
         "key": os.getenv("GOOGLE_MAP_API_KEY"),
-
-        "language": "zh-TW"  # Set the language to Traditional Chinese
+        "language": "zh-TW",  # Set the language to Traditional Chinese
     }
 
     # Make the request to the Google Places API
     response = requests.get(base_url, params=params)
     data = response.json()
 
-
     # Print the response data for debugging
-    
+
     # (data)
     # print(data)
 
@@ -215,7 +224,7 @@ def search_dining(query: str, location: str = "Taipei") -> str:
         if result.get("rating"):
             prompt_parts.append(f"Rating: {result.get('rating')}")
         prompt = "\n".join(prompt_parts) + "\nSummary:"
-        
+
         # Generate the summary using your LLM
         summary = llm.invoke(
             "the response must be in traditional Chinese please remove any markdown tags and also the newline tags, more than 20 words"
@@ -230,13 +239,13 @@ def search_dining(query: str, location: str = "Taipei") -> str:
             "Address": result.get("formatted_address"),
             # "rating": result.get("rating"),
             "description": f"店名: {result.get('name')} {summary} \n 連結: {link}",
-            "latency":120
+            "latency": 120,
             # "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
 
     # Return the results
-    return {"Recommendation":{"Recommendation": places}}
+    return {"Recommendation": {"Recommendation": places}}
 
 
 # place planner
@@ -254,7 +263,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
     params = {
         "query": f"{query} 有機 環保 素",  # The search query
         "key": os.getenv("GOOGLE_MAP_API_KEY"),
-        "language": "zh-TW"  # Set the language to Traditional Chinese
+        "language": "zh-TW",  # Set the language to Traditional Chinese
     }
 
     # Make the request to the Google Places API
@@ -262,7 +271,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
     data = response.json()
 
     # Print the response data for debugging
-    
+
     (data)
 
     # Extract the places from the response
@@ -276,7 +285,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
         if result.get("rating"):
             prompt_parts.append(f"Rating: {result.get('rating')}")
         prompt = "\n".join(prompt_parts) + "\nSummary:"
-        
+
         # Generate the summary using your LLM
         summary = llm.invoke(
             "the response must be in traditional Chinese please remove any markdown tags and also the newline tags, more than 20 words"
@@ -291,13 +300,13 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
             "Address": result.get("formatted_address"),
             # "rating": result.get("rating"),
             "description": f"店名: {result.get('name')} {summary} \n 連結: {link}",
-            "latency": 120
+            "latency": 120,
             # "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
 
     # Return the results
-    return {"Recommendation":{"Recommendation": places}}
+    return {"Recommendation": {"Recommendation": places}}
 
 
 # ticket planner
@@ -305,58 +314,67 @@ def search_ticket(query: str, location: str = "Taipei") -> str:
     """
     Function to call SERP API and return hotel search results with titles and links.
     """
-    # Query parameters
-    params = {
-        "engine": "google",
-        "q": f"{query} site: klook.com",  # The search query
-        "location": location,
-        "hl": "zh-TW",
-        "api_key": API_KEY,
-    }
+    try:
+        # Query parameters
+        params = {
+            "engine": "google",
+            "q": f"{query} site: klook.com",  # The search query
+            "location": location,
+            "hl": "zh-TW",
+            "api_key": API_KEY,
+        }
 
-    # Make the request to SERP API
-    response = requests.get("https://serpapi.com/search", params=params)
-    data = response.json()
-    if "organic_results" in data:
-        organic_results = []
-        for res in data["organic_results"]:
-            if res.get("position") <= 5:
-              if res.get("link"):
-                # print(res.get("link"))
-                ticket_detail = get_ticket_price_and_details(res.get("link"))
-                if ticket_detail.get("status"):
-                    prompt_parts = []
-                    if res.get("title"):
-                        prompt_parts.append(f"Title: {res.get('title')}")
-                    if ticket_detail.get("description"):
-                        prompt_parts.append(f"Snippet: {ticket_detail.get('description')}")
-                    if ticket_detail.get("price"):
-                        prompt_parts.append(f"Price: {ticket_detail.get('price')}")
+        # Make the request to SERP API
+        response = requests.get("https://serpapi.com/search", params=params)
+        data = response.json()
+        if "organic_results" in data:
+            organic_results = []
+            for res in data["organic_results"]:
+                if res.get("position") <= 5:
                     if res.get("link"):
-                        prompt_parts.append(f"link: {res.get('link')}")
-                    
-                    prompt = "\n".join(prompt_parts) + "\nSummary:"
-                    summary = llm.invoke(
-                                "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words and highlight the ticket price with **, also attacht the link with markdown link tag"
-                                + prompt).content   
-                  
-                    organic_entry = {
-                            # "name": res.get("title"),
-                            # "price": ticket_detail.get("price") or None,
-                            # "rating": res.get("rating") or None,
-                            # "extensions": res.get("extensions") or None,
-                            # "link": res.get("link"),
-                            # "address": res.get("address") or None,
-                            "summary": f'{summary}',
-                            # "place_id": res.get("place_id") or None,
-                        }
-                    organic_results.append(organic_entry)
-                    if len(organic_results)==1:
-                        break
-        # result = {"results": organic_results}
-        return organic_results[0]['summary']
+                        # print(res.get("link"))
+                        ticket_detail = get_ticket_price_and_details(res.get("link"))
+                        if ticket_detail.get("status"):
+                            prompt_parts = []
+                            if res.get("title"):
+                                prompt_parts.append(f"Title: {res.get('title')}")
+                            if ticket_detail.get("description"):
+                                prompt_parts.append(
+                                    f"Snippet: {ticket_detail.get('description')}"
+                                )
+                            if ticket_detail.get("price"):
+                                prompt_parts.append(
+                                    f"Price: {ticket_detail.get('price')}"
+                                )
+                            if res.get("link"):
+                                prompt_parts.append(f"link: {res.get('link')}")
 
-                  
+                            prompt = "\n".join(prompt_parts) + "\nSummary:"
+                            summary = llm.invoke(
+                                "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words and highlight the ticket price with **, also attacht the link with markdown link tag"
+                                + prompt
+                            ).content
+
+                            organic_entry = {
+                                # "name": res.get("title"),
+                                # "price": ticket_detail.get("price") or None,
+                                # "rating": res.get("rating") or None,
+                                # "extensions": res.get("extensions") or None,
+                                # "link": res.get("link"),
+                                # "address": res.get("address") or None,
+                                "summary": f"{summary}",
+                                # "place_id": res.get("place_id") or None,
+                            }
+                            organic_results.append(organic_entry)
+                            if len(organic_results) == 1:
+                                break
+            # result = {"results": organic_results}
+
+            return organic_results[0]["summary"]
+    except Exception as e:
+        # Log the error for debugging (optional)
+        print(f"Error: {e}")
+        return "Ticket information not found"
 
 
 def validate_time_format(time_str: str) -> bool:
@@ -456,7 +474,7 @@ def get_google_maps_route(
                 )
             return directions.strip()
         else:
-            return f"No route found. ", 
+            return (f"No route found. ",)
 
     except Exception as e:
         return f"Error occurred while fetching route: {e}"
@@ -472,9 +490,9 @@ def get_travel_route_with_google_maps(query: str):
         return travel_details
 
     destination = get_place(travel_details.get("destination"))
-    departure_location = get_place(travel_details.get(
-        "departure_location", "台北市中正區北平西路3號100臺灣"
-    ))
+    departure_location = get_place(
+        travel_details.get("departure_location", "台北市中正區北平西路3號100臺灣")
+    )
     departure_date = travel_details.get("departure_date")
     departure_time = travel_details.get("departure_time")
     mode = travel_details.get("mode")
@@ -704,12 +722,15 @@ def search_hotel_new(
         if min_price <= price <= max_price:
             prompt_parts = []
             if hotel.get("link"):
-                address = get_address(
+                address = (
+                    get_address(
                         hotel.get("gps_coordinates")["latitude"],
                         hotel.get("gps_coordinates")["longitude"],
                         os.getenv("GOOGLE_MAP_API_KEY"),
-                    )or None
-                
+                    )
+                    or None
+                )
+
                 if hotel["name"]:
                     prompt_parts.append(f"Title: {hotel['name']}")
                 if hotel.get("description"):
@@ -722,11 +743,12 @@ def search_hotel_new(
                     prompt_parts.append(f"price: {price}")
                 prompt = "\n".join(prompt_parts) + "\nSummary:"
                 summary = llm.invoke(
-                            "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words, please hightlight the price with ** "
-                            + prompt).content    
+                    "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words, please hightlight the price with ** "
+                    + prompt
+                ).content
                 # print(hotel)
                 res = {
-                    "Activity":"住宿",
+                    "Activity": "住宿",
                     "Location": hotel["name"] or None,
                     # "price": price or None,
                     # "extensions": hotel.get("extension") or None,
@@ -736,14 +758,15 @@ def search_hotel_new(
                     # "address": hotel.get("address") or None,
                     # "rating": hotel.get("location_rating") or None,
                     "description": f'住宿:{hotel["name"]} {summary} \n 訂房連結: {hotel.get("link") or None}',
-                    "latency": 600
+                    "latency": 600,
                     # "place_id": hotel.get("place_id") or None,
                 }
 
                 result.append(res)
             if len(result) == 3:
                 break
-    return {"Recommendation":{"Recommendation": result}}
+    return {"Recommendation": {"Recommendation": result}}
+
 
 def search_hotel_new_green(query, min_price, max_price):
     # print(type(min_price))
@@ -752,7 +775,10 @@ def search_hotel_new_green(query, min_price, max_price):
     if not isinstance(max_price, int):
         max_price = 1000000  # Default
     green_hotel_retriever_for_search = get_retriever(
-        index_name="green-hotel-for-search", min_budget=min_price, max_budget=max_price, top_k=3
+        index_name="green-hotel-for-search",
+        min_budget=min_price,
+        max_budget=max_price,
+        top_k=3,
     )
     green_hotel_for_search = green_hotel_retriever_for_search.get_relevant_documents(
         query
@@ -774,11 +800,12 @@ def search_hotel_new_green(query, min_price, max_price):
 
         prompt = "\n".join(prompt_parts) + "\nSummary:"
         summary = llm.invoke(
-                    "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words, please hightlight the price with ** "
-                    + prompt).content
+            "the resposne must in traditional Chinese please remove any markdown tags and also the newline tags more that 20 words, please hightlight the price with ** "
+            + prompt
+        ).content
         res = {
-            "Activity":"住宿",
-            "Location":name,
+            "Activity": "住宿",
+            "Location": name,
             # "name": name,
             # "price": result.get("price") or None,
             # "extensions": result.get("extensions") or None,
@@ -787,7 +814,7 @@ def search_hotel_new_green(query, min_price, max_price):
             # "rating": result.get("rating") or None,
             # "snippet": result.get("description") or None,
             "description": f"住宿:{name} {summary} \n 訂房連結: {detail.get('link') or None}",
-            "latency": 600
+            "latency": 600,
             # "place_id": result.get("place_id") or None,
         }
         # res = {
@@ -802,7 +829,7 @@ def search_hotel_new_green(query, min_price, max_price):
         # }
 
         result.append(res)
-    return {"Recommendation":{"Recommendation": result}}
+    return {"Recommendation": {"Recommendation": result}}
 
 
 def execute_hotel_query(query):
@@ -827,7 +854,4 @@ def execute_hotel_query_green(query):
         query=hotel_info.get("query"),
         min_price=hotel_info.get("min_price"),
         max_price=hotel_info.get("max_price"),
-       
     )
-
-
