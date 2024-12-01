@@ -63,6 +63,12 @@ class Chatbot(MethodView):
 
                     res_format["response"]["Plans"] = response
                     res_format["response"]["Text_ans"] = final_note
+            if "Recommendation_Spot" in response[0]:
+                    final_note_spot = response[0]['Note']
+                    del response[0]['Note']
+                    res_format["response"]["Plans"] = response
+                    res_format["response"]["Text_ans"] = final_note_spot
+
 
 
         else:
@@ -70,7 +76,12 @@ class Chatbot(MethodView):
                 res_format["response"]["results"] = response["results"]
 
             if "Recommendation" in response:
+                # print('aa')
                 res_format["response"]["Plans"] = response["Recommendation"]
+            # if "Recommendation_Spot" in response:
+            #     print('aa')
+            #     res_format["response"]["Plans"] = response["Recommendation_Spot"]
+
 
         return jsonify(res_format)
 
@@ -104,6 +115,11 @@ class GreenChatbot(MethodView):
 
                     res_format["response"]["Plans"] = response
                     res_format["response"]["Text_ans"] = final_note
+            if "Recommendation_Spot" in response[0]:
+                    final_note_spot = response[0]['Note']
+                    del response[0]['Note']
+                    res_format["response"]["Plans"] = response
+                    res_format["response"]["Text_ans"] = final_note_spot
 
 
         else:
