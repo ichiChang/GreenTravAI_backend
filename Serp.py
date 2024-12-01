@@ -853,4 +853,5 @@ def execute_hotel_query_green(query):
         query=hotel_info.get("query"),
         min_price=hotel_info.get("min_price"),
         max_price=hotel_info.get("max_price"),
+        
     )
