@@ -259,7 +259,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
     base_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 
     # Define the parameters
-    print(query)
+    # print(query)
     params = {
         "query": f"{query} 有機 環保 素",  # The search query
         "key": os.getenv("GOOGLE_MAP_API_KEY"),
@@ -272,7 +272,6 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
 
     # Print the response data for debugging
 
-    (data)
 
     # Extract the places from the response
     places = []
@@ -484,7 +483,7 @@ def get_google_maps_route(
 def get_travel_route_with_google_maps(query: str):
     # Extract travel details using LLM
     travel_details = extract_travel_details(query)
-    print(travel_details)
+    # print(travel_details)
 
     if isinstance(travel_details, str):  # Error handling
         return travel_details

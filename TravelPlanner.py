@@ -151,35 +151,35 @@ def retrieve_document_content(query):
                               "Activity": "早餐",
                               "Location": "餐廳名稱",
                               "Address": "餐廳地址",
-                              "Description": "餐廳簡述",
+                              "description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                               "Activity": "綠色景點參觀",
                               "Location": "景點名稱",
                               "Address": "景點地址",
-                              "Description": "景點簡述",
+                              "description": "景點簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                               "Activity": "午餐",
                               "Location": "餐廳名稱",
                               "Address": "餐廳地址",
-                              "Description": "餐廳簡述",
+                              "description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                              "Activity": "景點參觀",
                               "Location": "景點名稱",
                               "Address": "景點地址",
-                              "Description": "景點簡述",
+                              "description": "景點簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                               "Activity": "晚餐",
                               "Location": "餐廳名稱",
                               "Address": "餐廳地址",
-                              "Description": "餐廳簡述",
+                              "description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
 
                           }},
@@ -187,7 +187,7 @@ def retrieve_document_content(query):
                               "Activity": "住宿",
                               "Location": "住宿名稱",
                               "Address": "住宿地址",
-                              "Description": "住宿簡述",
+                              "description": "住宿簡述",
                               "latency":"480",
                           }}
                       ],
@@ -291,35 +291,35 @@ def retrieve_document_content_green(query):
                               "Activity": "早餐",
                               "Location": "餐廳名稱",
                               "Address": "餐廳地址",
-                              "Description": "餐廳簡述",
+                              "description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                               "Activity": "景點參觀",
                               "Location": "景點名稱",
                               "Address": "景點地址",
-                              "Description": "景點簡述",
+                              "description": "景點簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                               "Activity": "午餐",
                               "Location": "餐廳名稱",
                               "Address": "餐廳地址",
-                              "Description": "餐廳簡述",
+                              "description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                              "Activity": "景點參觀",
                               "Location": "景點名稱",
                               "Address": "景點地址",
-                              "Description": "景點簡述",
+                              "description": "景點簡述",
                               "latency":"預估停留時間 in minutes",
                           }},
                           {{
                               "Activity": "晚餐",
                               "Location": "餐廳名稱",
                               "Address": "餐廳地址",
-                              "Description": "餐廳簡述",
+                              "description": "餐廳簡述",
                               "latency":"預估停留時間 in minutes",
 
                           }},
@@ -327,7 +327,7 @@ def retrieve_document_content_green(query):
                               "Activity": "住宿",
                               "Location": "住宿名稱",
                               "Address": "住宿地址",
-                              "Description": "住宿簡述",
+                              "description": "住宿簡述",
                               "latency":"480",
                           }}
                       ],
@@ -402,7 +402,7 @@ def retrieve_document_content_spot(query):
                   {context}
 
                   請將回應格式化為符合以下JSON格式的plain text：
-                  {{"Recommendation": [
+                  {{"Recommendation_Spot": [
                         
                           {{
                               "Activity": "景點參觀",
@@ -470,7 +470,7 @@ def retrieve_document_content_spot_green(query):
                   {context}
 
                   請將回應格式化為符合以下JSON格式的plain text：
-                  {{"Recommendation": [
+                  {{"Recommendation_Spot": [
                         
                           {{
                               "Activity": "景點參觀",
