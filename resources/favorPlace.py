@@ -58,3 +58,12 @@ class favorplaceItem(MethodView):
             abort(404, description="favorplace not found")
         data = jsonify({"message": "favorplace deleted successfully"})
         return make_response(data, 200)
+    
+@blp.route("/testing_deploy_status")
+class favorplaceItem(MethodView):
+
+    @jwt_required()
+    def get(self):
+        
+        data = jsonify({"message": "deploy status updated successfully"})
+        return make_response(data, 200)
