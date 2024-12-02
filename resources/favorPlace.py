@@ -65,5 +65,5 @@ class favorplaceItem(MethodView):
     @jwt_required()
     def get(self):
         
-        data = jsonify({"message": "deploy status updated successfully"})
+        data = jsonify({"message": "deploy status updated v2 successfully"})
         return make_response(data, 200)
