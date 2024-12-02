@@ -34,7 +34,7 @@ from marshmallow import Schema, fields
 
 class CreateAllStopSchema(Schema):
     Location = fields.Str()
-    Description = fields.Str()
+    description = fields.Str()
     latency = fields.Int()
     Address = fields.Str()
     Activity = fields.Str()
