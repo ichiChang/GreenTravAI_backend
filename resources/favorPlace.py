@@ -65,7 +65,7 @@ class RetrieveFavorPLace(MethodView):
         )
 
         # Extract the list of PlaceIds
-        place_ids = [favorplace.PlaceId.id for favorplace in favorplaces]
+        place_ids = [favorplace.PlaceId for favorplace in favorplaces]
 
         # Return the list of place_ids with the key "places"
         data = jsonify({"places": place_ids})
