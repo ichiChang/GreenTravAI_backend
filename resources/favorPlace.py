@@ -71,16 +71,15 @@ class RetrieveFavorPLace(MethodView):
         data = jsonify({"places": place_ids})
         return make_response(data, 200)
 
-
-@blp.route("/<string:favorplace_id>")
-class favorplaceItem(MethodView):
+@blp.route("/create/<string:place_id>")
+class favorplaceItemcreate(MethodView):
 
     @jwt_required()
-    def post(self, favorplace_id):
+    def post(self, place_id):
         current_user = get_jwt_identity()
         # print(current_user)
         existing_favorplace = favorPlaceModel.objects.filter(
-            UserId=current_user, PlaceId=favorplace_id
+            UserId=current_user, PlaceId=place_id
         ).first()
 
         if existing_favorplace:
@@ -100,11 +99,16 @@ class favorplaceItem(MethodView):
 
         # Create a new favorplace if it doesn't exist
         favorplace = favorPlaceModel(
-            UserId=current_user, PlaceId=favorplace_id, is_deleted=False
+            UserId=current_user, PlaceId=place_id, is_deleted=False
         )
         favorplace.save()
         data = jsonify({"message": f"favorplace {favorplace} created successfully","favorPlace_id": str(favorplace.id)})
         return make_response(data, 201)
+    
+
+
+@blp.route("/<string:favorplace_id>")
+class favorplaceItem(MethodView):
 
     @jwt_required()
     def put(self, favorplace_id):
