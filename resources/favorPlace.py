@@ -106,7 +106,7 @@ class favorplaceItem(MethodView):
         return make_response(data, 201)
 
     @jwt_required()
-    def post(self, favorplace_id):
+    def put(self, favorplace_id):
         favorplace = favorPlaceModel.objects(id=favorplace_id).first()
 
         if not favorplace:
