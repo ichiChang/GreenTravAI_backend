@@ -245,7 +245,7 @@ def search_dining(query: str, location: str = "Taipei") -> str:
         places.append(place)
 
     # Return the results
-    return {"Recommendation": {"Recommendation": places}}
+    return {"Recommendation": [{"Recommendation_Spot": places}]}
 
 
 # place planner
@@ -305,7 +305,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
         places.append(place)
 
     # Return the results
-    return {"Recommendation": {"Recommendation": places}}
+    return {"Recommendation": [{"Recommendation_Spot": places}]}
 
 
 # ticket planner
@@ -764,7 +764,7 @@ def search_hotel_new(
                 result.append(res)
             if len(result) == 3:
                 break
-    return {"Recommendation": {"Recommendation": result}}
+    return {"Recommendation": [{"Recommendation_Spot": result}]}
 
 
 def search_hotel_new_green(query, min_price, max_price):
@@ -828,7 +828,7 @@ def search_hotel_new_green(query, min_price, max_price):
         # }
 
         result.append(res)
-    return {"Recommendation": {"Recommendation": result}}
+    return {"Recommendation": [{"Recommendation_Spot": result}]}
 
 
 def execute_hotel_query(query):
