@@ -92,7 +92,8 @@ class favorplaceItem(MethodView):
                 existing_favorplace.save()
                 data = jsonify(
                     {
-                        "message": f"favorplace {existing_favorplace} reactivated successfully"
+                        "message": f"favorplace {existing_favorplace} reactivated successfully",
+                        "favorPlace_id": str(existing_favorplace.id)
                     }
                 )
                 return make_response(data, 200)
@@ -102,7 +103,7 @@ class favorplaceItem(MethodView):
             UserId=current_user, PlaceId=favorplace_id, is_deleted=False
         )
         favorplace.save()
-        data = jsonify({"message": f"favorplace {favorplace} created successfully"})
+        data = jsonify({"message": f"favorplace {favorplace} created successfully","favorPlace_id": str(favorplace.id)})
         return make_response(data, 201)
 
     @jwt_required()
