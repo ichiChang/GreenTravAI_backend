@@ -239,7 +239,7 @@ def search_dining(query: str, location: str = "Taipei") -> str:
             "Address": result.get("formatted_address"),
             # "rating": result.get("rating"),
             "description": f"店名: {result.get('name')} {summary} \n 連結: {link}",
-            "latency": 120,
+            "latency": str(120),
             # "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
@@ -299,7 +299,7 @@ def search_dining_green(query: str, location: str = "Taipei") -> str:
             "Address": result.get("formatted_address"),
             # "rating": result.get("rating"),
             "description": f"店名: {result.get('name')} {summary} \n 連結: {link}",
-            "latency": 120,
+            "latency": str(120),
             # "link": f"https://www.google.com/maps/place/?q=place_id:{result.get('place_id')}"  # Construct the Google Maps link
         }
         places.append(place)
@@ -757,7 +757,7 @@ def search_hotel_new(
                     # "address": hotel.get("address") or None,
                     # "rating": hotel.get("location_rating") or None,
                     "description": f'住宿:{hotel["name"]} {summary} \n 訂房連結: {hotel.get("link") or None}',
-                    "latency": 600,
+                    "latency": str(600),
                     # "place_id": hotel.get("place_id") or None,
                 }
 
@@ -813,7 +813,7 @@ def search_hotel_new_green(query, min_price, max_price):
             # "rating": result.get("rating") or None,
             # "snippet": result.get("description") or None,
             "description": f"住宿:{name} {summary} \n 訂房連結: {detail.get('link') or None}",
-            "latency": 600,
+            "latency": str(600),
             # "place_id": result.get("place_id") or None,
         }
         # res = {
