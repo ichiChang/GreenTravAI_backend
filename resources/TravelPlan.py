@@ -258,7 +258,7 @@ class TravelPlanList(MethodView):
                 else:
                     parsed_date = datetime.strptime(str(day.Date), "%Y-%m-%d")
                     new_date = parsed_date.replace(
-                        hour=8, minute=0, second=0, microsecond=0
+                        hour=9, minute=0, second=0, microsecond=0
                     )
                     long, lat = get_lat_long(current_address, api_key)
                     # Convert back to string in yyyy-mm-dd hh:mm format
