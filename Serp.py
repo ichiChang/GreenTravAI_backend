@@ -450,6 +450,7 @@ def get_google_maps_route(
                 language="zh-TW",
             )
         else:
+        
             directions_result = gmaps.directions(
                 origin=departure_location,
                 destination=destination,
@@ -531,9 +532,9 @@ def get_travel_route_with_google_maps_green(query: str):
     if isinstance(travel_details, str):  # Error handling
         return travel_details
 
-    destination = travel_details.get("destination")
-    departure_location = travel_details.get(
-        "departure_location", "台北市中正區北平西路3號100臺灣"
+    destination = get_place(travel_details.get("destination"))
+    departure_location = get_place(
+        travel_details.get("departure_location", "台北市中正區北平西路3號100臺灣")
     )
     departure_date = travel_details.get("departure_date")
     departure_time = travel_details.get("departure_time")

@@ -16,6 +16,7 @@ from TravelPlanner import (
     retrieve_document_content_green,
     retrieve_document_content_spot,
     retrieve_document_content_spot_green,
+    travl_consult,
 )
 import datetime
 
@@ -76,6 +77,15 @@ def transoprtation_route_search(query: str) -> str:
     return get_travel_route_with_google_maps(query)
 
 
+@tool
+def travel_info_and_knowledge_tool(query: str) -> str:
+    """
+    Tool to get the tourist related info or the knowlwdge.
+    """
+    # print("using trav")
+    return travl_consult(query)
+
+
 # green tools
 
 
@@ -125,7 +135,7 @@ def transoprtation_route_search_green(query: str) -> str:
 
 
 def run_travel_agent(query: str) -> str:
-    print(f' agent init{datetime.datetime.now()}')
+    print(f" agent init{datetime.datetime.now()}")
     # Define the tools
     tools = [
         Tool(
@@ -164,6 +174,12 @@ def run_travel_agent(query: str) -> str:
             description="Use this tool to search for transportation route information.",
             return_direct=True,
         ),
+        Tool(
+            name="Tourist info and knowledge",
+            func=travel_info_and_knowledge_tool,
+            description="Retrieve general tourist information, news, or knowledge about travel destinations. Use this tool exclusively for informational queries unrelated to planning or recommendations.",
+            return_direct=True,
+        )
     ]
 
     # Define the system prompt
@@ -172,6 +188,7 @@ System Prompt:
 You are a highly knowledgeable agent specializing in travel planning. Your primary functions include providing information about hotels, dining options, and tourist attractions to help users arrange comprehensive travel plans.
 The resposne must in JSON format
 if the query is not related to travel, tourist, information, please return a short casual chat to user.
+if the query is related to travel but could not answer by the given tools, please only use your knowledge to handle it and no need to use answer.
 only when user talk about 規劃, 安排, then use the Travel Planner
 
 1. **Arranging a Travel Plan:**
@@ -189,7 +206,7 @@ only when user talk about 規劃, 安排, then use the Travel Planner
    - **Usage:**
      - When the user's request does not pertain to arranging a complete travel plan but seeks hotel recommendations or information, utilize the `Hotel information searching tool`.
 3. **Spot recommandation:**
-    **Indicators:** Queries that include phrases like "去哪", "去哪裡","推薦", "有什麼" etc.
+    **Indicators:** Queries that include phrases like "去哪", "去哪裡", "有什麼" etc.
    - **Tool to Use:**
      - `formal_spot_recommanadation_tool`: Only for single or serveral formal spot recommandation
    - **Usage:**
@@ -209,12 +226,17 @@ only when user talk about 規劃, 安排, then use the Travel Planner
      - `Transportation Route Search`: when user asking for how to go the destination and the route , using this tool
    - **Usage:**
      - When the user just ask for some spot to go, please just use spot_recommanadation_tool
-7. **Response Style:**
+7. **Tourist info and knowledge**
+   - **Tool to Use:**
+     - `Tourist info and knowledge`: Use this tool to provide tourist-related knowledge, news, and general information.
+   - **Usage:**
+     - Use this tool only when the user is specifically asking about tourist information, news, or general knowledge without requesting personalized recommendations or planning assistance.
+8. **Response Style:**
    - 如果tool 主要回傳的是json格式，請直接返回，並要包含所有的資訊
    - When arranging a travel plan, structure the response in a logical sequence in time series (e.g., accommodation first, followed by dining and then spot).
    - if the query is not related to travel, tourist, information, please return a short casual chat to user.
 
-8. **Language:**
+9. **Language:**
    - Respond in the traditioinal Chinese and Must in Json format
 """
 
@@ -236,7 +258,7 @@ only when user talk about 規劃, 安排, then use the Travel Planner
     )
 
     # Run the agent with the provided query
-    print(f' agent work{datetime.datetime.now()}')
+    print(f" agent work{datetime.datetime.now()}")
     response = agent.run(query)
 
     return response
@@ -288,6 +310,12 @@ def run_travel_agent_green(query: str) -> str:
             description="Use this tool to search for transportation route information.",
             return_direct=True,
         ),
+        Tool(
+            name="Tourist info and knowledge",
+            func=travel_info_and_knowledge_tool,
+            description="Retrieve general tourist information, news, or knowledge about travel destinations. Use this tool exclusively for informational queries unrelated to planning or recommendations.",
+            return_direct=True,
+        )
     ]
 
     # Define the system prompt
@@ -295,6 +323,7 @@ def run_travel_agent_green(query: str) -> str:
 System Prompt:
 #zh-tw You are a highly knowledgeable agent specializing in travel planning. Your primary functions include providing information about hotels, dining options, and tourist attractions to help users arrange comprehensive travel plans.
 The resposne must in JSON format
+if the query is related to travel but could not answer by the given tools, please only use your knowledge to response it and no need to use tool .
 if the query is not related to travel, tourist, information, please return a short casual chat to user 繁體中文.
 only when user talk about 規劃, 安排, then use the Travel Planner
 
@@ -313,7 +342,7 @@ only when user talk about 規劃, 安排, then use the Travel Planner
    - **Usage:**
      - When the user's request does not pertain to arranging a complete travel plan but seeks hotel recommendations or information, utilize the `Hotel information searching tool`.
 3. **Spot recommandation (formal):**
-    **Indicators:** Queries that include phrases like "去哪", "去哪裡","推薦", "有什麼" etc. and the formal spot can meet the requirements
+    **Indicators:** Queries that include phrases like "去哪", "去哪裡", "有什麼" etc. and the formal spot can meet the requirements
    - **Tool to Use:**
      - `formal_spot_recommanadation_tool`: Only for single or serveral foraml spot recommandation
    - **Usage:**
@@ -333,12 +362,17 @@ only when user talk about 規劃, 安排, then use the Travel Planner
      - `Transportation Route Search`: when user asking for how to go the destination and the route , using this tool
    - **Usage:**
      - When the user just ask for some spot to go, please just use spot_recommanadation_tool
-7. **Response Style:**
+7. **Tourist info and knowledge**
+   - **Tool to Use:**
+     - `Tourist info and knowledge`: Use this tool to provide tourist-related knowledge, news, and general information.
+   - **Usage:**
+     - Use this tool only when the user is specifically asking about tourist information, news, or general knowledge without requesting personalized recommendations or planning assistance.
+8. **Response Style:**
    - 如果tool 主要回傳的是json格式，請直接返回，並要包含所有的資訊
    - When arranging a travel plan, structure the response in a logical sequence in time series (e.g., accommodation first, followed by dining and then spot).
    - if the query is not related to travel, tourist, information, please return a short casual chat to user.
 
-8. **Language:**
+9. **Language:**
    - Respond in the traditioinal Chinese **繁體中文** and Must in Json format #zh-tw
 """
 

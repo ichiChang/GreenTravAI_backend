@@ -15,6 +15,40 @@ import re
 import datetime
 import concurrent.futures
 
+def travl_consult(query):
+    print("get tourist info...")
+
+    llm = ChatOpenAI(
+        temperature=0.4, model="gpt-4o-mini", openai_api_key=os.getenv("OPENAI_API_KEY")
+    )
+    
+    # Define the template
+    template = """
+                你是一個台北旅遊專家，你負責回答台北旅遊的相關資訊，或是景點知識以及文化背景因素等等，請用繁體中文來回答使用者的問題
+                  問題: {question}"""
+
+    custom_prompt = PromptTemplate.from_template(template)
+
+    # spot_retriever = get_retriever("normal", "travel-agent-spot", top_k=2)
+    # spot_docs = spot_retriever.get_relevant_documents(query)
+
+    # Format documents with metadata
+    # context = "景點: " + format_docs_with_metadata(spot_docs)
+    # print(context)
+
+    # Combine context with the question
+    final_prompt = custom_prompt.format(question=query)
+
+    # print(final_prompt)
+
+    # Invoke the LLM chain
+    result = llm.invoke(final_prompt)
+    # print(result.content)
+    # Parse the result
+
+    return result.content
+
+
 
 def fetch_weather_description(year, month, date):
     url = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-063'
