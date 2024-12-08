@@ -14,7 +14,7 @@ def get_duration_in_seconds(directions):
         distance = leg["distance"]["value"]  # in meters
         distance_km = distance / 1000  # convert to kilometers
         return duration, distance_km
-    return float("inf"), float("inf")
+    return int(0), int(0)
 
 
 def print_detailed_route_info(directions):
